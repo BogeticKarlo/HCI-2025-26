@@ -1,4 +1,4 @@
-# Project tasks Related Information
+# Idea Pitch
 
 Written summary 
 
