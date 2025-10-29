@@ -25,6 +25,7 @@
 ### Semester Assignments
 
 - Link to Assignment 1: [**Idea Pitch**](./assignments/assignment_1/) <!-- Replace with actual URL -->
+- Link to Assignment 1: [**User personas and sitemap**](./assignments/assignment_2/) <!-- Replace with actual URL -->
 
 <!-- Add more assignments as necessary -->
 

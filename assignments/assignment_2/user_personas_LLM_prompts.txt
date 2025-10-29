@@ -1,0 +1,40 @@
+U OVOM TEXT DOKUMENTU NALAZE SE 3 PERSONE KREIRANE POMOĆU CHATGPT.
+
+Input: Can you generate me 3 user personas for a new web application that allows users to share, save and search for recipes using filters
+
+Output:
+1. Persona: Supermom Sarah
+Background:
+Sarah Thompson is a 42-year-old mother of five who juggles her part-time nursing job with managing a busy household. She loves cooking for her family but often finds herself short on time. Living in suburban Ohio, she strives to prepare balanced, family-friendly meals without spending hours in the kitchen. Sarah enjoys sharing recipes with other parents and discovering new ways to make mealtime exciting yet manageable.
+Goals and Needs:
+Quick and Nutritious Meals: Sarah looks for healthy recipes that can be made in under 30 minutes and cater to different age groups.
+Meal Planning and Organization: She values tools that help her plan weekly meals, create shopping lists, and save favorite recipes.
+Community Sharing: Sarah appreciates being able to share her own tips, modifications, and family-favorite recipes with other users.
+Challenges:
+Time Constraints: Between work and parenting, Sarah has limited time to experiment with complex recipes.
+Ingredient Availability: She prefers recipes using common pantry items or ones that suggest easy substitutes.
+Dietary Preferences: Managing five kids means accommodating different tastes and dietary needs, making filtering options essential.
+
+2. Persona: Dorm Room Cook Alex
+Background:
+Alex Rivera is a 20-year-old computer science student living in a college dorm in Austin, Texas. He recently started learning to cook to save money and eat healthier instead of relying on takeout. Alex has limited kitchen access and basic equipment, so he prefers simple, fast recipes. He enjoys watching short cooking videos and finding hacks that make cooking easy and fun.
+Goals and Needs:
+Simple, Affordable Recipes: Alex wants low-cost, minimal-ingredient meals that fit a student budget and a small kitchen setup.
+Skill-Building: He’s eager to learn cooking basics and appreciates beginner-friendly recipes with clear instructions.
+Social Engagement: Alex enjoys platforms where he can share his creations, exchange tips with peers, and watch quick video tutorials.
+Challenges:
+Limited Kitchen Resources: He only has access to a microwave, stovetop, and mini-fridge.
+Time Management: Balancing classes, projects, and social life leaves little time for cooking.
+Ingredient Complexity: Many recipes online require specialized ingredients or tools he doesn’t have.
+
+3. Persona: Retired Engineer Bob
+Background:
+Robert “Bob” Jenkins is a 68-year-old retired mechanical engineer from Portland, Oregon. Since retiring, Bob has taken up cooking as a new hobby. He enjoys precision, experimenting with new cuisines, and improving his techniques. For him, cooking is both a creative outlet and an analytical process. Bob likes connecting with others who share his interest in culinary craftsmanship.
+Goals and Needs:
+Advanced Search and Filtering: Bob values being able to search recipes by cuisine type, ingredients, and difficulty level.
+Learning and Improvement: He seeks detailed, technical instructions and tips on perfecting dishes.
+Recipe Archiving: Bob appreciates tools that allow him to store his recipes, add personal notes, and print them easily.
+Challenges:
+Complex Interfaces: Bob dislikes cluttered, ad-heavy websites and prefers clean, easy-to-navigate designs.
+Information Accuracy: He values precision and gets frustrated by vague measurements or inconsistent instructions.
+Community Engagement: While he enjoys discussion forums, he’s selective about online interactions and prefers knowledgeable communities.

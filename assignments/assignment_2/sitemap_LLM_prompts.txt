@@ -1,0 +1,167 @@
+U OVOM TEXT DOKUMENTU PRIKAZAN JE POSTUPAK DOBIVANJA SITEMAPE. TO UKLJUČUJE PROCESE
+GENERIRANJA TEMA, CARD SORTINGA TE IZRADU SITEMAPE NA TEMELJU SVEGA NAVEDENOG.
+
+Input: Can you propose a set of 15 topics related to cooking app.
+
+Output:
+Smart Recipe Filters: Designing intuitive filters for dietary needs, prep time, and available ingredients.
+AI-Powered Recipe Suggestions: Using AI to recommend recipes based on pantry items, preferences, or past activity.
+Meal Planning Made Easy: Integrating weekly planners and grocery list automation into the cooking app.
+Community-Driven Cooking: Encouraging recipe sharing, comments, and collaborative cooking challenges.
+Gamification in Cooking Apps: Reward systems for uploading recipes, trying new cuisines, or completing cooking goals.
+Cooking for Beginners: Creating simple tutorials and step-by-step visual guides.
+Culinary Techniques Simplified: Breaking down advanced cooking skills (like knife skills or sauce-making) into easy modules.
+Regional & Cultural Cuisine Exploration: Introducing users to diverse global dishes and traditions through recipes and stories.
+Healthy Eating Habits: Promoting balanced diets with recipe tags like “heart-healthy,” “low-carb,” or “family-friendly.”
+Cooking on a Budget: Tips and tools for users to cook affordable yet delicious meals.
+User Recipe Spotlights: Featuring top contributors or popular family recipes from the community.
+Cooking Challenges: Themed events (e.g., “5 Ingredients Week,” “Dorm Chef Contest,” or “Vegan Month”).
+Recipe Storytelling: Encouraging users to share the personal stories or memories behind their recipes.
+Collaborative Meal Planning: Enabling group meal plans for families, roommates, or event hosts.
+Integrating Video & Social Media Sharing: Allowing users to upload quick cooking clips or share recipes on TikTok, Instagram, or YouTube.
+ 
+Input: Okay, great. Now, act as persona 1. Use Open Card Sorting and organize these topics in groups based on their understanding and logic.
+
+Output:
+Group 1: “Making My Family’s Mealtime Easier”
+Smart Recipe Filters
+Meal Planning Made Easy
+Cooking on a Budget
+Healthy Eating Habits
+Group 2: “Learning to Cook Better and Faster”
+Cooking for Beginners
+Culinary Techniques Simplified
+AI-Powered Recipe Suggestions
+Regional & Cultural Cuisine Exploration
+Group 3: “Connecting with Other Home Cooks”
+Community-Driven Cooking
+User Recipe Spotlights
+Recipe Storytelling
+Collaborative Meal Planning
+Group 4: “Keeping It Fun and Motivating”
+Cooking Challenges
+Gamification in Cooking Apps
+Integrating Video & Social Media Sharing
+ 
+Input: Okay, great. Now, act as persona 2. Use Open Card Sorting and organize these topics in groups based on their understanding and logic.
+ 
+Output:
+Group 1: “Fast and Cheap Meals That Actually Work”
+Cooking on a Budget
+Smart Recipe Filters
+Meal Planning Made Easy
+Healthy Eating Habits
+Group 2: “Leveling Up My Cooking Skills”
+Cooking for Beginners
+Culinary Techniques Simplified
+AI-Powered Recipe Suggestions
+Regional & Cultural Cuisine Exploration
+Group 3: “Cooking Together — Even If It’s Online”
+Community-Driven Cooking
+Recipe Storytelling
+User Recipe Spotlights
+Collaborative Meal Planning
+Group 4: “Make Cooking Fun (Not a Chore)”
+Cooking Challenges
+Gamification in Cooking Apps
+Integrating Video & Social Media Sharing
+ 
+Input: Okay, great. Now, act as persona 3. Use Open Card Sorting and organize these topics in groups based on their understanding and logic.
+ 
+Output:
+Group 1: “Cooking as a Craft and Science”
+Culinary Techniques Simplified
+Cooking for Beginners
+Regional & Cultural Cuisine Exploration
+AI-Powered Recipe Suggestions
+Group 2: “Organizing and Perfecting My Recipes”
+Smart Recipe Filters
+Meal Planning Made Easy
+Healthy Eating Habits
+Cooking on a Budget
+Group 3: “Sharing Knowledge and Learning from Others”
+Community-Driven Cooking
+Recipe Storytelling
+User Recipe Spotlights
+Collaborative Meal Planning
+Group 4: “Engagement Done Right”
+Cooking Challenges
+Gamification in Cooking Apps
+Integrating Video & Social Media Sharing
+ 
+Input: Great. Now, I want you to combine these resulting categories for all personas.
+ 
+Output:
+1. Plan & Cook (Core Utility Zone)
+Merged topics:
+Smart Recipe Filters
+Meal Planning Made Easy
+Cooking on a Budget
+Healthy Eating Habits
+2. Learn & Improve (Skill-Building Zone)
+Merged topics:
+Cooking for Beginners
+Culinary Techniques Simplified
+AI-Powered Recipe Suggestions
+Regional & Cultural Cuisine Exploration
+3. Share & Connect (Community Zone)
+Merged topics:
+Community-Driven Cooking
+User Recipe Spotlights
+Recipe Storytelling
+Collaborative Meal Planning
+4. Play & Engage (Motivation Zone)
+Merged topics:
+Cooking Challenges
+Gamification in Cooking Apps
+Integrating Video & Social Media Sharing
+ 
+Input: Great. Now, based on these combining categories, I want you to create a detailed sitemap for the web application that allows users to share, save and filter through cooking recipes.
+ 
+Output:
+Home
+        Welcome Feed
+	My Shortcuts
+        Notifications
+ 
+Cook
+       Recipe Search Hub
+       Smart Filters
+       Meal Planner
+       Saved Recipes 
+       Recipe Details Page
+ 
+Learn
+       Cooking 101
+       Culinary Techniques
+       Cuisine Explorer
+       AI-Powered Recommendations
+ 
+Connect
+       Community Feed
+       Upload Recipe
+       Recipe Storytelling
+       Collaborative Meal Planning
+       User Profiles
+ 
+Play & Engage
+       Cooking Challenges
+       Achievements & Badges
+       Gamified Learning
+       Video & Social Integration
+ 
+Settings
+       My Profile
+       My Activity
+       Preferences
+       Account Management
+ 
+Contact
+       Customer Support
+       FAQ
+       Contact Form
+ 
+Footer
+       Privacy Policy
+       Terms and Conditions
+       Social Media Links
