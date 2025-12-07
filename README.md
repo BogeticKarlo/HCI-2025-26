@@ -27,7 +27,7 @@
 - Link to Assignment 1: [**Idea Pitch**](./assignments/assignment_1/) <!-- Replace with actual URL -->
 - Link to Assignment 2: [**User personas and sitemap**](./assignments/assignment_2/) <!-- Replace with actual URL -->
 - Link to Assignment 3: [**Next.js and vercel deployment**](./my-cooking-app/) <!-- Replace with actual URL -->
-- Link to Assignment 4: [**User personas and sitemap**](./assignments/assignment_4/) <!-- Replace with actual URL -->
+- Link to Assignment 4: [**Figma link**](./assignments/assignment_4/) <!-- Replace with actual URL -->
 
 <!-- Add more assignments as necessary -->
 
