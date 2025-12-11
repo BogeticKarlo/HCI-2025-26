@@ -32,7 +32,7 @@ export function RecipeMinimizeCard({
 
       {/* Text */}
       <div className="flex flex-col px-4 py-3 gap-1 overflow-hidden">
-        <h2 className="text-base font-semibold text-primary-text truncate">
+        <h2 className="text-base font-semibold text-primary-text truncate font-playfair">
           {title}
         </h2>
         <p

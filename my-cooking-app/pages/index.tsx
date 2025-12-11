@@ -31,10 +31,10 @@ export default function HomePage() {
 
         const data: Recipe[] = await res.json();
 
-        // sort by createdAt desc (newest first)
-        const sorted = [...data].sort(
-          (a, b) => Number(b.createdAt) - Number(a.createdAt)
-        );
+        // sort by createdAt desc (newest first) and take only the 10 newest
+        const sorted = [...data]
+          .sort((a, b) => Number(b.createdAt) - Number(a.createdAt))
+          .slice(0, 12);
 
         setRecipes(sorted);
       } catch (err) {
@@ -70,7 +70,7 @@ export default function HomePage() {
         "
         >
           {isLoading
-            ? Array.from({ length: 6 }).map((_, i) => (
+            ? Array.from({ length: 12 }).map((_, i) => (
                 <RecipeMinimizeCardSkeletonLoader key={i} />
               ))
             : recipes.map((recipe) => (
