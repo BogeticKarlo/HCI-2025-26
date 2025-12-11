@@ -9,6 +9,8 @@ import { RecipeCardSkeleton } from "./RecipeSkeletonLoaderCard";
 import LemonImage from "../../public/assets/lemon.png";
 import CakeImage from "../../public/assets/cake.png";
 import SoupImage from "../../public/assets/soup.png";
+import { HeartIcon } from "@/public/reactComponentAssets/HeartIcon";
+import { BookmarkIcon } from "@/public/reactComponentAssets/BookmarkIcon";
 
 export function RecipeCard({
   recipe,
@@ -30,7 +32,9 @@ export function RecipeCard({
           height={50}
           className="rounded-md"
         />
-        <h1 className="text-3xl font-bold text-primary-text">{recipe.title}</h1>
+        <h1 className="text-3xl font-bold text-primary-text font-playfair">
+          {recipe.title}
+        </h1>
       </header>
 
       {/* Description */}
@@ -41,7 +45,7 @@ export function RecipeCard({
       {/* Ingredients */}
       <section className="flex justify-between items-start">
         <div>
-          <h2 className="text-xl font-semibold mb-2 text-primary-text">
+          <h2 className="text-xl font-semibold mb-2 text-primary-text font-playfair">
             Ingredients
           </h2>
           <ul className="list-disc ml-5 text-sm">
@@ -67,7 +71,7 @@ export function RecipeCard({
       {/* Instructions */}
       <section className="flex justify-between items-start">
         <div>
-          <h2 className="text-xl font-semibold mb-2 text-primary-text">
+          <h2 className="text-xl font-semibold mb-2 text-primary-text font-playfair">
             Instructions
           </h2>
           <ol className="list-decimal ml-5 text-sm">
@@ -102,17 +106,42 @@ export function RecipeCard({
         </div>
       )}
 
-      {/* Footer */}
       <footer className="flex justify-between items-center text-sm text-body-text">
         <span className="text-body-text">{recipe.author}</span>
 
-        <div className="flex items-center gap-5">
+        {/* Icons container */}
+        <div className="flex flex-col sm:flex-row items-center gap-5">
+          {/* Likes */}
           <div className="flex items-center gap-1 text-body-text">
-            <span>🤍</span>
+            <button
+              className="
+          w-8 h-8 
+          flex items-center justify-center
+          hover:text-primary-text
+          cursor-pointer
+          transition-all duration-200
+          hover:scale-110 active:scale-95
+        "
+            >
+              <HeartIcon className="w-5 h-5" />
+            </button>
             <span>{recipe.numberOfLikes}</span>
           </div>
+
+          {/* Saves */}
           <div className="flex items-center gap-1 text-body-text">
-            <span>🔖</span>
+            <button
+              className="
+          w-8 h-8 
+          flex items-center justify-center
+          hover:text-primary-text
+          cursor-pointer
+          transition-all duration-200
+          hover:scale-110 active:scale-95
+        "
+            >
+              <BookmarkIcon className="w-5 h-5" />
+            </button>
             <span>{recipe.numberOfSaves}</span>
           </div>
         </div>

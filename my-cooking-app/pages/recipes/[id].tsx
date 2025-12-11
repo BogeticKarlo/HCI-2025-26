@@ -37,18 +37,28 @@ const RecipePage: NextPage<RecipePageProps> = ({ recipe }) => {
   }, []);
 
   return (
-    <div className="max-w-3xl mx-auto mt-10 px-4">
-      {/* Center the arrow + card together */}
-      <div className="mt-2 flex justify-center items-start gap-4">
-        {/* Back arrow */}
-        <button
-          onClick={() => router.back()}
-          className="cursor-pointer transition-opacity duration-200 hover:scale-110 hover:opacity-80"
-        >
-          <Image src={backArrow} alt="Back" width={48} height={48} />
-        </button>
+    <div className="relative flex justify-center mt-2">
+      {/* Back Arrow — positioned to the left of the centered card */}
+      <button
+        onClick={() => router.back()}
+        className="
+      absolute left-0 top-2
+      cursor-pointer
+      transition duration-200
+      hover:scale-110 hover:opacity-80
+    "
+      >
+        <Image
+          src={backArrow}
+          alt="Back"
+          width={48}
+          height={48}
+          className="w-10 h-10 md:w-12 md:h-12"
+        />
+      </button>
 
-        {/* RecipeCard OR Skeleton */}
+      {/* Centered Card */}
+      <div>
         {loading ? (
           <RecipeCardSkeleton />
         ) : recipe ? (
