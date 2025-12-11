@@ -87,7 +87,7 @@ export default function NavBar() {
   })();
 
   return (
-    <header className="bg-navbar-bg text-secondary-text shadow-sm">
+    <header className="bg-navbar-bg text-secondary-text shadow-sm font-playfair">
       {/* Desktop */}
       <DesktopNavBar
         navItems={NAV_ITEMS}
