@@ -1,0 +1,75 @@
+/* Tailwind v4 import (must come first!) */
+@import "tailwindcss";
+
+@theme {
+  --color-primary: #e67833;
+  --color-secondary: #4ca6a8;
+
+  --color-primary-text: #333333;
+  --color-secondary-text: #f5f5f5;
+  --color-body-text: #555555;
+  --color-footer-text: #d1d5db;
+
+  --color-text-muted: #888888;
+
+  --color-main-bg: #faf7f2;
+  --color-section-bg: #ffffff;
+  --color-navbar-bg: #f6efe8;
+  --color-footer-bg: #2f3640;
+
+  --color-border: #e0dad3;
+  --color-input-field-bg: #dcdcdc;
+  --color-input-border: #969696;
+
+  --color-toggle-on: #e67833;
+  --color-toggle-off: #cccccc;
+
+  --color-success: #e8f6ea;
+  --color-warning: #fff8e5;
+  --color-error: #fdecec;
+
+  --color-success-border: #4caf50;
+  --color-warning-border: #ffc107;
+  --color-error-border: #d9534f;
+
+  --color-focus: #e67833;
+  --color-dark-tone: #d56a28;
+  --color-disabled: #bfbfbf;
+
+  --color-black: #000000;
+  --color-white: #ffffff;
+}
+
+@theme .dark {
+  --color-primary: #e67833;
+  --color-secondary: #4ca6a8;
+
+  --color-primary-text: #ffffff;
+  --color-secondary-text: #e2e2e2;
+  --color-body-text: #cccccc;
+  --color-footer-text: #bac2cf;
+
+  --color-main-bg: #1a1d21;
+  --color-section-bg: #25292e;
+  --color-navbar-bg: #2d3136;
+  --color-footer-bg: #2c3237;
+
+  --color-border: #3a3f45;
+  --color-input-field-bg: #454b52;
+  --color-input-border: #aab2bb;
+
+  --color-toggle-on: #e67833;
+  --color-toggle-off: #666666;
+
+  --color-success: #1f3a2e;
+  --color-warning: #3a2f12;
+  --color-error: #3a1e1e;
+
+  --color-success-border: #4caf50;
+  --color-warning-border: #ffc107;
+  --color-error-border: #d9534f;
+
+  --color-focus: #e67833;
+  --color-dark-tone: #d56a28;
+  --color-disabled: #6f6f6f;
+}
