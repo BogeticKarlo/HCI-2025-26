@@ -56,6 +56,10 @@ export default function HomePage() {
         </p>
       )}
 
+      <h1 className="font-playfair font-bold text-[40px] leading-[120%] tracking-[0] text-center mb-10 text-primary-text">
+        Check Out Newest Recipes
+      </h1>
+
       <div className="max-w-6xl mx-auto px-6 sm:px-10 lg:px-20">
         <div
           className="

@@ -1,3 +1,14 @@
 export default function SmartFilters() {
-  return <h1>Smart Filters</h1>;
+  return (
+    <h1
+      className="
+  font-playfair font-bold 
+  text-[32px] leading-[120%] 
+  md:text-[40px] 
+  text-center mb-10 text-primary-text
+"
+    >
+      Recipes Search Hub
+    </h1>
+  );
 }

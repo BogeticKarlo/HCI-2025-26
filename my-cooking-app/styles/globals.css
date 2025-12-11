@@ -1,7 +1,11 @@
 /* Tailwind v4 import (must come first!) */
+@import url("https://fonts.googleapis.com/css2?family=Chakra+Petch:ital,wght@0,300;0,400;0,500;0,600;0,700;1,300;1,400;1,500;1,600;1,700&family=Playfair+Display:ital,wght@0,400..900;1,400..900&display=swap");
+
 @import "tailwindcss";
 
 @theme {
+  --font-playfair: "Playfair Display", serif;
+
   --color-primary: #e67833;
   --color-secondary: #4ca6a8;
 
@@ -41,6 +45,8 @@
 }
 
 @theme .dark {
+  --font-playfair: "Playfair Display", serif;
+
   --color-primary: #e67833;
   --color-secondary: #4ca6a8;
 
