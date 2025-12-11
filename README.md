@@ -28,6 +28,8 @@
 - Link to Assignment 2: [**User personas and sitemap**](./assignments/assignment_2/) <!-- Replace with actual URL -->
 - Link to Assignment 3: [**Next.js and vercel deployment**](./my-cooking-app/) <!-- Replace with actual URL -->
 - Link to Assignment 4: [**Figma link**](./assignments/assignment_4/) <!-- Replace with actual URL -->
+- Link to Assignment 5: [**Dynamic routes, data fetching**](https://vercel.com/bogetickarlos-projects/hci-2025-26/d1HV8m6E4VKQhLD7QbJK7N6yFjaM)
+
 
 <!-- Add more assignments as necessary -->
 
