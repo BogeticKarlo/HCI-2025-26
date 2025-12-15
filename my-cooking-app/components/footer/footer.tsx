@@ -6,7 +6,7 @@ export default function Footer() {
         <div className="grid grid-cols-1 sm:grid-cols-3 gap-10 text-center">
           {/* Privacy Policy */}
           <div>
-            <h3 className="text-lg font-semibold mb-4 text-primary-text">
+            <h3 className="text-lg font-semibold mb-4 text-footer-text">
               Privacy Policy
             </h3>
 
@@ -36,7 +36,7 @@ export default function Footer() {
 
           {/* Terms and Conditions */}
           <div>
-            <h3 className="text-lg font-semibold mb-4 text-primary-text">
+            <h3 className="text-lg font-semibold mb-4 text-footer-text">
               Terms and Conditions
             </h3>
 
@@ -66,7 +66,7 @@ export default function Footer() {
 
           {/* Social Media */}
           <div>
-            <h3 className="text-lg font-semibold mb-4 text-primary-text">
+            <h3 className="text-lg font-semibold mb-4 text-footer-text">
               Social Media
             </h3>
 

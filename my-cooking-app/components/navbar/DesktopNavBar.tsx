@@ -44,8 +44,8 @@ export default function DesktopNavBar({
                 className={[
                   "px-4 py-1 rounded-full transition-colors duration-200",
                   activeMainHref === item.href
-                    ? "bg-primary text-white"
-                    : "text-secondary-text hover:text-primary-text",
+                    ? "bg-primary text-secondary-text"
+                    : "text-primary-text hover:text-primary-text/70",
                 ].join(" ")}
               >
                 {item.label}
