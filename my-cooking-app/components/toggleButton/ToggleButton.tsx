@@ -30,10 +30,14 @@ export const ToggleButton: FC<ToggleButtonProps> = ({
       }}
       disabled={disabled}
       className={clsx(
+        // default size
         "relative inline-flex h-7 w-12 items-center rounded-full transition-colors",
+
+        // allow override from parent (e.g. w-14)
+        className,
+
         checked ? "bg-toggle-on" : "bg-toggle-off",
-        disabled ? "opacity-50 cursor-not-allowed" : "cursor-pointer",
-        className
+        disabled ? "opacity-50 cursor-not-allowed" : "cursor-pointer"
       )}
     >
       <span
