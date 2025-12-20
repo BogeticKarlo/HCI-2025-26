@@ -1,81 +1,157 @@
-/* Tailwind v4 import (must come first!) */
 @import url("https://fonts.googleapis.com/css2?family=Chakra+Petch:ital,wght@0,300;0,400;0,500;0,600;0,700;1,300;1,400;1,500;1,600;1,700&family=Playfair+Display:ital,wght@0,400..900;1,400..900&display=swap");
-
 @import "tailwindcss";
 
+button:focus:not(:focus-visible) {
+  outline: none;
+  box-shadow: none;
+}
+
+:root {
+  color-scheme: light;
+
+  /* brand font */
+  --rs-font-playfair: "Playfair Display", serif;
+
+  /* brand colors */
+  --rs-color-primary: #e67833;
+  --rs-color-secondary: #4ca6a8;
+
+  /* text */
+  --rs-color-primary-text: #333333;
+  --rs-color-secondary-text: #f5f5f5;
+  --rs-color-body-text: #555555;
+  --rs-color-footer-text: #d1d5db;
+  --rs-color-text-muted: #888888;
+
+  /* surfaces */
+  --rs-color-main-bg: #faf7f2;
+  --rs-color-section-bg: #ffffff;
+  --rs-color-navbar-bg: #f6efe8;
+  --rs-color-footer-bg: #2f3640;
+
+  /* borders / inputs */
+  --rs-color-border: #e0dad3;
+  --rs-color-input-field-bg: #dcdcdc;
+  --rs-color-input-border: #969696;
+
+  /* toggles */
+  --rs-color-toggle-on: #e67833;
+  --rs-color-toggle-off: #cccccc;
+
+  /* statuses */
+  --rs-color-success: #e8f6ea;
+  --rs-color-warning: #fff8e5;
+  --rs-color-error: #fdecec;
+
+  --rs-color-success-border: #4caf50;
+  --rs-color-warning-border: #ffc107;
+  --rs-color-error-border: #d9534f;
+
+  /* misc */
+  --rs-color-focus: #e67833;
+  --rs-color-dark-tone: #d56a28;
+  --rs-color-disabled: #bfbfbf;
+
+  --rs-color-black: #000000;
+  --rs-color-white: #ffffff;
+}
+
+.dark {
+  color-scheme: dark;
+
+  /* font same, but keep var for flexibility */
+  --rs-font-playfair: "Playfair Display", serif;
+
+  /* brand */
+  --rs-color-primary: #e67833;
+  --rs-color-secondary: #4ca6a8;
+
+  /* text */
+  --rs-color-primary-text: #ffffff;
+  --rs-color-secondary-text: #e2e2e2;
+  --rs-color-body-text: #cccccc;
+  --rs-color-footer-text: #bac2cf;
+  --rs-color-text-muted: #9ca3af;
+
+  /* surfaces */
+  --rs-color-main-bg: #1a1d21;
+  --rs-color-section-bg: #25292e;
+  --rs-color-navbar-bg: #2d3136;
+  --rs-color-footer-bg: #2c3237;
+
+  /* borders / inputs */
+  --rs-color-border: #3a3f45;
+  --rs-color-input-field-bg: #454b52;
+  --rs-color-input-border: #aab2bb;
+
+  /* toggles */
+  --rs-color-toggle-on: #e67833;
+  --rs-color-toggle-off: #666666;
+
+  /* statuses */
+  --rs-color-success: #1f3a2e;
+  --rs-color-warning: #3a2f12;
+  --rs-color-error: #3a1e1e;
+
+  --rs-color-success-border: #4caf50;
+  --rs-color-warning-border: #ffc107;
+  --rs-color-error-border: #d9534f;
+
+  /* misc */
+  --rs-color-focus: #e67833;
+  --rs-color-dark-tone: #d56a28;
+  --rs-color-disabled: #6f6f6f;
+
+  --rs-color-black: #000000;
+  --rs-color-white: #ffffff;
+}
+
 @theme {
-  --font-playfair: "Playfair Display", serif;
+  /* font */
+  --font-playfair: var(--rs-font-playfair);
 
-  --color-primary: #e67833;
-  --color-secondary: #4ca6a8;
+  /* brand colors */
+  --color-primary: var(--rs-color-primary);
+  --color-secondary: var(--rs-color-secondary);
 
-  --color-primary-text: #2a2a2a;
-  --color-secondary-text: #f5f5f5;
-  --color-body-text: #3a3a3a;
-  --color-footer-text: #d1d5db;
+  /* text */
+  --color-primary-text: var(--rs-color-primary-text);
+  --color-secondary-text: var(--rs-color-secondary-text);
+  --color-body-text: var(--rs-color-body-text);
+  --color-footer-text: var(--rs-color-footer-text);
+  --color-text-muted: var(--rs-color-text-muted);
 
-  --color-text-muted: #666666;
+  /* surfaces */
+  --color-main-bg: var(--rs-color-main-bg);
+  --color-section-bg: var(--rs-color-section-bg);
+  --color-navbar-bg: var(--rs-color-navbar-bg);
+  --color-footer-bg: var(--rs-color-footer-bg);
 
-  --color-main-bg: #faf7f2;
-  --color-section-bg: #ffffff;
-  --color-navbar-bg: #f6efe8;
-  --color-footer-bg: #2f3640;
+  /* borders / inputs */
+  --color-border: var(--rs-color-border);
+  --color-input-field-bg: var(--rs-color-input-field-bg);
+  --color-input-border: var(--rs-color-input-border);
 
-  --color-border: #e0dad3;
-  --color-input-field-bg: #dcdcdc;
-  --color-input-border: #969696;
+  /* toggles */
+  --color-toggle-on: var(--rs-color-toggle-on);
+  --color-toggle-off: var(--rs-color-toggle-off);
 
-  --color-toggle-on: #e67833;
-  --color-toggle-off: #cccccc;
+  /* statuses */
+  --color-success: var(--rs-color-success);
+  --color-warning: var(--rs-color-warning);
+  --color-error: var(--rs-color-error);
 
-  --color-success: #e8f6ea;
-  --color-warning: #fff8e5;
-  --color-error: #fdecec;
+  --color-success-border: var(--rs-color-success-border);
+  --color-warning-border: var(--rs-color-warning-border);
+  --color-error-border: var(--rs-color-error-border);
 
-  --color-success-border: #4caf50;
-  --color-warning-border: #ffc107;
-  --color-error-border: #d9534f;
+  /* misc */
+  --color-focus: var(--rs-color-focus);
+  --color-dark-tone: var(--rs-color-dark-tone);
+  --color-disabled: var(--rs-color-disabled);
 
-  --color-focus: #e67833;
-  --color-dark-tone: #d56a28;
-  --color-disabled: #bfbfbf;
-
-  --color-black: #000000;
-  --color-white: #ffffff;
+  --color-black: var(--rs-color-black);
+  --color-white: var(--rs-color-white);
 }
 
-@theme .dark {
-  --font-playfair: "Playfair Display", serif;
-
-  --color-primary: #e67833;
-  --color-secondary: #4ca6a8;
-
-  --color-primary-text: #ffffff;
-  --color-secondary-text: #e2e2e2;
-  --color-body-text: #cccccc;
-  --color-footer-text: #bac2cf;
-
-  --color-main-bg: #1a1d21;
-  --color-section-bg: #25292e;
-  --color-navbar-bg: #2d3136;
-  --color-footer-bg: #2c3237;
-
-  --color-border: #3a3f45;
-  --color-input-field-bg: #454b52;
-  --color-input-border: #aab2bb;
-
-  --color-toggle-on: #e67833;
-  --color-toggle-off: #666666;
-
-  --color-success: #1f3a2e;
-  --color-warning: #3a2f12;
-  --color-error: #3a1e1e;
-
-  --color-success-border: #4caf50;
-  --color-warning-border: #ffc107;
-  --color-error-border: #d9534f;
-
-  --color-focus: #e67833;
-  --color-dark-tone: #d56a28;
-  --color-disabled: #6f6f6f;
-}
+@custom-variant dark (&:where(.dark, .dark *));
