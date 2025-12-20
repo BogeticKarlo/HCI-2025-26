@@ -81,7 +81,7 @@ export default function DesktopNavBar({
                   "px-3 py-1 rounded-full transition-colors duration-200",
                   activeSubHref === item.href
                     ? "bg-primary text-white"
-                    : "text-secondary-text hover:text-primary-text",
+                    : "text-primary-text hover:text-primary-text",
                 ].join(" ")}
               >
                 {item.label}
