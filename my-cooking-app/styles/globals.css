@@ -18,7 +18,7 @@ button:focus:not(:focus-visible) {
 
   /* text */
   --rs-color-primary-text: #333333;
-  --rs-color-secondary-text: #f5f5f534;
+  --rs-color-secondary-text: #f5f5f5;
   --rs-color-body-text: #555555;
   --rs-color-footer-text: #d1d5db;
   --rs-color-text-muted: #888888;
