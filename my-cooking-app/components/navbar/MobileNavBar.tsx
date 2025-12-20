@@ -101,7 +101,7 @@ export default function MobileNavBar({
                       "block w-full text-left px-3 py-2 rounded-md text-base",
                       activeMainHref === item.href
                         ? "bg-primary text-white"
-                        : "text-secondary-text hover:text-primary-text",
+                        : "text-primary-text hover:text-primary-text",
                     ].join(" ")}
                     onClick={() => setMobileOpen(false)}
                   >
@@ -126,7 +126,7 @@ export default function MobileNavBar({
                           "block w-full text-left px-3 py-2 rounded-md text-sm",
                           activeSubHref === item.href
                             ? "bg-primary text-white"
-                            : "text-secondary-text hover:text-primary-text",
+                            : "text-primary-text hover:text-primary-text",
                         ].join(" ")}
                         onClick={() => setMobileOpen(false)}
                       >
