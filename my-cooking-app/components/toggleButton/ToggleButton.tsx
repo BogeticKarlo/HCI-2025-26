@@ -42,8 +42,9 @@ export const ToggleButton: FC<ToggleButtonProps> = ({
     >
       <span
         className={clsx(
-          "absolute h-5 w-5 rounded-full bg-section-bg shadow transition-all",
-          checked ? "right-1" : "left-1"
+          "absolute left-1 h-5 w-5 rounded-full bg-section-bg shadow",
+          "transition-transform duration-200 ease-out",
+          checked ? "translate-x-5" : "translate-x-0"
         )}
       />
     </button>
