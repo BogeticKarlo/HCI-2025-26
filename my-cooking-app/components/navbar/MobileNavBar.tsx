@@ -51,7 +51,7 @@ export default function MobileNavBar({
           {/* Animated hamburger */}
           <button
             type="button"
-            className="inline-flex items-center justify-center w-9 h-9 rounded-md border border-border text-secondary-text hover:text-primary-text hover:border-primary transition-colors"
+            className="inline-flex items-center justify-center w-9 h-9 rounded-md border border-border text-primary-text hover:text-primary-text hover:border-primary transition-colors"
             onClick={() => setMobileOpen(!mobileOpen)}
             aria-label="Toggle navigation menu"
           >
@@ -59,7 +59,7 @@ export default function MobileNavBar({
               {/* Top line */}
               <span
                 className={[
-                  "h-[3px] rounded-full bg-secondary-text transition-all duration-200 ease-out",
+                  "h-[3px] rounded-full bg-primary-text transition-all duration-200 ease-out",
                   mobileOpen ? "w-6" : "w-5",
                 ].join(" ")}
               />
@@ -67,7 +67,7 @@ export default function MobileNavBar({
               {/* Middle line */}
               <span
                 className={[
-                  "h-[3px] rounded-full bg-secondary-text transition-all duration-200 ease-out",
+                  "h-[3px] rounded-full bg-primary-text transition-all duration-200 ease-out",
                   mobileOpen ? "w-4" : "w-3",
                 ].join(" ")}
               />
@@ -75,7 +75,7 @@ export default function MobileNavBar({
               {/* Bottom line */}
               <span
                 className={[
-                  "h-[3px] rounded-full bg-secondary-text transition-all duration-200 ease-out",
+                  "h-[3px] rounded-full bg-primary-text transition-all duration-200 ease-out",
                   mobileOpen ? "w-6" : "w-5",
                 ].join(" ")}
               />
