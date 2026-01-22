@@ -38,7 +38,7 @@ export default function Settings() {
       <div className="max-w-xl rounded-2xl bg-section-bg shadow-sm px-6 py-4">
         {/* Email notification row */}
         <div className="flex items-center justify-between gap-4 py-3">
-          <div>
+          <div className="w-80%">
             <h3 className="text-[26px] font-semibold font-playfair text-primary-text">
               Email notification
             </h3>
@@ -47,17 +47,19 @@ export default function Settings() {
             </p>
           </div>
 
-          <ToggleButton
-            checked={isNotificationsEnabled}
-            onChange={setIsNotificationsEnabled}
-          />
+          <div className="w-20%">
+            <ToggleButton
+              checked={isNotificationsEnabled}
+              onChange={setIsNotificationsEnabled}
+            />
+          </div>
         </div>
 
         <div className="border-t border-body-text my-1" />
 
         {/* Dark mode row */}
         <div className="flex items-center justify-between gap-4 py-3">
-          <div>
+          <div className="w-80%">
             <h3 className="text-[26px] font-semibold font-playfair text-primary-text">
               Dark mode
             </h3>
@@ -66,10 +68,12 @@ export default function Settings() {
             </p>
           </div>
 
-          <ToggleButton
-            checked={isDarkMode}
-            onChange={(value) => setTheme(value ? "dark" : "light")}
-          />
+          <div className="w-20%">
+            <ToggleButton
+              checked={isDarkMode}
+              onChange={(value) => setTheme(value ? "dark" : "light")}
+            />
+          </div>
         </div>
       </div>
     </div>
