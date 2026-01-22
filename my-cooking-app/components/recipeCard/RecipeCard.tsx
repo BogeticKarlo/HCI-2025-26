@@ -52,8 +52,8 @@ export function RecipeCard({
       </p>
 
       {/* Ingredients & Instructions */}
-      <section className="flex flex-col md:flex-row items-start gap-6">
-        <div className="flex items-start justify-center">
+      <section className="flex flex-col md:flex-row items-start">
+        <div className="flex items-start justify-center lg:w-1/2">
           {/* Ingredients */}
           <div className="md:w-1/2 flex flex-col gap-4">
             <h2 className="text-xl font-semibold mb-2 text-primary-text font-playfair">
@@ -80,7 +80,7 @@ export function RecipeCard({
         </div>
 
         {/* Instructions */}
-        <div className="flex justify-center items-start">
+        <div className="flex justify-center items-start lg:w-1/2">
           <div className="md:w-1/2 flex flex-col gap-4">
             <h2 className="text-xl font-semibold mb-2 text-primary-text font-playfair">
               Instructions
