@@ -6,11 +6,16 @@ import Link from "next/link";
 import logo from "../../public/assets/logo.svg";
 import { LogoutIcon } from "@/assets/LogoutIcon";
 
-type NavItem = { label: string; href: string };
+type SubNavItem = { label: string; href: string };
+
+type NavItem = {
+  label: string;
+  href: string;
+  subnav?: SubNavItem[];
+};
 
 type DesktopNavBarProps = {
   navItems: NavItem[];
-  subnavItems: NavItem[];
   activeMainHref: string;
   activeSubHref: string | null;
   userName: string;
@@ -19,12 +24,15 @@ type DesktopNavBarProps = {
 
 export default function DesktopNavBar({
   navItems,
-  subnavItems,
   activeMainHref,
   activeSubHref,
   userName,
   onLogout,
 }: DesktopNavBarProps) {
+  const activeNavItem = navItems.find((item) => item.href === activeMainHref);
+
+  const subnavItems = activeNavItem?.subnav ?? [];
+
   return (
     <div className="hidden md:block">
       {/* Top bar */}
@@ -40,7 +48,6 @@ export default function DesktopNavBar({
           />
         </div>
 
-        {/* Main nav */}
         <ul className="flex items-center gap-6 lg:gap-8 text-lg">
           {navItems.map((item) => (
             <li key={item.href}>
@@ -71,9 +78,8 @@ export default function DesktopNavBar({
         </div>
       </nav>
 
-      {/* Subnav (only if there are items) */}
       {subnavItems.length > 0 && (
-        <div className="bg-navbar-bg">
+        <div className="bg-navbar-bg border-t border-border">
           <div className="max-w-6xl mx-auto px-4 sm:px-6 py-3 flex items-center justify-center gap-6 text-sm sm:text-base">
             {subnavItems.map((item) => (
               <Link

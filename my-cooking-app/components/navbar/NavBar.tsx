@@ -7,26 +7,38 @@ import DesktopNavBar from "./DesktopNavBar";
 import MobileNavBar from "./MobileNavBar";
 import { useAuth } from "@/context/AuthContext";
 
-// Main nav items – keep these as your *entry pages*
-export const NAV_ITEMS = [
+type SubNavItem = { label: string; href: string };
+
+type NavItem = {
+  label: string;
+  href: string;
+  subnav?: SubNavItem[];
+};
+
+export const NAV_ITEMS: NavItem[] = [
   { label: "Home", href: "/" },
-  { label: "Cook", href: "/cook/upload-recipes" },
-  { label: "Learn", href: "/learn/cooking-101" },
+
+  {
+    label: "Cook",
+    href: "/cook/upload-recipes",
+    subnav: [
+      { label: "Upload Recipe", href: "/cook/upload-recipes" },
+      { label: "My Recipes", href: "/cook/my-recipes" },
+    ],
+  },
+
+  {
+    label: "Learn",
+    href: "/learn/cooking-101",
+    subnav: [
+      { label: "Cooking 101", href: "/learn/cooking-101" },
+      { label: "Culinary Techniques", href: "/learn/culinary-techniques" },
+      { label: "Cuisine Explorer", href: "/learn/cuisine-explorer" },
+    ],
+  },
+
   { label: "Settings", href: "/settings" },
 ];
-
-// Subnav per section – keys are the *section roots*
-export const SUBNAV_ITEMS: Record<string, { label: string; href: string }[]> = {
-  "/cook": [
-    { label: "Upload Recipe", href: "/cook/upload-recipes" },
-    { label: "My Recipes", href: "/cook/my-recipes" },
-  ],
-  "/learn": [
-    { label: "Cooking 101", href: "/learn/cooking-101" },
-    { label: "Culinary Techniques", href: "/learn/culinary-techniques" },
-    { label: "Cuisine Explorer", href: "/learn/cuisine-explorer" },
-  ],
-};
 
 export default function NavBar() {
   const pathname = usePathname();
@@ -36,51 +48,37 @@ export default function NavBar() {
 
   if (!user) return null;
 
-  // 1) Determine which section we're in based on SUBNAV_ITEMS keys ("/cook", "/learn", ...)
-  const sectionKeys = Object.keys(SUBNAV_ITEMS);
-
-  const currentSection =
-    sectionKeys.find((section) => {
-      if (pathname === section) return true;
-      return pathname.startsWith(section + "/");
-    }) ?? null;
-
-  // 2) Which main nav item is active?
   const activeMainHref = (() => {
     if (pathname === "/") return "/";
 
-    if (currentSection) {
-      // Find the NAV item whose href belongs to this section
-      const navForSection = NAV_ITEMS.find(
-        (item) =>
-          item.href === currentSection ||
-          item.href.startsWith(currentSection + "/")
+    for (const item of NAV_ITEMS) {
+      if (!item.subnav) continue;
+
+      const subMatch = item.subnav.find(
+        (sub) => pathname === sub.href || pathname.startsWith(sub.href + "/")
       );
-      return navForSection?.href ?? "/";
+
+      if (subMatch) {
+        return item.href;
+      }
     }
 
-    // Fallback: match directly by pathname
-    const found = NAV_ITEMS.find(
+    const mainMatch = NAV_ITEMS.find(
       (item) => pathname === item.href || pathname.startsWith(item.href + "/")
     );
-    return found?.href ?? "/";
+
+    return mainMatch?.href ?? "/";
   })();
 
-  // 3) Subnav items for this section
-  const currentSubnav = currentSection
-    ? SUBNAV_ITEMS[currentSection] ?? []
-    : [];
-
-  // 4) Which subnav item is active?
   const activeSubHref = (() => {
-    if (!currentSection || currentSubnav.length === 0) return null;
+    const activeMain = NAV_ITEMS.find((item) => item.href === activeMainHref);
 
-    // If we are exactly on the section root (e.g. "/cook"), don't highlight any subnav item
-    if (pathname === currentSection) return null;
+    if (!activeMain?.subnav) return null;
 
-    const found = currentSubnav.find(
+    const found = activeMain.subnav.find(
       (item) => pathname === item.href || pathname.startsWith(item.href + "/")
     );
+
     return found?.href ?? null;
   })();
 
@@ -98,17 +96,14 @@ export default function NavBar() {
       {/* Desktop */}
       <DesktopNavBar
         navItems={NAV_ITEMS}
-        subnavItems={currentSubnav}
         activeMainHref={activeMainHref}
         activeSubHref={activeSubHref}
         userName={user.email?.split("@")[0] || "User"}
         onLogout={handleLogout}
       />
 
-      {/* Mobile */}
       <MobileNavBar
         navItems={NAV_ITEMS}
-        subnavItems={currentSubnav}
         activeMainHref={activeMainHref}
         activeSubHref={activeSubHref}
         mobileOpen={mobileOpen}

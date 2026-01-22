@@ -6,11 +6,16 @@ import Link from "next/link";
 import logo from "../../public/assets/logo.svg";
 import { LogoutIcon } from "@/assets/LogoutIcon";
 
-type NavItem = { label: string; href: string };
+type SubNavItem = { label: string; href: string };
+
+type NavItem = {
+  label: string;
+  href: string;
+  subnav?: SubNavItem[];
+};
 
 type MobileNavBarProps = {
   navItems: NavItem[];
-  subnavItems: NavItem[];
   activeMainHref: string;
   activeSubHref: string | null;
   mobileOpen: boolean;
@@ -21,7 +26,6 @@ type MobileNavBarProps = {
 
 export default function MobileNavBar({
   navItems,
-  subnavItems,
   activeMainHref,
   activeSubHref,
   mobileOpen,
@@ -95,52 +99,51 @@ export default function MobileNavBar({
       {mobileOpen && (
         <div className="bg-navbar-bg border-t border-border">
           <div className="max-w-6xl mx-auto px-4 py-3 space-y-4">
-            {/* Main nav */}
             <ul className="flex flex-col gap-2">
-              {navItems.map((item) => (
-                <li key={item.href}>
-                  <Link
-                    href={item.href}
-                    className={[
-                      "block w-full text-left px-3 py-2 rounded-md text-base",
-                      activeMainHref === item.href
-                        ? "bg-primary text-white"
-                        : "text-primary-text hover:text-primary-text",
-                    ].join(" ")}
-                    onClick={() => setMobileOpen(false)}
-                  >
-                    {item.label}
-                  </Link>
-                </li>
-              ))}
-            </ul>
+              {navItems.map((item) => {
+                const isActiveMain = activeMainHref === item.href;
 
-            {/* Subnav (if any) */}
-            {subnavItems.length > 0 && (
-              <div className="border-t border-border pt-3">
-                <p className="text-xs uppercase tracking-wide text-text-muted mb-2">
-                  Section options
-                </p>
-                <ul className="flex flex-col gap-2">
-                  {subnavItems.map((item) => (
-                    <li key={item.href}>
-                      <Link
-                        href={item.href}
-                        className={[
-                          "block w-full text-left px-3 py-2 rounded-md text-sm",
-                          activeSubHref === item.href
-                            ? "bg-primary text-white"
-                            : "text-primary-text hover:text-primary-text",
-                        ].join(" ")}
-                        onClick={() => setMobileOpen(false)}
-                      >
-                        {item.label}
-                      </Link>
-                    </li>
-                  ))}
-                </ul>
-              </div>
-            )}
+                return (
+                  <li key={item.href} className="space-y-1">
+                    {/* Main link */}
+                    <Link
+                      href={item.href}
+                      className={[
+                        "block w-full px-3 py-2 rounded-md text-base",
+                        isActiveMain
+                          ? "bg-primary text-white"
+                          : "text-primary-text hover:text-primary-text",
+                      ].join(" ")}
+                      onClick={() => setMobileOpen(false)}
+                    >
+                      {item.label}
+                    </Link>
+
+                    {/* Subnav — always rendered if exists */}
+                    {item.subnav && item.subnav.length > 0 && (
+                      <ul className="ml-4 flex flex-col gap-1">
+                        {item.subnav.map((sub) => (
+                          <li key={sub.href}>
+                            <Link
+                              href={sub.href}
+                              className={[
+                                "block px-3 py-1.5 rounded-md text-sm",
+                                activeSubHref === sub.href
+                                  ? "bg-primary/90 text-white"
+                                  : "text-text-muted hover:text-primary-text",
+                              ].join(" ")}
+                              onClick={() => setMobileOpen(false)}
+                            >
+                              {sub.label}
+                            </Link>
+                          </li>
+                        ))}
+                      </ul>
+                    )}
+                  </li>
+                );
+              })}
+            </ul>
           </div>
         </div>
       )}
