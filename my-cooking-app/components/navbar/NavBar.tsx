@@ -2,9 +2,10 @@
 "use client";
 
 import { useState } from "react";
-import { usePathname } from "next/navigation";
+import { usePathname, useRouter } from "next/navigation";
 import DesktopNavBar from "./DesktopNavBar";
 import MobileNavBar from "./MobileNavBar";
+import { useAuth } from "@/context/AuthContext";
 
 // Main nav items – keep these as your *entry pages*
 export const NAV_ITEMS = [
@@ -37,6 +38,10 @@ export const SUBNAV_ITEMS: Record<string, { label: string; href: string }[]> = {
 export default function NavBar() {
   const pathname = usePathname();
   const [mobileOpen, setMobileOpen] = useState(false);
+  const { user, signOut } = useAuth();
+  const router = useRouter();
+
+  if (!user) return null;
 
   // 1) Determine which section we're in based on SUBNAV_ITEMS keys ("/cook", "/learn", ...)
   const sectionKeys = Object.keys(SUBNAV_ITEMS);
@@ -86,6 +91,15 @@ export default function NavBar() {
     return found?.href ?? null;
   })();
 
+  const handleLogout = async () => {
+    try {
+      await signOut();
+      router.push("/login");
+    } catch (error) {
+      console.error("Logout failed:", error);
+    }
+  };
+
   return (
     <header className="bg-navbar-bg text-secondary-text shadow-sm font-playfair">
       {/* Desktop */}
@@ -94,6 +108,8 @@ export default function NavBar() {
         subnavItems={currentSubnav}
         activeMainHref={activeMainHref}
         activeSubHref={activeSubHref}
+        userName={user.email?.split("@")[0] || "User"}
+        onLogout={handleLogout}
       />
 
       {/* Mobile */}
@@ -104,6 +120,8 @@ export default function NavBar() {
         activeSubHref={activeSubHref}
         mobileOpen={mobileOpen}
         setMobileOpen={setMobileOpen}
+        userName={user.email?.split("@")[0] || "User"}
+        onLogout={handleLogout}
       />
     </header>
   );
