@@ -4,6 +4,7 @@ import { useState } from "react";
 import Link from "next/link";
 import { useRouter } from "next/router";
 import { z } from "zod";
+import { supabase } from "../../lib/supabase";
 
 import { Input } from "../../components/input/Input";
 import { Button } from "../../components/button/Button";
@@ -40,8 +41,19 @@ export default function LoginPage() {
     }
 
     setErrors({});
+    setIsSubmitting(true);
 
-    // Supabase login logic
+    const { error } = await supabase.auth.signInWithPassword({
+      email,
+      password,
+    });
+
+    setIsSubmitting(false);
+
+    if (error) {
+      setFormError(error.message);
+      return;
+    }
 
     router.push("/");
   };

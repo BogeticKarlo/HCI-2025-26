@@ -4,6 +4,7 @@ import { useState, type FormEvent } from "react";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { z } from "zod";
+import { supabase } from "../../lib/supabase";
 
 import { Input } from "../../components/input/Input";
 import { Button } from "../../components/button/Button";
@@ -14,14 +15,9 @@ type SignupErrors = Partial<Record<keyof SignupForm, string>>;
 
 export default function SignupPage() {
   const router = useRouter();
-
-  const [username, setUsername] = useState("");
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [confirmPassword, setConfirmPassword] = useState("");
-  const [profilePicture, setProfilePicture] = useState<File | undefined>(
-    undefined
-  );
 
   const [errors, setErrors] = useState<SignupErrors>({});
   const [formError, setFormError] = useState<string | null>(null);
@@ -32,11 +28,9 @@ export default function SignupPage() {
     setFormError(null);
 
     const result = signupSchema.safeParse({
-      username,
       email,
       password,
       confirmPassword,
-      profilePicture,
     });
 
     if (!result.success) {
@@ -52,10 +46,26 @@ export default function SignupPage() {
     }
 
     setErrors({});
+    setIsSubmitting(true);
 
-    //supabase signup logic
+    const { data, error } = await supabase.auth.signUp({
+      email,
+      password,
+    });
 
-    router.push("/login");
+    setIsSubmitting(false);
+
+    if (error) {
+      setFormError(error.message);
+      return;
+    }
+
+    if (!data.session) {
+      router.push("/login");
+      return;
+    }
+
+    router.push("/");
   };
 
   return (
@@ -117,19 +127,6 @@ export default function SignupPage() {
 
             <form onSubmit={handleSubmit} noValidate className="space-y-4">
               <Input
-                label="Username"
-                placeholder="Choose a username"
-                value={username}
-                onChange={(e) => {
-                  setUsername(e.target.value);
-                  if (errors.username) {
-                    setErrors((prev) => ({ ...prev, username: undefined }));
-                  }
-                }}
-                error={errors.username}
-              />
-
-              <Input
                 label="Email"
                 type="email"
                 placeholder="Enter your email"
@@ -172,23 +169,6 @@ export default function SignupPage() {
                   }
                 }}
                 error={errors.confirmPassword}
-              />
-
-              <Input
-                label="Profile Picture (optional)"
-                type="file"
-                accept="image/*"
-                onChange={(e) => {
-                  const file = e.target.files?.[0];
-                  setProfilePicture(file ?? undefined);
-                  if (errors.profilePicture) {
-                    setErrors((prev) => ({
-                      ...prev,
-                      profilePicture: undefined,
-                    }));
-                  }
-                }}
-                error={errors.profilePicture}
               />
 
               {formError && (
