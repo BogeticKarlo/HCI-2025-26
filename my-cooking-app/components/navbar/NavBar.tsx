@@ -10,23 +10,16 @@ import { useAuth } from "@/context/AuthContext";
 // Main nav items – keep these as your *entry pages*
 export const NAV_ITEMS = [
   { label: "Home", href: "/" },
-  { label: "Cook", href: "/cook/smart-filters" },
+  { label: "Cook", href: "/cook/upload-recipes" },
   { label: "Learn", href: "/learn/cooking-101" },
-  { label: "Connect", href: "/connect/community-feed" },
   { label: "Settings", href: "/settings" },
 ];
 
 // Subnav per section – keys are the *section roots*
 export const SUBNAV_ITEMS: Record<string, { label: string; href: string }[]> = {
   "/cook": [
-    { label: "Smart Filters", href: "/cook/smart-filters" },
     { label: "Upload Recipe", href: "/cook/upload-recipes" },
     { label: "My Recipes", href: "/cook/my-recipes" },
-    { label: "Saved Recipes", href: "/cook/saved-recipes" },
-  ],
-  "/connect": [
-    { label: "Community Feed", href: "/connect/community-feed" },
-    { label: "Your Story", href: "/connect/your-story" },
   ],
   "/learn": [
     { label: "Cooking 101", href: "/learn/cooking-101" },
