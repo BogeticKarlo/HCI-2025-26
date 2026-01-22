@@ -4,6 +4,7 @@
 import Image from "next/image";
 import Link from "next/link";
 import logo from "../../public/assets/logo.svg";
+import { LogoutIcon } from "@/assets/LogoutIcon";
 
 type NavItem = { label: string; href: string };
 
@@ -14,6 +15,8 @@ type MobileNavBarProps = {
   activeSubHref: string | null;
   mobileOpen: boolean;
   setMobileOpen: (open: boolean) => void;
+  userName: string;
+  onLogout: () => void;
 };
 
 export default function MobileNavBar({
@@ -23,6 +26,8 @@ export default function MobileNavBar({
   activeSubHref,
   mobileOpen,
   setMobileOpen,
+  userName,
+  onLogout,
 }: MobileNavBarProps) {
   return (
     <div className="md:hidden">
@@ -41,15 +46,7 @@ export default function MobileNavBar({
 
         {/* Right: user + hamburger */}
         <div className="flex items-center gap-3">
-          <div className="w-9 h-9 rounded-full overflow-hidden border border-border">
-            <Image
-              src="https://avatars.dicebear.com/api/avataaars/dominko.svg"
-              alt="User avatar"
-              width={36}
-              height={36}
-              className="object-cover"
-            />
-          </div>
+          <span className="text-primary-text font-medium">{userName}</span>
 
           {/* Animated hamburger */}
           <button
@@ -84,6 +81,13 @@ export default function MobileNavBar({
               />
             </span>
           </button>
+
+          <div
+            onClick={onLogout}
+            className="w-10 h-10 rounded-full overflow-hidden border border-border duration-200 transition-colors ease-in-out hover:bg-main-bg/90"
+          >
+            <LogoutIcon className="w-6 h-6 text-primary-text m-2 cursor-pointer" />
+          </div>
         </div>
       </nav>
 

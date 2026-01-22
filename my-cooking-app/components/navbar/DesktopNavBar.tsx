@@ -4,6 +4,7 @@
 import Image from "next/image";
 import Link from "next/link";
 import logo from "../../public/assets/logo.svg";
+import { LogoutIcon } from "@/assets/LogoutIcon";
 
 type NavItem = { label: string; href: string };
 
@@ -12,6 +13,8 @@ type DesktopNavBarProps = {
   subnavItems: NavItem[];
   activeMainHref: string;
   activeSubHref: string | null;
+  userName: string;
+  onLogout: () => void;
 };
 
 export default function DesktopNavBar({
@@ -19,6 +22,8 @@ export default function DesktopNavBar({
   subnavItems,
   activeMainHref,
   activeSubHref,
+  userName,
+  onLogout,
 }: DesktopNavBarProps) {
   return (
     <div className="hidden md:block">
@@ -56,15 +61,12 @@ export default function DesktopNavBar({
 
         {/* Right: user */}
         <div className="flex items-center gap-3">
-          <span className="text-primary-text font-medium">Dominko123</span>
-          <div className="w-10 h-10 rounded-full overflow-hidden border border-border">
-            <Image
-              src="https://avatars.dicebear.com/api/avataaars/dominko.svg"
-              alt="User avatar"
-              width={40}
-              height={40}
-              className="object-cover"
-            />
+          <span className="text-primary-text font-medium">{userName}</span>
+          <div
+            onClick={onLogout}
+            className="w-10 h-10 rounded-full overflow-hidden border border-border duration-200 transition-colors ease-in-out hover:bg-main-bg/90"
+          >
+            <LogoutIcon className="w-6 h-6 text-primary-text m-2 cursor-pointer" />
           </div>
         </div>
       </nav>
