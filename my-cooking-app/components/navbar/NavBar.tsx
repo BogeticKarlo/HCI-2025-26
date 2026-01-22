@@ -48,8 +48,10 @@ export default function NavBar() {
 
   if (!user) return null;
 
+  const isRecipePage = pathname.startsWith("/recipes/");
+
   const activeMainHref = (() => {
-    if (pathname === "/") return "/";
+    if (isRecipePage) return null;
 
     for (const item of NAV_ITEMS) {
       if (!item.subnav) continue;
@@ -58,19 +60,19 @@ export default function NavBar() {
         (sub) => pathname === sub.href || pathname.startsWith(sub.href + "/")
       );
 
-      if (subMatch) {
-        return item.href;
-      }
+      if (subMatch) return item.href;
     }
 
     const mainMatch = NAV_ITEMS.find(
       (item) => pathname === item.href || pathname.startsWith(item.href + "/")
     );
 
-    return mainMatch?.href ?? "/";
+    return mainMatch?.href ?? null;
   })();
 
   const activeSubHref = (() => {
+    if (isRecipePage) return null;
+
     const activeMain = NAV_ITEMS.find((item) => item.href === activeMainHref);
 
     if (!activeMain?.subnav) return null;
