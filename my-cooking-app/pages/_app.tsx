@@ -6,6 +6,7 @@ import { ThemeProvider } from "next-themes";
 import Nav from "../components/navbar/NavBar";
 import Footer from "../components/footer/footer";
 import { useRouter } from "next/router";
+import { AuthProvider } from "@/context/AuthContext";
 
 export default function MyApp({ Component, pageProps }: AppProps) {
   const router = useRouter();
@@ -14,20 +15,26 @@ export default function MyApp({ Component, pageProps }: AppProps) {
   const isAuthRoute = authRoutes.includes(router.pathname);
 
   return (
-    <ThemeProvider attribute="class" defaultTheme="light" enableSystem={false}>
-      {isAuthRoute ? (
-        <Component {...pageProps} />
-      ) : (
-        <div className="min-h-screen flex flex-col bg-main-bg">
-          <Nav />
+    <AuthProvider>
+      <ThemeProvider
+        attribute="class"
+        defaultTheme="light"
+        enableSystem={false}
+      >
+        {isAuthRoute ? (
+          <Component {...pageProps} />
+        ) : (
+          <div className="min-h-screen flex flex-col bg-main-bg">
+            <Nav />
 
-          <main className="flex-1 p-5">
-            <Component {...pageProps} />
-          </main>
+            <main className="flex-1 p-5">
+              <Component {...pageProps} />
+            </main>
 
-          <Footer />
-        </div>
-      )}
-    </ThemeProvider>
+            <Footer />
+          </div>
+        )}
+      </ThemeProvider>
+    </AuthProvider>
   );
 }

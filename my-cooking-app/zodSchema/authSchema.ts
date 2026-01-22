@@ -10,7 +10,6 @@ export const loginSchema = z.object({
 
 export const signupSchema = z
   .object({
-    username: z.string().min(1, "Username is required."),
     email: z
       .string()
       .min(1, "Email is required.")
@@ -20,7 +19,6 @@ export const signupSchema = z
       .min(1, "Password is required.")
       .min(8, "Password must be at least 8 characters long."),
     confirmPassword: z.string().min(1, "Please confirm your password."),
-    profilePicture: z.instanceof(File).optional(),
   })
   .refine((data) => data.password === data.confirmPassword, {
     message: "Passwords do not match.",
