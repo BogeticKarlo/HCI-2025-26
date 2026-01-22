@@ -1,11 +1,8 @@
 // pages/recipes/[id].tsx
 import type { GetServerSideProps, NextPage } from "next";
-import { useRouter } from "next/navigation";
 import { useEffect, useState } from "react";
 import { RecipeCard } from "../../components/recipeCard/RecipeCard";
 import { RecipeCardSkeleton } from "../../components/recipeCard/RecipeSkeletonLoaderCard";
-import Image from "next/image";
-import backArrow from "../../public/assets/backArrow.png";
 
 type Recipe = {
   id: string;
@@ -28,8 +25,6 @@ const RecipePage: NextPage<RecipePageProps> = ({ recipe }) => {
   // Show skeleton on first paint for smooth UX
   const [loading, setLoading] = useState(true);
 
-  const router = useRouter();
-
   useEffect(() => {
     // Delay one tick so the skeleton shows before hydration
     const timeout = setTimeout(() => setLoading(false), 150);
@@ -38,25 +33,6 @@ const RecipePage: NextPage<RecipePageProps> = ({ recipe }) => {
 
   return (
     <div className="relative flex justify-center mt-2">
-      {/* Back Arrow — positioned to the left of the centered card */}
-      <button
-        onClick={() => router.back()}
-        className="
-      absolute left-0 top-2
-      cursor-pointer
-      transition duration-200
-      hover:scale-110 hover:opacity-80
-    "
-      >
-        <Image
-          src={backArrow}
-          alt="Back"
-          width={48}
-          height={48}
-          className="w-10 h-10 md:w-12 md:h-12"
-        />
-      </button>
-
       {/* Centered Card */}
       <div>
         {loading ? (
