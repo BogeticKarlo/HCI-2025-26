@@ -2,7 +2,7 @@ import { SVGProps } from "react";
 
 export const ArrowIcon = (props: SVGProps<SVGSVGElement>) => (
   <svg
-    width="800"
+    width="800px"
     viewBox="0 0 15 15"
     fill="none"
     xmlns="http://www.w3.org/2000/svg"
