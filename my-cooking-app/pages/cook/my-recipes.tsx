@@ -42,45 +42,43 @@ export default function MyRecipes() {
       </h1>
 
       <div className="max-w-6xl mx-auto px-6 sm:px-10 lg:px-20">
-        <div className="max-w-6xl mx-auto px-6 sm:px-10 lg:px-20">
-          {loading ? (
-            <div
-              className="
+        {loading ? (
+          <div
+            className="
         grid 
         gap-6
         grid-cols-1 md:grid-cols-2 xl:grid-cols-3
         place-items-center
       "
-            >
-              {Array.from({ length: 12 }).map((_, i) => (
-                <RecipeMinimizeCardSkeletonLoader key={i} />
-              ))}
-            </div>
-          ) : recipes.length === 0 ? (
-            <div className="flex justify-center">
-              <NoRecipesCard />
-            </div>
-          ) : (
-            <div
-              className="
+          >
+            {Array.from({ length: 12 }).map((_, i) => (
+              <RecipeMinimizeCardSkeletonLoader key={i} />
+            ))}
+          </div>
+        ) : recipes.length === 0 ? (
+          <div className="flex justify-center">
+            <NoRecipesCard />
+          </div>
+        ) : (
+          <div
+            className="
         grid 
         gap-6
         grid-cols-1 md:grid-cols-2 xl:grid-cols-3
         place-items-center
       "
-            >
-              {recipes.map((recipe) => (
-                <RecipeMinimizeCard
-                  key={recipe.id}
-                  id={recipe.id}
-                  title={recipe.title}
-                  imageUrl={recipe.image_url || ""}
-                  description={recipe.description || ""}
-                />
-              ))}
-            </div>
-          )}
-        </div>
+          >
+            {recipes.map((recipe) => (
+              <RecipeMinimizeCard
+                key={recipe.id}
+                id={recipe.id}
+                title={recipe.title}
+                imageUrl={recipe.image_url || ""}
+                description={recipe.description || ""}
+              />
+            ))}
+          </div>
+        )}
       </div>
     </div>
   );
