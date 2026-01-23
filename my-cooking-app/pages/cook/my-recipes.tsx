@@ -57,7 +57,13 @@ export default function MyRecipes() {
           </div>
         ) : recipes.length === 0 ? (
           <div className="flex justify-center">
-            <NoRecipesCard />
+            <NoRecipesCard
+              title="Your kitchen is empty!"
+              description="No recipes yet — not even a secret family dish 👀 Time to break the
+        silence and cook up something amazing."
+              buttonText="Create your first recipe"
+              quote="Even instant noodles deserve a recipe 😌"
+            />
           </div>
         ) : (
           <div
