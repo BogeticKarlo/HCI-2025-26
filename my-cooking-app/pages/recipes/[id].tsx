@@ -3,19 +3,11 @@ import type { GetServerSideProps, NextPage } from "next";
 import { useEffect, useState } from "react";
 import { RecipeCard } from "../../components/recipeCard/RecipeCard";
 import { RecipeCardSkeleton } from "../../components/recipeCard/RecipeSkeletonLoaderCard";
+import { fetchRecipeById } from "../../fetch/fetch";
 
-type Recipe = {
-  id: string;
-  createdAt: number;
-  title: string;
-  description: string;
-  ingredients: string[];
-  instructions: string[];
-  author: string;
-  numberOfLikes: number;
-  numberOfSaves: number;
-  fileUrl: string;
-};
+import { Database } from "@/types/supabase";
+
+type Recipe = Database["public"]["Tables"]["recipes"]["Row"];
 
 type RecipePageProps = {
   recipe: Recipe | null;
@@ -40,7 +32,7 @@ const RecipePage: NextPage<RecipePageProps> = ({ recipe }) => {
         ) : recipe ? (
           <RecipeCard recipe={recipe} isLoading={false} />
         ) : (
-          <p className="text-gray-800">Recipe not found.</p>
+          <p className="text-primary-text">Recipe not found.</p>
         )}
       </div>
     </div>
@@ -53,13 +45,7 @@ export const getServerSideProps: GetServerSideProps<RecipePageProps> = async (
   const { id } = context.params as { id: string };
 
   try {
-    const res = await fetch(process.env.NEXT_PUBLIC_API_URL as string);
-
-    if (!res.ok) return { props: { recipe: null } };
-
-    const data: Recipe[] = await res.json();
-    const recipe = data.find((r) => r.id === id) ?? null;
-
+    const recipe = await fetchRecipeById(id);
     return { props: { recipe } };
   } catch (e) {
     console.error(e);

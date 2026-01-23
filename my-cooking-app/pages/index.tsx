@@ -3,15 +3,10 @@
 import { useEffect, useState } from "react";
 import { RecipeMinimizeCard } from "../components/recipeMinimizeCard/RecipeMinimizeCard";
 import { RecipeMinimizeCardSkeletonLoader } from "../components/recipeMinimizeCard/RecipeMinimizeCardSkeletonLoader";
+import { fetchLatestRecipes } from "@/fetch/fetch";
+import { Database } from "@/types/supabase";
 
-type Recipe = {
-  id: string;
-  createdAt: number;
-  title: string;
-  description: string;
-  fileUrl: string;
-  // other fields exist but we only need these here
-};
+type Recipe = Database["public"]["Tables"]["recipes"]["Row"];
 
 export default function HomePage() {
   const [recipes, setRecipes] = useState<Recipe[]>([]);
@@ -24,19 +19,7 @@ export default function HomePage() {
         setIsLoading(true);
         setIsError(false);
 
-        const res = await fetch(process.env.NEXT_PUBLIC_API_URL as string);
-        if (!res.ok) {
-          throw new Error("Failed to fetch recipes");
-        }
-
-        const data: Recipe[] = await res.json();
-
-        // sort by createdAt desc (newest first) and take only the 10 newest
-        const sorted = [...data]
-          .sort((a, b) => Number(b.createdAt) - Number(a.createdAt))
-          .slice(0, 12);
-
-        setRecipes(sorted);
+        setRecipes(await fetchLatestRecipes(12));
       } catch (err) {
         console.error(err);
         setIsError(true);
@@ -78,8 +61,8 @@ export default function HomePage() {
                   key={recipe.id}
                   id={recipe.id}
                   title={recipe.title}
-                  imageUrl={recipe.fileUrl}
-                  description={recipe.description}
+                  imageUrl={recipe.image_url || ""}
+                  description={recipe.description || ""}
                 />
               ))}
         </div>

@@ -16,7 +16,7 @@ type NavItem = {
 
 type DesktopNavBarProps = {
   navItems: NavItem[];
-  activeMainHref: string;
+  activeMainHref: string | null;
   activeSubHref: string | null;
   userName: string;
   onLogout: () => void;

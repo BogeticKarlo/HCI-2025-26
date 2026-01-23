@@ -16,7 +16,7 @@ type NavItem = {
 
 type MobileNavBarProps = {
   navItems: NavItem[];
-  activeMainHref: string;
+  activeMainHref: string | null;
   activeSubHref: string | null;
   mobileOpen: boolean;
   setMobileOpen: (open: boolean) => void;
