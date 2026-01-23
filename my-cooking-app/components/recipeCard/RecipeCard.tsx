@@ -56,9 +56,24 @@ export function RecipeCard({
             className="w-15 md:w-12 aspect-square"
           />
         </button>
-        <h1 className="text-3xl font-bold text-primary-text font-playfair">
+        <h1 className="text-3xl font-bold text-primary-text font-playfair lg:mr-5">
           {recipe.title}
         </h1>
+        <h3 className="text-primary-text">
+          <span className="font-playfair font-semibold text-text-muted text-sm">
+            Cuisine:
+          </span>{" "}
+          <span className="font-normal text-primary-text">
+            {recipe.cuisine}
+          </span>
+          <br />
+          <span className="font-playfair font-semibold text-text-muted text-sm">
+            Type:
+          </span>{" "}
+          <span className="font-normal text-primary-text">
+            {recipe.recipe_type?.replace("_", " ")}
+          </span>
+        </h3>
       </header>
 
       {/* Description */}

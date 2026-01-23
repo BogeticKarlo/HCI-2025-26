@@ -19,6 +19,7 @@ function formatLabel(str: string) {
     .join(" ");
 }
 export const cuisineOptions: Option<"cuisine">[] = createOptions("cuisine", [
+  "all",
   "italian",
   "greek",
   "mexican",
@@ -34,6 +35,7 @@ export const cuisineOptions: Option<"cuisine">[] = createOptions("cuisine", [
 export const recipeTypeOptions: Option<"recipeType">[] = createOptions(
   "recipeType",
   [
+    "all",
     "quick",
     "healthy",
     "cheap",
@@ -45,3 +47,14 @@ export const recipeTypeOptions: Option<"recipeType">[] = createOptions(
     "other",
   ]
 );
+
+export const timeOptions: Option<"time">[] = createOptions("time", [
+  "latest",
+  "oldest",
+]);
+
+export const favoriteOptions: Option<"favorite">[] = createOptions("favorite", [
+  "all",
+  "most_likes",
+  "least_likes",
+]);

@@ -2,7 +2,19 @@ import { useRouter } from "next/navigation";
 import { PlusCircleIcon } from "../../assets/PlusCircleIcon";
 import { Button } from "../button/Button";
 
-export const NoRecipesCard = () => {
+type NoRecipesCardProps = {
+  title: string;
+  description: string;
+  buttonText: string;
+  quote?: string;
+};
+
+export const NoRecipesCard = ({
+  title,
+  description,
+  buttonText,
+  quote,
+}: NoRecipesCardProps) => {
   const router = useRouter();
 
   const handleAddRecipeClick = () => {
@@ -14,13 +26,10 @@ export const NoRecipesCard = () => {
       <div className="text-5xl mb-4">🍳</div>
 
       <h2 className="font-playfair text-3xl font-bold text-primary-text mb-3">
-        Your kitchen is empty!
+        {title}
       </h2>
 
-      <p className="text-body-text mb-6 leading-relaxed">
-        No recipes yet — not even a secret family dish 👀 Time to break the
-        silence and cook up something amazing.
-      </p>
+      <p className="text-body-text mb-6 leading-relaxed">{description}</p>
 
       <div className="flex justify-center">
         <Button
@@ -28,13 +37,11 @@ export const NoRecipesCard = () => {
           icon={<PlusCircleIcon className="w-5 h-5" />}
           onClick={handleAddRecipeClick}
         >
-          Create your first recipe
+          {buttonText}
         </Button>
       </div>
 
-      <p className="text-text-muted text-sm mt-6">
-        Even instant noodles deserve a recipe 😌
-      </p>
+      {quote && <p className="text-text-muted text-sm mt-6">{quote}</p>}
     </div>
   );
 };

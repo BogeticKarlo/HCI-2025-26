@@ -28,7 +28,7 @@ export const Button: FC<ButtonProps> = ({
     <button
       type="button"
       className={clsx(
-        "inline-flex items-center justify-center rounded-[10px] px-6 py-2",
+        "inline-flex items-center justify-center rounded-[10px] px-6 py-4",
         "text-sm font-medium transition-all duration-150",
         "focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-primary",
         isDisabled ? disabledClasses : variantClasses,
