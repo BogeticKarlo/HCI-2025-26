@@ -1,19 +1,16 @@
-// RecipeCard.tsx
 "use client";
 
 import Image from "next/image";
 import { useRouter } from "next/navigation";
 import { RecipeCardSkeleton } from "./RecipeSkeletonLoaderCard";
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import CakeImage from "../../public/assets/cake.png";
 import SoupImage from "../../public/assets/soup.png";
+import backArrow from "../../public/assets/backArrow.png";
 import { HeartIcon } from "@/public/reactComponentAssets/HeartIcon";
 import { BookmarkIcon } from "@/public/reactComponentAssets/BookmarkIcon";
-import backArrow from "../../public/assets/backArrow.png";
 import { Database } from "@/types/supabase";
-import { useEffect } from "react";
 import { fetchUserById } from "@/fetch/fetch";
-import { User } from "@supabase/supabase-js";
 
 type Recipe = Database["public"]["Tables"]["recipes"]["Row"];
 type Profile = Database["public"]["Tables"]["profiles"]["Row"];
@@ -40,6 +37,8 @@ export function RecipeCard({
   }, [recipe?.author_id]);
 
   if (isLoading || !recipe) return <RecipeCardSkeleton />;
+
+  const publicImageUrl = `https://xhebsnwjpfcdttydwuhg.supabase.co/storage/v1/object/public/recipe-images/${recipe.image_url}`;
 
   return (
     <article className="w-full max-w-[360px] md:max-w-[720px] bg-section-bg rounded-3xl p-8 shadow-md text-body-text flex flex-col gap-6">
@@ -83,7 +82,6 @@ export function RecipeCard({
               ))}
             </ul>
           </div>
-
           <div className="w-24 h-20 rounded-xl flex items-center justify-center">
             <Image
               src={CakeImage}
@@ -121,13 +119,14 @@ export function RecipeCard({
         </div>
       </section>
 
-      {/* Recipe Image */}
-      {recipe.image_url && (
+      {/* Main Recipe Image */}
+      {publicImageUrl && (
         <div className="relative w-full h-48 rounded-2xl overflow-hidden">
           <Image
-            src={recipe.image_url}
+            src={publicImageUrl}
             alt={recipe.title}
             fill
+            sizes="100%"
             className="object-cover"
           />
         </div>
@@ -135,7 +134,9 @@ export function RecipeCard({
 
       {/* Footer */}
       <footer className="flex justify-between items-center text-sm text-body-text">
-        <span className="text-body-text">{author?.username.split("@")[0]}</span>
+        <span className="text-body-text">
+          {author?.username?.split("@")[0]}
+        </span>
         <div className="flex flex-col sm:flex-row items-center gap-5">
           {/* Likes */}
           <div className="flex items-center gap-1 text-body-text">
