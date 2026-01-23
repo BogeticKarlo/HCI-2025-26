@@ -17,7 +17,7 @@ export const Button: FC<ButtonProps> = ({
   const variantClasses =
     variant === "primary"
       ? "bg-primary text-secondary-text"
-      : "bg-secondary text-primary-text";
+      : "bg-secondary text-secondary-text";
 
   const enabledHover =
     "hover:opacity-90 hover:shadow-[0_4px_4px_rgba(0,0,0,0.25)]";
