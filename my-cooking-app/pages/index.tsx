@@ -5,6 +5,14 @@ import { RecipeMinimizeCard } from "../components/recipeMinimizeCard/RecipeMinim
 import { RecipeMinimizeCardSkeletonLoader } from "../components/recipeMinimizeCard/RecipeMinimizeCardSkeletonLoader";
 import { fetchLatestRecipes } from "@/fetch/fetch";
 import { Database } from "@/types/supabase";
+import { Option } from "@/components/dropdown/Dropdown.types";
+import {
+  cuisineOptions,
+  recipeTypeOptions,
+  timeOptions,
+  favoriteOptions,
+} from "@/components/dropdown/DropdownOptions";
+import { Dropdown } from "@/components/dropdown/Dropdown";
 
 type Recipe = Database["public"]["Tables"]["recipes"]["Row"];
 
@@ -12,6 +20,19 @@ export default function HomePage() {
   const [recipes, setRecipes] = useState<Recipe[]>([]);
   const [isLoading, setIsLoading] = useState(true);
   const [isError, setIsError] = useState(false);
+
+  const [selectedCuisine, setSelectedCuisine] = useState<Option<"cuisine">>(
+    cuisineOptions[0]
+  );
+  const [selectedRecipeType, setSelectedRecipeType] = useState<
+    Option<"recipeType">
+  >(recipeTypeOptions[0]);
+  const [selectedTime, setSelectedTime] = useState<Option<"time">>(
+    timeOptions[0]
+  );
+  const [selectedFavorite, setSelectedFavorite] = useState<Option<"favorite">>(
+    favoriteOptions[0]
+  );
 
   useEffect(() => {
     const fetchRecipes = async () => {
@@ -32,7 +53,7 @@ export default function HomePage() {
   }, []);
 
   return (
-    <>
+    <div className="flex flex-col items-center">
       {isError && (
         <p className="text-warning text-sm mb-4">
           Something went wrong while loading recipes.
@@ -40,8 +61,39 @@ export default function HomePage() {
       )}
 
       <h1 className="font-playfair font-bold text-[40px] leading-[120%] tracking-[0] text-center mb-10 text-primary-text">
-        Check Out Newest Recipes
+        Check Out Best Recipes
       </h1>
+
+      <div className="flex flex-col w-9/10 items-center justify-center gap-10">
+        <div className="grid grid-cols-2 gap-5 w-full lg:w-[70%]">
+          <Dropdown
+            label="Choose Cuisine"
+            options={cuisineOptions}
+            onSelect={setSelectedCuisine}
+            value={selectedCuisine}
+          />
+          <Dropdown
+            label="Choose Type"
+            options={recipeTypeOptions}
+            onSelect={setSelectedRecipeType}
+            value={selectedRecipeType}
+          />
+        </div>
+        <div className="grid grid-cols-2 gap-5 w-full mb-10 lg:w-[70%]">
+          <Dropdown
+            label="Choose Latest"
+            options={timeOptions}
+            onSelect={setSelectedTime}
+            value={selectedTime}
+          />
+          <Dropdown
+            label="Choose Popular"
+            options={favoriteOptions}
+            onSelect={setSelectedFavorite}
+            value={selectedFavorite}
+          />
+        </div>
+      </div>
 
       <div className="max-w-6xl mx-auto px-6 sm:px-10 lg:px-20">
         <div
@@ -67,6 +119,6 @@ export default function HomePage() {
               ))}
         </div>
       </div>
-    </>
+    </div>
   );
 }
