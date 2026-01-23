@@ -8,6 +8,7 @@ export const Input: FC<InputProps> = ({
   error,
   id,
   className,
+  containerClassName,
   ...rest
 }) => {
   const generatedId = useId();
@@ -15,7 +16,7 @@ export const Input: FC<InputProps> = ({
   const hasError = Boolean(error);
 
   return (
-    <div className="flex flex-col gap-1">
+    <div className={clsx("flex flex-col gap-1", containerClassName)}>
       {label && (
         <label
           htmlFor={inputId}

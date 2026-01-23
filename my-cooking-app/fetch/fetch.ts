@@ -1,3 +1,4 @@
+import { BaseRecipe } from "@/database/models/domain";
 import { supabase } from "./client";
 
 export async function fetchRecipesByUser(userId: string) {
@@ -52,4 +53,33 @@ export async function fetchUserById(userId: string) {
 
   if (error || !data) return null;
   return data;
+}
+
+export async function uploadRecipe(recipeData: BaseRecipe) {
+  const { data, error } = await supabase
+    .from("recipes")
+    .insert([recipeData])
+    .select();
+
+  if (error) {
+    console.error("Error uploading recipe:", error);
+    return null;
+  }
+
+  return data;
+}
+
+export async function uploadRecipeImage(file: File, userId: string) {
+  const filePath = `${userId}/${Date.now()}-${file.name}`;
+
+  const { data, error } = await supabase.storage
+    .from("recipe-images")
+    .upload(filePath, file);
+
+  if (error) {
+    console.error("Error uploading image:", error);
+    return null;
+  }
+
+  return data.path;
 }

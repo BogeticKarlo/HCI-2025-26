@@ -8,6 +8,8 @@ export type CookingLessonRow =
 export type CulinaryTechniqueRow =
   Database["public"]["Tables"]["culinary_techniques"]["Row"];
 
+export type BaseRecipe = Database["public"]["Tables"]["recipes"]["Insert"];
+
 export type UserProfile = {
   id: string;
   username: string;
@@ -32,35 +34,20 @@ export function mapProfile(row: ProfileRow): UserProfile {
   };
 }
 
-export type Recipe = {
-  id: string;
-  authorId: string;
-  createdAt: string;
-  title: string;
-  description: string | null;
-  ingredients: string[];
-  instructions: string[];
-  cuisine: CuisineType | null;
-  recipeType: RecipeKind | null;
-  imageUrl: string | null;
-  numberOfLikes: number;
-  numberOfSaves: number;
-};
-
-export function mapRecipe(row: RecipeRow): Recipe {
+export function mapRecipe(row: RecipeRow): BaseRecipe {
   return {
     id: row.id,
-    authorId: row.author_id,
-    createdAt: row.created_at,
+    author_id: row.author_id,
+    created_at: row.created_at,
     title: row.title,
     description: row.description,
     ingredients: row.ingredients,
     instructions: row.instructions,
     cuisine: row.cuisine,
-    recipeType: row.recipe_type,
-    imageUrl: row.image_url,
-    numberOfLikes: row.number_of_likes,
-    numberOfSaves: row.number_of_saves,
+    recipe_type: row.recipe_type,
+    image_url: row.image_url,
+    number_of_likes: row.number_of_likes,
+    number_of_saves: row.number_of_saves,
   };
 }
 

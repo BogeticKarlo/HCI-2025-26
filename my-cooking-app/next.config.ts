@@ -8,6 +8,10 @@ const nextConfig: NextConfig = {
         protocol: "https",
         hostname: "cloudinary-marketing-res.cloudinary.com",
       },
+      {
+        protocol: "https",
+        hostname: "xhebsnwjpfcdttydwuhg.supabase.co",
+      },
     ],
   },
 };
