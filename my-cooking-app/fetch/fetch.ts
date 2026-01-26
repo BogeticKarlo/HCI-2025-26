@@ -1,5 +1,7 @@
 import { BaseRecipe } from "@/database/models/domain";
 import { supabase } from "./client";
+import { supabaseServer } from "@/lib/supabase-server";
+
 import {
   CuisineOptions,
   RecipeTypeOptions,
@@ -24,11 +26,11 @@ export async function fetchRecipesByUser(userId: string) {
   return data;
 }
 
-export async function fetchRecipeById(recipeId: string) {
-  const { data, error } = await supabase
+export async function fetchRecipeById(id: string) {
+  const { data, error } = await supabaseServer
     .from("recipes")
     .select("*")
-    .eq("id", recipeId)
+    .eq("id", id)
     .single();
 
   if (error || !data) return null;
