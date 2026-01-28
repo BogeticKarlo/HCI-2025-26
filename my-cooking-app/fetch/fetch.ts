@@ -177,3 +177,19 @@ export async function uploadRecipeImage(file: File, userId: string) {
 
   return data.path;
 }
+
+export async function deleteRecipe(recipeId: string, userId: string) {
+  const { error } = await supabase
+    .from("recipes")
+    .delete()
+    .eq("id", recipeId)
+    .eq("author_id", userId)
+    .select();
+
+  if (error) {
+    console.error("Error deleting recipe:", error);
+    return false;
+  }
+
+  return true;
+}
