@@ -57,7 +57,7 @@ export function RecipeCard({
     }
 
     setIsModalOpen(false);
-    router.push("/cook/my-recipes");
+    router.back();
   };
 
   return (

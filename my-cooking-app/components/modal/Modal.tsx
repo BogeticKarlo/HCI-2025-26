@@ -16,7 +16,7 @@ export default function Modal({
 }: ModalProps) {
   return (
     <div className="w-screen h-screen bg-black/60 top-0 left-0 fixed z-100 flex items-center justify-center">
-      <div className="flex flex-col bg-section-bg border border-input-border rounded-2xl p-10 items-center justify-center gap-10">
+      <div className="flex flex-col bg-section-bg border border-input-border rounded-2xl p-10 items-center justify-center gap-10 max-w-9/10">
         <h3 className="text-primary-text">{title}</h3>
         <div className="flex gap-10">
           <Button
