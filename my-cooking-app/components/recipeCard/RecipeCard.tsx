@@ -12,6 +12,7 @@ import { TrashIcon } from "@/assets/TrashIcon";
 import { Database } from "@/types/supabase";
 import { fetchUserById, deleteRecipe } from "@/fetch/fetch";
 import { useAuth } from "@/context/AuthContext";
+import Modal from "../modal/Modal";
 
 type Recipe = Database["public"]["Tables"]["recipes"]["Row"];
 type Profile = Database["public"]["Tables"]["profiles"]["Row"];
@@ -27,6 +28,7 @@ export function RecipeCard({
   const [author, setAuthor] = useState<Profile>();
   const { user } = useAuth();
   const [deleteOption, setDeleteOption] = useState(false);
+  const [isModalOpen, setIsModalOpen] = useState(false);
 
   useEffect(() => {
     if (!recipe?.author_id) return;
@@ -53,6 +55,9 @@ export function RecipeCard({
     } catch (error) {
       console.error("Error deleting recipe:", error);
     }
+
+    setIsModalOpen(false);
+    router.push("/cook/my-recipes");
   };
 
   return (
@@ -179,7 +184,7 @@ export function RecipeCard({
           {deleteOption && (
             <div className="flex items-center gap-1 text-body-text">
               <button
-                onClick={handleDelete}
+                onClick={() => setIsModalOpen(true)}
                 className="w-8 h-8 flex items-center justify-center cursor-pointer transition-all duration-200 hover:scale-110 active:scale-95 hover:text-error-border"
               >
                 <TrashIcon className="w-7 h-7" />
@@ -188,6 +193,13 @@ export function RecipeCard({
           )}
         </div>
       </footer>
+      {isModalOpen && (
+        <Modal
+          handleAction={handleDelete}
+          setIsModalOpen={setIsModalOpen}
+          title="Are you sure you want to delete this recipe?"
+        />
+      )}
     </article>
   );
 }
