@@ -1,7 +1,6 @@
 import { Button } from "../button/Button";
 import { CloseIcon } from "@/assets/CloseIcon";
 import { CheckIcon } from "@/assets/CheckIcon";
-import { title } from "process";
 
 export type ModalProps = {
   handleAction: () => void;
