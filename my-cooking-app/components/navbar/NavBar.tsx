@@ -6,9 +6,7 @@ import { usePathname, useRouter } from "next/navigation";
 import DesktopNavBar from "./DesktopNavBar";
 import MobileNavBar from "./MobileNavBar";
 import { useAuth } from "@/context/AuthContext";
-import { Button } from "../button/Button";
-import { CloseIcon } from "@/assets/CloseIcon";
-import { CheckIcon } from "@/assets/CheckIcon";
+import Modal from "../modal/Modal";
 
 type SubNavItem = { label: string; href: string };
 
@@ -135,28 +133,11 @@ export default function NavBar() {
       />
 
       {isModalOpen && (
-        <div className="w-screen h-screen bg-black/60 top-0 left-0 fixed z-100 flex items-center justify-center">
-          <div className="flex flex-col bg-section-bg border border-input-border rounded-2xl p-10 items-center justify-center gap-10">
-            <h3 className="text-primary-text">
-              Are you sure you want to exit?
-            </h3>
-            <div className="flex gap-10">
-              <Button
-                icon={<CheckIcon className="w-5 shrink-0" />}
-                onClick={handleLogout}
-              >
-                Yes
-              </Button>
-              <Button
-                icon={<CloseIcon className="w-5 shrink-0" />}
-                variant="secondary"
-                onClick={() => setIsModalOpen(false)}
-              >
-                No
-              </Button>
-            </div>
-          </div>
-        </div>
+        <Modal
+          title="Are you sure you want to exit?"
+          handleAction={handleLogout}
+          setIsModalOpen={setIsModalOpen}
+        />
       )}
     </header>
   );

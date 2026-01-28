@@ -8,9 +8,11 @@ import CakeImage from "../../public/assets/cake.png";
 import SoupImage from "../../public/assets/soup.png";
 import backArrow from "../../public/assets/backArrow.png";
 import { HeartIcon } from "@/public/reactComponentAssets/HeartIcon";
-import { BookmarkIcon } from "@/public/reactComponentAssets/BookmarkIcon";
+import { TrashIcon } from "@/assets/TrashIcon";
 import { Database } from "@/types/supabase";
-import { fetchUserById } from "@/fetch/fetch";
+import { fetchUserById, deleteRecipe } from "@/fetch/fetch";
+import { useAuth } from "@/context/AuthContext";
+import Modal from "../modal/Modal";
 
 type Recipe = Database["public"]["Tables"]["recipes"]["Row"];
 type Profile = Database["public"]["Tables"]["profiles"]["Row"];
@@ -24,13 +26,20 @@ export function RecipeCard({
 }) {
   const router = useRouter();
   const [author, setAuthor] = useState<Profile>();
+  const { user } = useAuth();
+  const [deleteOption, setDeleteOption] = useState(false);
+  const [isModalOpen, setIsModalOpen] = useState(false);
 
   useEffect(() => {
     if (!recipe?.author_id) return;
 
     const fetchData = async () => {
-      const user = await fetchUserById(recipe.author_id);
-      setAuthor(user);
+      const author = await fetchUserById(recipe.author_id);
+      setAuthor(author);
+
+      if (user && author?.id === user.id) {
+        setDeleteOption(true);
+      }
     };
 
     fetchData();
@@ -39,6 +48,17 @@ export function RecipeCard({
   if (isLoading || !recipe) return <RecipeCardSkeleton />;
 
   const publicImageUrl = `https://xhebsnwjpfcdttydwuhg.supabase.co/storage/v1/object/public/recipe-images/${recipe.image_url}`;
+
+  const handleDelete = async () => {
+    try {
+      await deleteRecipe(recipe.id, user!.id);
+    } catch (error) {
+      console.error("Error deleting recipe:", error);
+    }
+
+    setIsModalOpen(false);
+    router.back();
+  };
 
   return (
     <article className="w-full max-w-[360px] md:max-w-[720px] bg-section-bg rounded-3xl p-8 shadow-md text-body-text flex flex-col gap-6">
@@ -156,19 +176,30 @@ export function RecipeCard({
           {/* Likes */}
           <div className="flex items-center gap-1 text-body-text">
             <button className="w-8 h-8 flex items-center justify-center hover:text-primary-text cursor-pointer transition-all duration-200 hover:scale-110 active:scale-95">
-              <HeartIcon className="w-5 h-5" />
+              <HeartIcon className="w-7 h-7" />
             </button>
             <span>{recipe.number_of_likes}</span>
           </div>
-          {/* Saves */}
-          <div className="flex items-center gap-1 text-body-text">
-            <button className="w-8 h-8 flex items-center justify-center hover:text-primary-text cursor-pointer transition-all duration-200 hover:scale-110 active:scale-95">
-              <BookmarkIcon className="w-5 h-5" />
-            </button>
-            <span>{recipe.number_of_saves}</span>
-          </div>
+          {/* Delete */}
+          {deleteOption && (
+            <div className="flex items-center gap-1 text-body-text">
+              <button
+                onClick={() => setIsModalOpen(true)}
+                className="w-8 h-8 flex items-center justify-center cursor-pointer transition-all duration-200 hover:scale-110 active:scale-95 hover:text-error-border"
+              >
+                <TrashIcon className="w-7 h-7" />
+              </button>
+            </div>
+          )}
         </div>
       </footer>
+      {isModalOpen && (
+        <Modal
+          handleAction={handleDelete}
+          setIsModalOpen={setIsModalOpen}
+          title="Are you sure you want to delete this recipe?"
+        />
+      )}
     </article>
   );
 }
