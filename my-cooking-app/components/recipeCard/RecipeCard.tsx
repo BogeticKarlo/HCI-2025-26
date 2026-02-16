@@ -47,7 +47,7 @@ export function RecipeCard({
 
   if (isLoading || !recipe) return <RecipeCardSkeleton />;
 
-  const publicImageUrl = `https://xhebsnwjpfcdttydwuhg.supabase.co/storage/v1/object/public/recipe-images/${recipe.image_url}`;
+  const publicImageUrl = `https://xhebsnwjpfcdttydwuhg.supabase.co/storage/v1/object/public/recipe-images/${recipe.author_id}/${recipe.image_url}`;
 
   const handleDelete = async () => {
     try {

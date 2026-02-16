@@ -33,16 +33,16 @@ export default function HomePage() {
   const [hasMore, setHasMore] = useState(true);
 
   const [selectedCuisine, setSelectedCuisine] = useState<Option<"cuisine">>(
-    savedFilters.cuisine || cuisineOptions[0]
+    savedFilters.cuisine || cuisineOptions[0],
   );
   const [selectedRecipeType, setSelectedRecipeType] = useState<
     Option<"recipeType">
   >(savedFilters.recipeType || recipeTypeOptions[0]);
   const [selectedTime, setSelectedTime] = useState<Option<"time">>(
-    savedFilters.time || timeOptions[0]
+    savedFilters.time || timeOptions[0],
   );
   const [selectedFavorite, setSelectedFavorite] = useState<Option<"favorite">>(
-    savedFilters.favorite || favoriteOptions[0]
+    savedFilters.favorite || favoriteOptions[0],
   );
 
   useEffect(() => {
@@ -77,7 +77,7 @@ export default function HomePage() {
         });
 
         setRecipes((prev) =>
-          currentPage === 1 ? newRecipes : [...prev, ...newRecipes]
+          currentPage === 1 ? newRecipes : [...prev, ...newRecipes],
         );
         setHasMore(newRecipes.length === pageLimit);
       } catch (err) {
@@ -110,7 +110,7 @@ export default function HomePage() {
         recipeType: recipeTypeOptions[0],
         time: timeOptions[0],
         favorite: favoriteOptions[0],
-      })
+      }),
     );
   };
 
@@ -189,6 +189,7 @@ export default function HomePage() {
                 title={recipe.title}
                 imageUrl={recipe.image_url || ""}
                 description={recipe.description || ""}
+                authorId={recipe.author_id || ""}
               />
             ))
           )}

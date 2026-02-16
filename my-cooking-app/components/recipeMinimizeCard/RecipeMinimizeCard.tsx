@@ -10,6 +10,7 @@ export function RecipeMinimizeCard({
   title,
   imageUrl,
   description,
+  authorId,
 }: RecipeMinimizeCardProps) {
   const router = useRouter();
 
@@ -19,7 +20,7 @@ export function RecipeMinimizeCard({
 
   if (!imageUrl) return <RecipeMinimizeCardSkeletonLoader />;
 
-  const publicImageUrl = `https://xhebsnwjpfcdttydwuhg.supabase.co/storage/v1/object/public/recipe-images/${imageUrl}`;
+  const publicImageUrl = `https://xhebsnwjpfcdttydwuhg.supabase.co/storage/v1/object/public/recipe-images/${authorId}/${imageUrl}`;
 
   return (
     <article

@@ -3,7 +3,7 @@
 import { Input } from "@/components/input/Input";
 import { TextArea } from "@/components/textArea/TextArea";
 import { InputList } from "@/components/inputList/InputList";
-import { useEffect, useState } from "react";
+import { useState } from "react";
 import { Dropdown } from "@/components/dropdown/Dropdown";
 import { Option } from "@/components/dropdown/Dropdown.types";
 import {
@@ -18,7 +18,6 @@ import { recipeDataFormating } from "@/utils/UploadRecipe.utils";
 import { useAuth } from "@/context/AuthContext";
 import { useBannerNotification } from "@/hooks/UseBannerNotification";
 import { Banner } from "@/components/banner/Banner";
-import { set } from "zod";
 
 export default function UploadRecipes() {
   const { user } = useAuth();
@@ -32,7 +31,7 @@ export default function UploadRecipes() {
   const [ingredients, setIngredients] = useState<string[]>([""]);
   const [steps, setSteps] = useState<string[]>([""]);
   const [selectedCuisine, setSelectedCuisine] = useState<Option<"cuisine">>(
-    cuisineOptions[0]
+    cuisineOptions[0],
   );
   const [selectedRecipeType, setSelectedRecipeType] = useState<
     Option<"recipeType">
@@ -78,7 +77,7 @@ export default function UploadRecipes() {
         showBanner(
           "Something went wrong",
           "Error uploading image. Please try again.",
-          "error"
+          "error",
         );
         setIsLoading(false);
         return;
@@ -92,13 +91,13 @@ export default function UploadRecipes() {
       showBanner(
         "Recipe Uploaded",
         "Your recipe has been uploaded successfully!",
-        "success"
+        "success",
       );
     } catch (error) {
       showBanner(
         "Something went wrong",
         "Error uploading recipe. Please try again.",
-        "error"
+        "error",
       );
       setIsLoading(false);
       return;

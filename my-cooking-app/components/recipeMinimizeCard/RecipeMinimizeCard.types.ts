@@ -3,4 +3,5 @@ export interface RecipeMinimizeCardProps {
   imageUrl: string;
   description: string;
   id: string;
+  authorId: string;
 }

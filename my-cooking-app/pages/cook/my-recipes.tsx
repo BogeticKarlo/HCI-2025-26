@@ -36,16 +36,16 @@ export default function MyRecipes() {
   const [hasMore, setHasMore] = useState(true);
 
   const [selectedCuisine, setSelectedCuisine] = useState<Option<"cuisine">>(
-    savedFilters.cuisine || cuisineOptions[0]
+    savedFilters.cuisine || cuisineOptions[0],
   );
   const [selectedRecipeType, setSelectedRecipeType] = useState<
     Option<"recipeType">
   >(savedFilters.recipeType || recipeTypeOptions[0]);
   const [selectedTime, setSelectedTime] = useState<Option<"time">>(
-    savedFilters.time || timeOptions[0]
+    savedFilters.time || timeOptions[0],
   );
   const [selectedFavorite, setSelectedFavorite] = useState<Option<"favorite">>(
-    savedFilters.favorite || favoriteOptions[0]
+    savedFilters.favorite || favoriteOptions[0],
   );
 
   // Save filters to localStorage whenever they change
@@ -101,7 +101,7 @@ export default function MyRecipes() {
         });
 
         setRecipes((prev) =>
-          currentPage === 1 ? newRecipes : [...prev, ...newRecipes]
+          currentPage === 1 ? newRecipes : [...prev, ...newRecipes],
         );
         setHasMore(newRecipes.length === pageLimit);
       } catch (err) {
@@ -135,7 +135,7 @@ export default function MyRecipes() {
         recipeType: recipeTypeOptions[0],
         time: timeOptions[0],
         favorite: favoriteOptions[0],
-      })
+      }),
     );
   };
 
@@ -209,6 +209,7 @@ export default function MyRecipes() {
                 title={recipe.title}
                 imageUrl={recipe.image_url || ""}
                 description={recipe.description || ""}
+                authorId={recipe.author_id || ""}
               />
             ))
           )}
