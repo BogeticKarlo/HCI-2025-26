@@ -91,5 +91,8 @@ export function getMediaVideoUrl(
     typeof mediaOrPath === "string" ? mediaOrPath : mediaOrPath.url;
 
   if (!rawPath) return "";
-  return `${MEDIA_VIDEOS_URL}/${rawPath}`;
+
+  const fileName = rawPath.split("/").pop() || "";
+
+  return `${MEDIA_VIDEOS_URL}/${fileName}`;
 }

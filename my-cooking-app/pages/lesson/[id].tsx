@@ -3,7 +3,8 @@ import { LessonType } from "@/types/cms";
 import { useRouter } from "next/router";
 import { useEffect, useState } from "react";
 import { Button } from "@/components/button/Button";
-import LessonCardSkeleton from "@/components/lessonCard/LessonCardSkeleton";
+import SingleLesson from "@/components/lessonCard/SingleLesson";
+import SingleLessonSkeleton from "@/components/lessonCard/SingleLessonSkeleton";
 
 export default function LessonPage() {
   const router = useRouter();
@@ -55,15 +56,16 @@ export default function LessonPage() {
   if (isLoading || !data) {
     return (
       <div className="flex flex-col items-center gap-10">
-        <div className="h-10 w-1/3 bg-secondary-text rounded-md animate-pulse" />
-        <div className="grid justify-center items-center gap-10 grid-cols-1 md:grid-cols-2 lg:grid-cols-3">
-          {[...Array(6)].map((_, i) => (
-            <LessonCardSkeleton key={i} />
-          ))}
+        <div className="justify-center items-center gap-10">
+          <SingleLessonSkeleton />
         </div>
       </div>
     );
   }
 
-  return <div>Lesson Page for ID: {data?.title}</div>;
+  return (
+    <div className="flex flex-col items-center gap-10">
+      <SingleLesson lesson={data} />
+    </div>
+  );
 }
