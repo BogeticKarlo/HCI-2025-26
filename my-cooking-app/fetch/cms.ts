@@ -10,30 +10,16 @@ const CMS_URL = process.env.NEXT_PUBLIC_CMS_URL as string;
 const MEDIA_IMAGES_URL = process.env.NEXT_PUBLIC_DB_MEDIA_IMAGES as string;
 const MEDIA_VIDEOS_URL = process.env.NEXT_PUBLIC_DB_MEDIA_VIDEOS as string;
 
-export async function getLessonsBySlug(
-  slug: string,
-): Promise<LessonType | null> {
-  const url = `${CMS_URL}/api/lesson-pages?where[slug][equals]=${encodeURIComponent(
-    slug,
-  )}&depth=3&limit=1`;
+export async function getLessonsById(id: string): Promise<LessonType | null> {
+  const url = `${CMS_URL}/api/lessons/${id}?depth=2`;
 
   const res = await fetch(url);
-  const contentType = res.headers.get("content-type") || "";
 
-  if (!res.ok) {
-    const text = await res.text();
-    console.error("getLessonsBySlug failed:", res.status, res.statusText, text);
-    return null;
-  }
+  if (!res.ok) return null;
 
-  if (!contentType.includes("application/json")) {
-    const text = await res.text();
-    console.error("Expected JSON, got:", contentType, text);
-    throw new Error("CMS did not return JSON for getLessonsBySlug");
-  }
+  const data = await res.json();
 
-  const data = (await res.json()) as ListResponse<LessonType>;
-  return data.docs[0] ?? null;
+  return data ?? null; // no docs[]
 }
 
 export async function getLessonsPageBySlug(
@@ -105,5 +91,8 @@ export function getMediaVideoUrl(
     typeof mediaOrPath === "string" ? mediaOrPath : mediaOrPath.url;
 
   if (!rawPath) return "";
-  return `${MEDIA_VIDEOS_URL}/${rawPath}`;
+
+  const fileName = rawPath.split("/").pop() || "";
+
+  return `${MEDIA_VIDEOS_URL}/${fileName}`;
 }
