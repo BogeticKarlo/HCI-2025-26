@@ -37,7 +37,6 @@ export type MediaVideoType = {
 export type LessonType = {
   id: number;
   title: string;
-  slug: string;
   description: string;
   heroImage: MediaImageType;
   video: MediaVideoType;

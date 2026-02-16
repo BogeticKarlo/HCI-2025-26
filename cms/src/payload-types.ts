@@ -198,7 +198,6 @@ export interface Lesson {
    * The title of the lesson
    */
   title: string;
-  slug: string;
   /**
    * A short description of the lesson
    */
@@ -398,7 +397,6 @@ export interface MediaVideosSelect<T extends boolean = true> {
  */
 export interface LessonsSelect<T extends boolean = true> {
   title?: T;
-  slug?: T;
   description?: T;
   heroImage?: T;
   video?: T;
