@@ -40,12 +40,14 @@ const RecipePage: NextPage<RecipePageProps> = ({ recipe }) => {
 };
 
 export const getServerSideProps: GetServerSideProps<RecipePageProps> = async (
-  context
+  context,
 ) => {
   const { id } = context.params as { id: string };
 
+  const recipeId = id.slice(0, 36);
+
   try {
-    const recipe = await fetchRecipeById(id);
+    const recipe = await fetchRecipeById(recipeId);
     return { props: { recipe } };
   } catch (e) {
     console.error(e);

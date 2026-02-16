@@ -39,18 +39,27 @@ export type LessonType = {
   title: string;
   slug: string;
   description: string;
-  heroImage: number | MediaImageType;
-  video: number | MediaVideoType;
+  heroImage: MediaImageType;
+  video: MediaVideoType;
   updatedAt: string;
   createdAt: string;
+};
+
+export type ListResponse<T> = {
+  docs: T[];
+  totalDocs: number;
+  limit: number;
+  page: number;
+  totalPages: number;
 };
 
 export type LessonPageType = {
   id: number;
   title: string;
+  label: string;
   slug: string;
   order: number;
-  lessons?: (number | LessonType)[] | null;
+  lessons?: LessonType[] | null;
   updatedAt: string;
   createdAt: string;
 };

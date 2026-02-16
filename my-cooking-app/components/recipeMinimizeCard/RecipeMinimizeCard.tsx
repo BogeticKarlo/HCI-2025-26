@@ -15,7 +15,7 @@ export function RecipeMinimizeCard({
   const router = useRouter();
 
   const handleClick = () => {
-    router.push(`/recipes/${id}`);
+    router.push(`/recipes/${id}-${title.toLowerCase().replace(/\s+/g, "-")}`);
   };
 
   if (!imageUrl) return <RecipeMinimizeCardSkeletonLoader />;
