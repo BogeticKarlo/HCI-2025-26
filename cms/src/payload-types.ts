@@ -229,6 +229,10 @@ export interface LessonPage {
    */
   slug: string;
   /**
+   * Label to display in the navigation UI for this lesson page
+   */
+  label: string;
+  /**
    * Order of the lesson page in the sequence
    */
   order: number;
@@ -408,6 +412,7 @@ export interface LessonsSelect<T extends boolean = true> {
 export interface LessonPagesSelect<T extends boolean = true> {
   title?: T;
   slug?: T;
+  label?: T;
   order?: T;
   lessons?: T;
   updatedAt?: T;

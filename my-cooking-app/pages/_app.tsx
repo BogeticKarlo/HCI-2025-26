@@ -2,7 +2,7 @@
 import "../styles/globals.css";
 import type { AppProps } from "next/app";
 import { ThemeProvider } from "next-themes";
-import Nav from "../components/navbar/NavBar";
+import NavBar from "../components/navbar/NavBar";
 import Footer from "../components/footer/footer";
 import { useRouter } from "next/router";
 import { AuthProvider, useAuth } from "@/context/AuthContext";
@@ -61,7 +61,7 @@ function PageLayout({
 
   return (
     <div className="min-h-screen flex flex-col bg-main-bg">
-      {!isAuthRoute && <Nav />}
+      {!isAuthRoute && <NavBar />}
       <main className="flex-1 p-5">
         <Component {...pageProps} />
       </main>

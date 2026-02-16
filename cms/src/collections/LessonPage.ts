@@ -42,6 +42,14 @@ fields: [
       },
     },
     {
+      name: 'label',
+      type: 'text',
+      required: true,
+      admin: {
+        description: 'Label to display in the navigation UI for this lesson page',
+      },
+    },
+    {
         name: 'order',
         type: 'number',
         required: true,

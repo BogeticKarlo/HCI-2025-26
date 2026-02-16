@@ -1,144 +1,52 @@
 // components/nav/NavBar.tsx
 "use client";
 
-import { useState, useEffect } from "react";
-import { usePathname, useRouter } from "next/navigation";
-import DesktopNavBar from "./DesktopNavBar";
-import MobileNavBar from "./MobileNavBar";
-import { useAuth } from "@/context/AuthContext";
-import Modal from "../modal/Modal";
+import { getLessonPages } from "@/fetch/cms";
+import Navigation from "@/components/navbar/Navigation";
+import { LessonPageType } from "@/types/cms";
+import { useEffect, useState } from "react";
 
 type SubNavItem = { label: string; href: string };
 
-type NavItem = {
+export type NavItem = {
   label: string;
   href: string;
   subnav?: SubNavItem[];
 };
 
-export const NAV_ITEMS: NavItem[] = [
-  { label: "Home", href: "/" },
-
-  {
-    label: "Cook",
-    href: "/cook/upload-recipes",
-    subnav: [
-      { label: "Upload Recipe", href: "/cook/upload-recipes" },
-      { label: "My Recipes", href: "/cook/my-recipes" },
-    ],
-  },
-
-  {
-    label: "Learn",
-    href: "/learn/cooking-101",
-    subnav: [
-      { label: "Cooking 101", href: "/learn/cooking-101" },
-      { label: "Culinary Techniques", href: "/learn/culinary-techniques" },
-      { label: "Cuisine Explorer", href: "/learn/cuisine-explorer" },
-    ],
-  },
-
-  { label: "Settings", href: "/settings" },
-];
-
 export default function NavBar() {
-  const pathname = usePathname();
-  const [mobileOpen, setMobileOpen] = useState(false);
-  const [isModalOpen, setIsModalOpen] = useState(false);
-  const { user, signOut } = useAuth();
-  const router = useRouter();
-
-  if (!user) return null;
-
-  const isRecipePage = pathname.startsWith("/recipes/");
-
-  const activeMainHref = (() => {
-    if (isRecipePage) return null;
-
-    for (const item of NAV_ITEMS) {
-      if (!item.subnav) continue;
-
-      const subMatch = item.subnav.find(
-        (sub) => pathname === sub.href || pathname.startsWith(sub.href + "/")
-      );
-
-      if (subMatch) return item.href;
-    }
-
-    const mainMatch = NAV_ITEMS.find(
-      (item) => pathname === item.href || pathname.startsWith(item.href + "/")
-    );
-
-    return mainMatch?.href ?? null;
-  })();
-
-  const activeSubHref = (() => {
-    if (isRecipePage) return null;
-
-    const activeMain = NAV_ITEMS.find((item) => item.href === activeMainHref);
-
-    if (!activeMain?.subnav) return null;
-
-    const found = activeMain.subnav.find(
-      (item) => pathname === item.href || pathname.startsWith(item.href + "/")
-    );
-
-    return found?.href ?? null;
-  })();
+  const [learnPages, setLearnPages] = useState<LessonPageType[]>([]);
 
   useEffect(() => {
-    if (isModalOpen) {
-      document.body.style.overflow = "hidden";
-    } else {
-      document.body.style.overflow = "";
+    async function load() {
+      const data = await getLessonPages();
+      setLearnPages(data);
     }
+    load();
+  }, []);
 
-    return () => {
-      document.body.style.overflow = "";
-    };
-  }, [isModalOpen]);
+  const NAV_ITEMS: NavItem[] = [
+    { label: "Home", href: "/" },
+    {
+      label: "Cook",
+      href: "/cook/upload-recipes",
+      subnav: [
+        { label: "Upload Recipe", href: "/cook/upload-recipes" },
+        { label: "My Recipes", href: "/cook/my-recipes" },
+      ],
+    },
+    {
+      label: "Learn",
+      href: `/learn/${
+        learnPages.length > 0 ? learnPages[0].slug : "cooking-101"
+      }`,
+      subnav: learnPages.map((page) => ({
+        label: page.label,
+        href: `/learn/${page.slug}`,
+      })),
+    },
+    { label: "Settings", href: "/settings" },
+  ];
 
-  const handleLogoutModal = () => {
-    setIsModalOpen(true);
-  };
-
-  const handleLogout = async () => {
-    try {
-      await signOut();
-      router.push("/login");
-    } catch (error) {
-      console.error("Logout failed:", error);
-    }
-  };
-
-  return (
-    <header className="bg-navbar-bg text-secondary-text shadow-sm font-playfair">
-      {/* Desktop */}
-      <DesktopNavBar
-        navItems={NAV_ITEMS}
-        activeMainHref={activeMainHref}
-        activeSubHref={activeSubHref}
-        userName={user.email?.split("@")[0] || "User"}
-        onLogout={handleLogoutModal}
-      />
-
-      <MobileNavBar
-        navItems={NAV_ITEMS}
-        activeMainHref={activeMainHref}
-        activeSubHref={activeSubHref}
-        mobileOpen={mobileOpen}
-        setMobileOpen={setMobileOpen}
-        userName={user.email?.split("@")[0] || "User"}
-        onLogout={handleLogoutModal}
-      />
-
-      {isModalOpen && (
-        <Modal
-          title="Are you sure you want to exit?"
-          handleAction={handleLogout}
-          setIsModalOpen={setIsModalOpen}
-        />
-      )}
-    </header>
-  );
+  return <Navigation items={NAV_ITEMS} />;
 }
