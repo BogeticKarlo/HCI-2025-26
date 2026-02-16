@@ -21,16 +21,8 @@ export default buildConfig({
       baseDir: path.resolve(dirname),
     },
   },
-  cors: [
-    'http://localhost:5173',
-    'http://localhost:3000',
-    'https://hci-2025-26-beta.vercel.app',
-  ],
-  csrf: [
-    'http://localhost:5173',
-    'http://localhost:3000',
-    'https://hci-2025-26-beta.vercel.app',
-  ],
+  cors: process.env.CORS_ORIGIN?.split(',').map(s => s.trim()) || [],
+  csrf: process.env.CSRF_ORIGIN?.split(',').map(s => s.trim()) || [],
   collections: [Users, MediaImages, MediaVideos, Lesson, LessonPage],
   globals: [],
   editor: lexicalEditor(),
