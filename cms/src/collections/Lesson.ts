@@ -34,12 +34,6 @@ export const Lesson: CollectionConfig = {
       },
     },
     {
-      name: 'slug',
-      type: 'text',
-      required: true,
-      unique: true,
-    },
-    {
       name: 'description',
       type: 'textarea',
       required: true,
