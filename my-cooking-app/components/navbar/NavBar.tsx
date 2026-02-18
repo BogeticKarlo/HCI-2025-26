@@ -16,11 +16,21 @@ export type NavItem = {
 
 export default function NavBar() {
   const [learnPages, setLearnPages] = useState<LessonPageType[]>([]);
+  const [error, setError] = useState<string | null>(null);
 
   useEffect(() => {
     async function load() {
-      const data = await getLessonPages();
-      setLearnPages(data);
+      try {
+        const data = await getLessonPages();
+        setLearnPages(data);
+        setError(null);
+      } catch (err) {
+        const errorMessage = err instanceof Error ? err.message : "Failed to load lesson pages";
+        console.error("Error loading lesson pages:", errorMessage);
+        setError(errorMessage);
+        // Set default empty array so navigation doesn't break
+        setLearnPages([]);
+      }
     }
     load();
   }, []);

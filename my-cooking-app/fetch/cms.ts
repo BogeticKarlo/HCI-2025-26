@@ -56,15 +56,23 @@ export async function getLessonsPageBySlug(
 export async function getLessonPages(): Promise<LessonPageType[]> {
   const url = `${CMS_URL}/api/lesson-pages?depth=1&sort=order`;
 
-  const res = await fetch(url);
+  try {
+    const res = await fetch(url);
 
-  if (!res.ok) {
-    console.error("getLessonPages failed:", res.status, res.statusText);
-    throw new Error("Failed to fetch lesson pages");
+    if (!res.ok) {
+      console.error("getLessonPages failed:", res.status, res.statusText);
+      throw new Error(`Failed to fetch lesson pages: ${res.status} ${res.statusText}`);
+    }
+
+    const data = (await res.json()) as ListResponse<LessonPageType>;
+    return data.docs;
+  } catch (error) {
+    console.error("getLessonPages error:", {
+      url,
+      error: error instanceof Error ? error.message : String(error),
+    });
+    throw error;
   }
-
-  const data = (await res.json()) as ListResponse<LessonPageType>;
-  return data.docs;
 }
 
 export function getMediaImageUrl(
