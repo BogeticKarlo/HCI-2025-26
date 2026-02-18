@@ -2,7 +2,15 @@ import { withPayload } from '@payloadcms/next/withPayload'
 
 /** @type {import('next').NextConfig} */
 const nextConfig = {
-  // Your Next.js config here
+  // Image domains for Next.js image optimization
+  images: {
+    domains: [
+      'cms-bogetickarlos-projects.vercel.app',  // your CMS domain
+      'xhebsnwjpfcdttydwuhg.storage.supabase.co', // your Supabase storage bucket
+    ],
+  },
+
+  // Your existing webpack config
   webpack: (webpackConfig) => {
     webpackConfig.resolve.extensionAlias = {
       '.cjs': ['.cts', '.cjs'],
