@@ -13,7 +13,6 @@ export const LikeButton = ({ recipeId }: LikeButtonProps) => {
   const { user } = useAuth();
   const [liked, setLiked] = useState(false);
   const [likesCount, setLikesCount] = useState(0);
-  const [loading, setLoading] = useState(false); // prevent multiple clicks
 
   useEffect(() => {
     const fetchLikes = async () => {
@@ -30,13 +29,12 @@ export const LikeButton = ({ recipeId }: LikeButtonProps) => {
   }, [recipeId, user]);
 
   const handleLike = async () => {
-    if (!user || loading) return; // prevent multiple requests
-    setLoading(true);
+    if (!user) return;
 
     if (liked) {
       const success = await unlikeRecipe(recipeId, user.id);
       if (success) {
-        setLikesCount((prev) => Math.max(prev - 1, 0));
+        setLikesCount((prev) => prev - 1);
         setLiked(false);
       }
     } else {
@@ -46,16 +44,13 @@ export const LikeButton = ({ recipeId }: LikeButtonProps) => {
         setLiked(true);
       }
     }
-
-    setLoading(false);
   };
 
   return (
     <div className="flex items-center gap-1 text-body-text">
       <button
         onClick={handleLike}
-        disabled={loading} // disable while updating
-        className="w-8 h-8 flex items-center justify-center hover:text-primary-text cursor-pointer transition-all duration-200 hover:scale-110 active:scale-95 disabled:opacity-50"
+        className="w-8 h-8 flex items-center justify-center hover:text-primary-text cursor-pointer transition-all duration-200 hover:scale-110 active:scale-95"
       >
         <HeartIcon className={`w-7 h-7 ${liked ? "text-red-500" : ""}`} />
       </button>

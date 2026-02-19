@@ -193,7 +193,6 @@ export async function deleteRecipe(recipeId: string, userId: string) {
 
   return true;
 }
-
 // --- Like/Unlike Functions ---
 
 // Like a recipe
@@ -311,3 +310,4 @@ export async function getRecipeLikes(recipeId: string) {
 
   return data?.number_of_likes || 0;
 }
+
