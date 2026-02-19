@@ -15,36 +15,35 @@ export const LikeButton = ({ recipeId }: LikeButtonProps) => {
   const [likesCount, setLikesCount] = useState(0);
   const [loading, setLoading] = useState(false);
 
-  // Fetch likes count and whether the current user liked the recipe
-  const fetchLikes = async () => {
-    const count = await getRecipeLikes(recipeId);
-    setLikesCount(count);
-
-    if (user) {
-      const likedByUser = await hasUserLikedRecipe(recipeId, user.id);
-      setLiked(likedByUser);
-    }
-  };
-
+  // Fetch initial state
   useEffect(() => {
+    const fetchLikes = async () => {
+      const count = await getRecipeLikes(recipeId);
+      setLikesCount(count);
+
+      if (user) {
+        const likedByUser = await hasUserLikedRecipe(recipeId, user.id);
+        setLiked(likedByUser);
+      }
+    };
+
     fetchLikes();
   }, [recipeId, user]);
 
   const handleLike = async () => {
     if (!user || loading) return;
-
     setLoading(true);
 
     if (liked) {
-      const success = await unlikeRecipe(recipeId, user.id);
-      if (success) {
-        setLikesCount((prev) => Math.max(prev - 1, 0));
+      const updatedCount = await unlikeRecipe(recipeId, user.id);
+      if (updatedCount !== null) {
+        setLikesCount(updatedCount);
         setLiked(false);
       }
     } else {
-      const success = await likeRecipe(recipeId, user.id);
-      if (success) {
-        setLikesCount((prev) => prev + 1);
+      const updatedCount = await likeRecipe(recipeId, user.id);
+      if (updatedCount !== null) {
+        setLikesCount(updatedCount);
         setLiked(true);
       }
     }
