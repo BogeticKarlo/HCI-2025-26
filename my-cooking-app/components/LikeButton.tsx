@@ -3,7 +3,7 @@
 import { useState, useEffect } from "react";
 import { useAuth } from "@/context/AuthContext";
 import { HeartIcon } from "@/public/reactComponentAssets/HeartIcon";
-import { likeRecipe, unlikeRecipe, hasUserLikedRecipe, getRecipeLikes } from "@/fetch/fetch";
+import { getRecipeLikes, hasUserLikedRecipe, toggleRecipeLike } from "@/fetch/fetch";
 
 interface LikeButtonProps {
   recipeId: string;
@@ -31,18 +31,10 @@ export const LikeButton = ({ recipeId }: LikeButtonProps) => {
   const handleLike = async () => {
     if (!user) return;
 
-    if (liked) {
-      const success = await unlikeRecipe(recipeId, user.id);
-      if (success) {
-        setLikesCount((prev) => prev - 1);
-        setLiked(false);
-      }
-    } else {
-      const success = await likeRecipe(recipeId, user.id);
-      if (success) {
-        setLikesCount((prev) => prev + 1);
-        setLiked(true);
-      }
+    const result = await toggleRecipeLike(recipeId, user.id);
+    if (result) {
+      setLikesCount(result.number_of_likes);
+      setLiked(result.liked);
     }
   };
 
