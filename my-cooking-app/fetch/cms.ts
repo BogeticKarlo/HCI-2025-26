@@ -2,17 +2,21 @@
 import type {
   MediaImageType,
   MediaVideoType,
-  LessonType,
   LessonPageType,
+  LessonType,
   ListResponse,
 } from "@/types/cms";
 
-// ⚠️ Server-only CMS URL (do NOT use NEXT_PUBLIC_ prefix)
-const CMS_URL = (process.env.CMS_URL || "").replace(/\/$/, "");
-if (!CMS_URL) throw new Error("CMS_URL environment variable is not set");
+// ⚠️ Server-only CMS URL
+const CMS_URL = process.env.CMS_URL?.replace(/\/$/, "");
+if (!CMS_URL) throw new Error("CMS_URL environment variable is not set.");
 
-const MEDIA_IMAGES_URL = (process.env.DB_MEDIA_IMAGES || "").replace(/\/$/, "");
-const MEDIA_VIDEOS_URL = (process.env.DB_MEDIA_VIDEOS || "").replace(/\/$/, "");
+// Optional safeguard: prevent accidental client import
+if (typeof window !== "undefined") {
+  throw new Error(
+    "CMS fetch functions are server-only. Do not import or call them in client components."
+  );
+}
 
 // -------------------------
 // Lessons
@@ -20,19 +24,17 @@ const MEDIA_VIDEOS_URL = (process.env.DB_MEDIA_VIDEOS || "").replace(/\/$/, "");
 export async function getLessonsById(id: string): Promise<LessonType | null> {
   const url = new URL(`/api/lessons/${id}?depth=2`, CMS_URL).toString();
 
-  const res = await fetch(url, { cache: "no-store" }); // server-side fetch
+  const res = await fetch(url, { cache: "no-store" });
   if (!res.ok) return null;
 
   const data = await res.json();
   return data ?? null;
 }
 
-export async function getLessonsPageBySlug(
-  slug: string,
-): Promise<LessonPageType | null> {
+export async function getLessonsPageBySlug(slug: string): Promise<LessonPageType | null> {
   const url = new URL(
     `/api/lesson-pages?where[slug][equals]=${encodeURIComponent(slug)}&depth=3&limit=1`,
-    CMS_URL,
+    CMS_URL
   ).toString();
 
   const res = await fetch(url, { cache: "no-store" });
@@ -56,22 +58,13 @@ export async function getLessonsPageBySlug(
 export async function getLessonPages(): Promise<LessonPageType[]> {
   const url = new URL(`/api/lesson-pages?depth=1&sort=order`, CMS_URL).toString();
 
-  try {
-    const res = await fetch(url, { cache: "no-store" });
-    if (!res.ok) {
-      console.error("getLessonPages failed:", res.status, res.statusText);
-      throw new Error(`Failed to fetch lesson pages: ${res.status}`);
-    }
-
-    const data = (await res.json()) as ListResponse<LessonPageType>;
-    return data.docs;
-  } catch (error) {
-    console.error("getLessonPages error:", {
-      url,
-      error: error instanceof Error ? error.message : String(error),
-    });
-    throw error;
+  const res = await fetch(url, { cache: "no-store" });
+  if (!res.ok) {
+    throw new Error(`Failed to fetch lesson pages: ${res.status} ${res.statusText}`);
   }
+
+  const data = (await res.json()) as ListResponse<LessonPageType>;
+  return data.docs;
 }
 
 // -------------------------
@@ -79,20 +72,16 @@ export async function getLessonPages(): Promise<LessonPageType[]> {
 // -------------------------
 export function getMediaImageUrl(mediaOrPath?: MediaImageType | string | null): string {
   if (!mediaOrPath) return "";
-
   const rawPath = typeof mediaOrPath === "string" ? mediaOrPath : mediaOrPath.url;
   if (!rawPath) return "";
-
   const fileName = rawPath.split("/").pop() || "";
-  return `${MEDIA_IMAGES_URL}/${fileName}`;
+  return `${process.env.DB_MEDIA_IMAGES?.replace(/\/$/, "")}/${fileName}`;
 }
 
 export function getMediaVideoUrl(mediaOrPath?: MediaVideoType | string | null): string {
   if (!mediaOrPath) return "";
-
   const rawPath = typeof mediaOrPath === "string" ? mediaOrPath : mediaOrPath.url;
   if (!rawPath) return "";
-
   const fileName = rawPath.split("/").pop() || "";
-  return `${MEDIA_VIDEOS_URL}/${fileName}`;
+  return `${process.env.DB_MEDIA_VIDEOS?.replace(/\/$/, "")}/${fileName}`;
 }
