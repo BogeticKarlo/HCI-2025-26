@@ -1,7 +1,7 @@
 import type { NextApiRequest, NextApiResponse } from "next";
 import { LessonPageType, ListResponse } from "@/types/cms";
 
-const CMS_URL = process.env.NEXT_PUBLIC_CMS_URL as string;
+const CMS_URL = process.env.CMS_URL as string;
 
 export default async function handler(
   req: NextApiRequest,
