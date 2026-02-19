@@ -8,7 +8,9 @@ import type {
 } from "@/types/cms";
 
 // ⚠️ Server-only CMS URL (do NOT use NEXT_PUBLIC_ prefix)
-const CMS_URL = (process.env.CMS_URL || "").replace(/\/$/, ""); // remove trailing slash
+const CMS_URL = (process.env.CMS_URL || "").replace(/\/$/, "");
+if (!CMS_URL) throw new Error("CMS_URL environment variable is not set");
+
 const MEDIA_IMAGES_URL = (process.env.DB_MEDIA_IMAGES || "").replace(/\/$/, "");
 const MEDIA_VIDEOS_URL = (process.env.DB_MEDIA_VIDEOS || "").replace(/\/$/, "");
 
