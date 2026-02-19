@@ -1,4 +1,5 @@
-import { getMediaImageUrl } from "@/fetch/cms";
+// components/lessonCard/LessonCardHero.tsx
+import { getMediaImageUrl } from "@/fetch/media";
 import { LessonType } from "@/types/cms";
 import Image from "next/image";
 import { useEffect, useState } from "react";
@@ -13,18 +14,12 @@ export default function LessonCardHero({
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
-    const fetchImageUrl = async () => {
-      const data = getMediaImageUrl(heroImage);
-      setImageUrl(data);
-      setLoading(false);
-    };
-
-    fetchImageUrl();
+    const url = getMediaImageUrl(heroImage);
+    setImageUrl(url);
+    setLoading(false);
   }, [heroImage]);
 
-  if (loading) {
-    return <LessonCardSkeleton />;
-  }
+  if (loading) return <LessonCardSkeleton />;
 
   return (
     <article
@@ -37,7 +32,7 @@ export default function LessonCardHero({
       <div className="w-full aspect-square">
         <Image
           src={imageUrl || "/placeholder.png"}
-          alt={heroImage.alt || "Lesson Hero Image"}
+          alt={heroImage?.alt || "Lesson Hero Image"}
           width={400}
           height={400}
           loading="eager"
