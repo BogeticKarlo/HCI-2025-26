@@ -1,10 +1,9 @@
 // components/nav/NavBar.tsx
 "use client";
 
-import { getLessonPages } from "@/fetch/cms";
 import Navigation from "@/components/navbar/Navigation";
-import { LessonPageType } from "@/types/cms";
 import { useEffect, useState } from "react";
+import { LessonPageType } from "@/types/cms";
 
 type SubNavItem = { label: string; href: string };
 
@@ -21,14 +20,16 @@ export default function NavBar() {
   useEffect(() => {
     async function load() {
       try {
-        const data = await getLessonPages();
+        // Fetch from your Next.js server-side API, not the external CMS
+        const res = await fetch("/api/lesson-pages");
+        if (!res.ok) throw new Error(`Failed to fetch: ${res.status}`);
+        const data: LessonPageType[] = await res.json();
         setLearnPages(data);
         setError(null);
       } catch (err) {
         const errorMessage = err instanceof Error ? err.message : "Failed to load lesson pages";
         console.error("Error loading lesson pages:", errorMessage);
         setError(errorMessage);
-        // Set default empty array so navigation doesn't break
         setLearnPages([]);
       }
     }
@@ -47,9 +48,7 @@ export default function NavBar() {
     },
     {
       label: "Learn",
-      href: `/learn/${
-        learnPages.length > 0 ? learnPages[0].slug : "cooking-101"
-      }`,
+      href: `/learn/${learnPages.length > 0 ? learnPages[0].slug : "cooking-101"}`,
       subnav: learnPages.map((page) => ({
         label: page.label,
         href: `/learn/${page.slug}`,
