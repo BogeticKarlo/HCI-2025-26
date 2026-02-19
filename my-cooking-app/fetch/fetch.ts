@@ -194,114 +194,120 @@ export async function deleteRecipe(recipeId: string, userId: string) {
   return true;
 }
 
-// Get the current number of likes for a recipe
-export async function getRecipeLikes(recipeId: string) {
-  const { data, error } = await supabase
-    .from("recipes")
-    .select("number_of_likes")
-    .eq("id", recipeId)
-    .maybeSingle(); // safe even if row does not exist
-
-  if (error || !data) {
-    console.error("Error fetching likes:", error);
-    return 0;
-  }
-
-  return data.number_of_likes || 0;
-}
-
+// --- Like/Unlike Functions ---
 
 // Like a recipe
 export async function likeRecipe(recipeId: string, userId: string) {
-  // 1. Check if user already liked
-  const { data: exists, error: checkError } = await supabase
-    .from("recipe_likes")
-    .select("*")
-    .eq("recipe_id", recipeId)
-    .eq("user_id", userId)
-    .maybeSingle();
-
-  if (checkError) {
-    console.error("Error checking existing like:", checkError);
-    return null;
-  }
-
-  if (exists) return await getRecipeLikes(recipeId); // already liked
-
-  // 2. Insert like
-  const { error: insertError } = await supabase
+  // 1. Add user like
+  const { error: likeError } = await supabase
     .from("recipe_likes")
     .insert({ recipe_id: recipeId, user_id: userId });
 
-  if (insertError) {
-    console.error("Error liking recipe:", insertError);
-    return null;
+  if (likeError) {
+    console.error("Error liking recipe:", likeError);
+    return false;
   }
 
-  // 3. Increment number_of_likes safely
-  // fetch current likes first
-  const currentLikes = await getRecipeLikes(recipeId);
-  const newCount = currentLikes + 1;
+  // 2. Increment number_of_likes in recipes
+  // First, get current number_of_likes
+  const { data: recipeData, error: fetchError } = await supabase
+    .from("recipes")
+    .select("number_of_likes")
+    .eq("id", recipeId)
+    .single();
 
-  const { data, error: updateError } = await supabase
+  if (fetchError || !recipeData) {
+    console.error("Error fetching recipe likes:", fetchError);
+    return false;
+  }
+
+  const newCount = (recipeData.number_of_likes || 0) + 1;
+
+  const { error: countError } = await supabase
     .from("recipes")
     .update({ number_of_likes: newCount })
-    .eq("id", recipeId)
-    .select();
+    .eq("id", recipeId);
 
-  if (updateError) {
-    console.error("Error updating likes count:", updateError);
-    return null;
+  if (countError) {
+    console.error("Error updating number_of_likes:", countError);
+    return false;
   }
 
-  return data?.[0]?.number_of_likes || 0;
+  return true;
 }
 
 // Unlike a recipe
 export async function unlikeRecipe(recipeId: string, userId: string) {
   // 1. Remove user like
-  const { error: deleteError } = await supabase
+  const { error: likeError } = await supabase
     .from("recipe_likes")
     .delete()
     .eq("recipe_id", recipeId)
     .eq("user_id", userId);
 
-  if (deleteError) {
-    console.error("Error unliking recipe:", deleteError);
-    return null;
+  if (likeError) {
+    console.error("Error unliking recipe:", likeError);
+    return false;
   }
 
-  // 2. Decrement number_of_likes safely
-  const currentLikes = await getRecipeLikes(recipeId);
-  const newCount = Math.max(currentLikes - 1, 0);
+  // 2. Decrement number_of_likes
+  const { data: recipeData, error: fetchError } = await supabase
+    .from("recipes")
+    .select("number_of_likes")
+    .eq("id", recipeId)
+    .single();
 
-  const { data, error: updateError } = await supabase
+  if (fetchError || !recipeData) {
+    console.error("Error fetching recipe likes:", fetchError);
+    return false;
+  }
+
+  const newCount = Math.max((recipeData.number_of_likes || 1) - 1, 0);
+
+  const { error: countError } = await supabase
     .from("recipes")
     .update({ number_of_likes: newCount })
-    .eq("id", recipeId)
-    .select();
+    .eq("id", recipeId);
 
-  if (updateError) {
-    console.error("Error updating likes count:", updateError);
-    return null;
+  if (countError) {
+    console.error("Error updating number_of_likes:", countError);
+    return false;
   }
 
-  return data?.[0]?.number_of_likes || 0;
+  return true;
 }
 
-// Check if a user has liked a recipe
+// Check if user has liked a recipe
 export async function hasUserLikedRecipe(recipeId: string, userId: string) {
-  const { data, error } = await supabase
+  const { data, error, status } = await supabase
     .from("recipe_likes")
     .select("*")
     .eq("recipe_id", recipeId)
     .eq("user_id", userId)
-    .maybeSingle(); // safe if no row
+    .single();
 
-  if (error) {
-    console.error("Error checking if user liked recipe:", error);
+  if (error && status !== 406) {
+    // 406 = not found, which is ok
+    console.error("Error checking like:", error);
     return false;
   }
 
-  return !!data; // true if liked, false otherwise
+  return !!data; // true if user liked, false otherwise
+}
+
+
+// Get number of likes for a recipe
+export async function getRecipeLikes(recipeId: string) {
+  const { data, error } = await supabase
+    .from("recipes")
+    .select("number_of_likes")
+    .eq("id", recipeId)
+    .single();
+
+  if (error) {
+    console.error("Error fetching likes:", error);
+    return 0;
+  }
+
+  return data?.number_of_likes || 0;
 }
