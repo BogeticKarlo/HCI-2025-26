@@ -1,71 +1,52 @@
-import { getLessonsById } from "@/fetch/cms";
-import { LessonType } from "@/types/cms";
-import { useRouter } from "next/router";
-import { useEffect, useState } from "react";
-import { Button } from "@/components/button/Button";
+// app/lessons/[id]/page.tsx
 import SingleLesson from "@/components/lessonCard/SingleLesson";
-import SingleLessonSkeleton from "@/components/lessonCard/SingleLessonSkeleton";
 
-export default function LessonPage() {
-  const router = useRouter();
-  const { id } = router.query;
+// ⚠️ Server-side only environment variable
+const CMS_URL = process.env.CMS_URL?.replace(/\/$/, "");
+if (!CMS_URL) throw new Error("CMS_URL environment variable is not set.");
 
-  const [data, setData] = useState<LessonType | null>(null);
-  const [error, setError] = useState<string | null>(null);
-  const [isLoading, setIsLoading] = useState(true);
+interface LessonPageProps {
+  params: {
+    id: string;
+  };
+}
 
-  useEffect(() => {
-    if (!router.isReady || typeof id !== "string") return;
+export const dynamic = "force-dynamic"; // ensures server-side fetch
 
-    setIsLoading(true);
-    setData(null);
-    setError(null);
+export default async function LessonPage({ params }: LessonPageProps) {
+  const { id } = params;
 
-    getLessonsById(id)
-      .then((data) => {
-        if (!data) {
-          setError("Lesson not found.");
-          return;
-        }
-        setData(data);
-      })
-      .catch(() => {
-        setError("Error loading lesson.");
-      })
-      .finally(() => {
-        setIsLoading(false);
-      });
-  }, [router.isReady, id]);
+  let lesson = null;
 
-  if (error) {
+  try {
+    const url = new URL(`/api/lessons/${id}?depth=2`, CMS_URL).toString();
+    const res = await fetch(url, { cache: "no-store" });
+
+    if (!res.ok) {
+      console.error("Failed to fetch lesson:", res.status, res.statusText);
+      lesson = null;
+    } else {
+      lesson = await res.json();
+    }
+  } catch (err) {
+    console.error("Error fetching lesson:", err);
+    lesson = null;
+  }
+
+  if (!lesson) {
     return (
       <div className="flex flex-col items-center gap-5">
         <h1 className="text-xl">
           We are sorry, but we couldn&apos;t load the requested lesson.
-          <br />
-          Please try again later or contact support if the problem persists.
         </h1>
-        <p>{error}</p>
-        <Button onClick={() => window.location.reload()} className="mt-4">
-          Retry
-        </Button>
-      </div>
-    );
-  }
-
-  if (isLoading || !data) {
-    return (
-      <div className="flex flex-col items-center gap-10">
-        <div className="justify-center items-center gap-10">
-          <SingleLessonSkeleton />
-        </div>
+        <p>Please try again later or contact support if the problem persists.</p>
       </div>
     );
   }
 
   return (
     <div className="flex flex-col items-center gap-10">
-      <SingleLesson lesson={data} />
+      <SingleLesson lesson={lesson} />
     </div>
   );
 }
