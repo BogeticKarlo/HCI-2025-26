@@ -13,6 +13,8 @@ import { Database } from "@/types/supabase";
 import { fetchUserById, deleteRecipe } from "@/fetch/fetch";
 import { useAuth } from "@/context/AuthContext";
 import Modal from "../modal/Modal";
+import { LikeButton } from "../LikeButton";
+
 
 type Recipe = Database["public"]["Tables"]["recipes"]["Row"];
 type Profile = Database["public"]["Tables"]["profiles"]["Row"];
@@ -168,31 +170,28 @@ export function RecipeCard({
       )}
 
       {/* Footer */}
-      <footer className="flex justify-between items-center text-sm text-body-text">
-        <span className="text-body-text">
-          {author?.username?.split("@")[0]}
-        </span>
-        <div className="flex flex-col sm:flex-row items-center gap-5">
-          {/* Likes */}
-          <div className="flex items-center gap-1 text-body-text">
-            <button className="w-8 h-8 flex items-center justify-center hover:text-primary-text cursor-pointer transition-all duration-200 hover:scale-110 active:scale-95">
-              <HeartIcon className="w-7 h-7" />
-            </button>
-            <span>{recipe.number_of_likes}</span>
-          </div>
-          {/* Delete */}
-          {deleteOption && (
-            <div className="flex items-center gap-1 text-body-text">
-              <button
-                onClick={() => setIsModalOpen(true)}
-                className="w-8 h-8 flex items-center justify-center cursor-pointer transition-all duration-200 hover:scale-110 active:scale-95 hover:text-error-border"
-              >
-                <TrashIcon className="w-7 h-7" />
-              </button>
-            </div>
-          )}
-        </div>
-      </footer>
+<footer className="flex justify-between items-center text-sm text-body-text">
+  <span className="text-body-text">
+    {author?.username?.split("@")[0]}
+  </span>
+  <div className="flex flex-col sm:flex-row items-center gap-5">
+    {/* Likes */}
+    <LikeButton recipeId={recipe.id} />
+
+    {/* Delete */}
+    {deleteOption && (
+      <div className="flex items-center gap-1 text-body-text">
+        <button
+          onClick={() => setIsModalOpen(true)}
+          className="w-8 h-8 flex items-center justify-center cursor-pointer transition-all duration-200 hover:scale-110 active:scale-95 hover:text-error-border"
+        >
+          <TrashIcon className="w-7 h-7" />
+        </button>
+      </div>
+    )}
+  </div>
+</footer>
+
       {isModalOpen && (
         <Modal
           handleAction={handleDelete}
