@@ -72,8 +72,8 @@ export default function UploadRecipes() {
 
     let imagePath = null;
     if (image) {
-      imagePath = await uploadRecipeImage(image, user.id);
-      if (!imagePath) {
+      const fullPath = await uploadRecipeImage(image, user.id);
+      if (!fullPath) {
         showBanner(
           "Something went wrong",
           "Error uploading image. Please try again.",
@@ -82,6 +82,8 @@ export default function UploadRecipes() {
         setIsLoading(false);
         return;
       }
+      // Extract only the filename from the path
+      imagePath = fullPath.split("/").pop();
     }
 
     const recipe = recipeDataFormating(formData, user.id, imagePath);
