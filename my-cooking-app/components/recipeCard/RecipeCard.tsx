@@ -7,14 +7,12 @@ import { useState, useEffect } from "react";
 import CakeImage from "../../public/assets/cake.png";
 import SoupImage from "../../public/assets/soup.png";
 import backArrow from "../../public/assets/backArrow.png";
-import { HeartIcon } from "@/public/reactComponentAssets/HeartIcon";
 import { TrashIcon } from "@/assets/TrashIcon";
 import { Database } from "@/types/supabase";
 import { fetchUserById, deleteRecipe } from "@/fetch/fetch";
 import { useAuth } from "@/context/AuthContext";
 import Modal from "../modal/Modal";
 import { LikeButton } from "../LikeButton";
-
 
 type Recipe = Database["public"]["Tables"]["recipes"]["Row"];
 type Profile = Database["public"]["Tables"]["profiles"]["Row"];
@@ -27,10 +25,12 @@ export function RecipeCard({
   isLoading?: boolean;
 }) {
   const router = useRouter();
-  const [author, setAuthor] = useState<Profile>();
   const { user } = useAuth();
-  const [deleteOption, setDeleteOption] = useState(false);
+  const [author, setAuthor] = useState<Profile>();
   const [isModalOpen, setIsModalOpen] = useState(false);
+
+  // ✅ Creator check (clean solution)
+  const isCreator = user?.id === recipe?.author_id;
 
   useEffect(() => {
     if (!recipe?.author_id) return;
@@ -38,10 +38,6 @@ export function RecipeCard({
     const fetchData = async () => {
       const author = await fetchUserById(recipe.author_id);
       setAuthor(author);
-
-      if (user && author?.id === user.id) {
-        setDeleteOption(true);
-      }
     };
 
     fetchData();
@@ -53,7 +49,8 @@ export function RecipeCard({
 
   const handleDelete = async () => {
     try {
-      await deleteRecipe(recipe.id, user!.id);
+      if (!user) return;
+      await deleteRecipe(recipe.id, user.id);
     } catch (error) {
       console.error("Error deleting recipe:", error);
     }
@@ -78,9 +75,11 @@ export function RecipeCard({
             className="w-15 md:w-12 aspect-square"
           />
         </button>
+
         <h1 className="text-3xl font-bold text-primary-text font-playfair lg:mr-5">
           {recipe.title}
         </h1>
+
         <h3 className="text-primary-text">
           <span className="font-playfair font-semibold text-text-muted text-sm">
             Cuisine:
@@ -105,8 +104,8 @@ export function RecipeCard({
 
       {/* Ingredients & Instructions */}
       <section className="flex flex-col md:flex-row items-start">
+        {/* Ingredients */}
         <div className="flex items-start justify-center lg:w-1/2">
-          {/* Ingredients */}
           <div className="md:w-1/2 flex flex-col gap-4">
             <h2 className="text-xl font-semibold mb-2 text-primary-text font-playfair">
               Ingredients
@@ -119,6 +118,7 @@ export function RecipeCard({
               ))}
             </ul>
           </div>
+
           <div className="w-24 h-20 rounded-xl flex items-center justify-center">
             <Image
               src={CakeImage}
@@ -144,6 +144,7 @@ export function RecipeCard({
               ))}
             </ol>
           </div>
+
           <div className="w-24 h-20 rounded-xl flex items-center justify-center">
             <Image
               src={SoupImage}
@@ -170,27 +171,24 @@ export function RecipeCard({
       )}
 
       {/* Footer */}
-<footer className="flex justify-between items-center text-sm text-body-text">
-  <span className="text-body-text">
-    {author?.username?.split("@")[0]}
-  </span>
-  <div className="flex flex-col sm:flex-row items-center gap-5">
-    {/* Likes */}
-    <LikeButton recipeId={recipe.id} />
+      <footer className="flex justify-between items-center text-sm text-body-text">
+        <span>{author?.username?.split("@")[0]}</span>
 
-    {/* Delete */}
-    {deleteOption && (
-      <div className="flex items-center gap-1 text-body-text">
-        <button
-          onClick={() => setIsModalOpen(true)}
-          className="w-8 h-8 flex items-center justify-center cursor-pointer transition-all duration-200 hover:scale-110 active:scale-95 hover:text-error-border"
-        >
-          <TrashIcon className="w-7 h-7" />
-        </button>
-      </div>
-    )}
-  </div>
-</footer>
+        <div className="flex flex-col sm:flex-row items-center gap-5">
+          {/* ✅ Hide Like button if creator */}
+          {!isCreator && <LikeButton recipeId={recipe.id} />}
+
+          {/* ✅ Show Delete only to creator */}
+          {isCreator && (
+            <button
+              onClick={() => setIsModalOpen(true)}
+              className="w-8 h-8 flex items-center justify-center cursor-pointer transition-all duration-200 hover:scale-110 active:scale-95 hover:text-error-border"
+            >
+              <TrashIcon className="w-7 h-7" />
+            </button>
+          )}
+        </div>
+      </footer>
 
       {isModalOpen && (
         <Modal
