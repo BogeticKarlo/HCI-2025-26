@@ -168,7 +168,7 @@ export default function HomePage() {
       {activeFilters.length > 0 && (
         <div className="flex flex-wrap gap-3 mb-6">
           {activeFilters.map(({ type, value }) => {
-            // Hide latest/oldest filter completely
+            // Hide latest/oldest completely
             if (type === "time") return null;
 
             return (
@@ -200,7 +200,10 @@ export default function HomePage() {
               >
                 <span>{value.label}</span>
 
-                {(type === "cuisine" || type === "recipeType") && (
+                {/* Show ✕ for cuisine, recipeType, and favorite */}
+                {(type === "cuisine" ||
+                  type === "recipeType" ||
+                  type === "favorite") && (
                   <span
                     className="
                       text-xs font-bold
