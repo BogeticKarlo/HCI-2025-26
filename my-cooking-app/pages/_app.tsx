@@ -1,6 +1,8 @@
 // pages/_app.tsx
+
 import "../styles/globals.css";
 import type { AppProps } from "next/app";
+import Head from "next/head";
 import { ThemeProvider } from "next-themes";
 import NavBar from "../components/navbar/NavBar";
 import Footer from "../components/footer/footer";
@@ -21,30 +23,40 @@ function AuthGuard({ children }: { children: React.ReactNode }) {
         router.push("/login");
       }
       if (user && isAuthRoute) {
-        router.push("/"); // redirect logged-in users away from login/signup
+        router.push("/");
       }
     }
   }, [user, loading, router, isAuthRoute]);
 
-  // Don't render anything until loading is done
   if (loading || (!user && !isAuthRoute)) return null;
 
-  return children;
+  return <>{children}</>;
 }
 
 export default function MyApp({ Component, pageProps }: AppProps) {
   return (
-    <AuthProvider>
-      <ThemeProvider
-        attribute="class"
-        defaultTheme="light"
-        enableSystem={false}
-      >
-        <AuthGuard>
-          <PageLayout Component={Component} pageProps={pageProps} />
-        </AuthGuard>
-      </ThemeProvider>
-    </AuthProvider>
+    <>
+      <Head>
+        <title>My Cooking App</title>
+        <link
+          rel="icon"
+          type="image/svg+xml"
+          href="/assets/logo.svg"
+        />
+      </Head>
+
+      <AuthProvider>
+        <ThemeProvider
+          attribute="class"
+          defaultTheme="light"
+          enableSystem={false}
+        >
+          <AuthGuard>
+            <PageLayout Component={Component} pageProps={pageProps} />
+          </AuthGuard>
+        </ThemeProvider>
+      </AuthProvider>
+    </>
   );
 }
 
