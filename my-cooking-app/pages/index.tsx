@@ -2,7 +2,6 @@
 
 import { useEffect, useState, useMemo } from "react";
 import { RecipeMinimizeCard } from "../components/recipeMinimizeCard/RecipeMinimizeCard";
-import { RecipeMinimizeCardSkeletonLoader } from "../components/recipeMinimizeCard/RecipeMinimizeCardSkeletonLoader";
 import { fetchRecipes } from "@/fetch/fetch";
 import { Option } from "@/components/dropdown/Dropdown.types";
 import {
@@ -26,26 +25,28 @@ export default function HomePage() {
       : {};
 
   const [recipes, setRecipes] = useState<BaseRecipe[]>([]);
-  const [isLoading, setIsLoading] = useState(true);
+  const [isLoading, setIsLoading] = useState(false);
   const [isFetchingMore, setIsFetchingMore] = useState(false);
   const [isError, setIsError] = useState(false);
-  const [showResetMessage, setShowResetMessage] = useState(false);
 
   const [currentPage, setCurrentPage] = useState(1);
   const [hasMore, setHasMore] = useState(true);
 
-  const [selectedCuisine, setSelectedCuisine] = useState<Option<"cuisine">>(
-    savedFilters.cuisine || cuisineOptions[0],
-  );
-  const [selectedRecipeType, setSelectedRecipeType] = useState<
-    Option<"recipeType">
-  >(savedFilters.recipeType || recipeTypeOptions[0]);
-  const [selectedTime, setSelectedTime] = useState<Option<"time">>(
-    savedFilters.time || timeOptions[0],
-  );
-  const [selectedFavorite, setSelectedFavorite] = useState<Option<"favorite">>(
-    savedFilters.favorite || favoriteOptions[0],
-  );
+  const [selectedCuisine, setSelectedCuisine] =
+    useState<Option<"cuisine">>(savedFilters.cuisine || cuisineOptions[0]);
+
+  const [selectedRecipeType, setSelectedRecipeType] =
+    useState<Option<"recipeType">>(
+      savedFilters.recipeType || recipeTypeOptions[0],
+    );
+
+  const [selectedTime, setSelectedTime] =
+    useState<Option<"time">>(savedFilters.time || timeOptions[0]);
+
+  const [selectedFavorite, setSelectedFavorite] =
+    useState<Option<"favorite">>(
+      savedFilters.favorite || favoriteOptions[0],
+    );
 
   // Save filters
   useEffect(() => {
@@ -58,22 +59,12 @@ export default function HomePage() {
     localStorage.setItem(localStorageKey, JSON.stringify(filters));
   }, [selectedCuisine, selectedRecipeType, selectedTime, selectedFavorite]);
 
-  // Reset pagination on filter change
-  useEffect(() => {
-    setCurrentPage(1);
-    setRecipes([]);
-    setHasMore(true);
-  }, [selectedCuisine, selectedRecipeType, selectedTime, selectedFavorite]);
-
-  // Fetch recipes
+  // Fetch recipes (Optimistic UI: do NOT clear recipes immediately)
   useEffect(() => {
     const fetchHomeRecipes = async () => {
       try {
-        if (currentPage === 1) {
-          setIsLoading(true);
-        } else {
-          setIsFetchingMore(true);
-        }
+        if (currentPage === 1) setIsLoading(true);
+        else setIsFetchingMore(true);
 
         setIsError(false);
 
@@ -92,7 +83,6 @@ export default function HomePage() {
 
         setHasMore(newRecipes.length === pageLimit);
       } catch (err) {
-        console.error(err);
         setIsError(true);
       } finally {
         setIsLoading(false);
@@ -109,24 +99,20 @@ export default function HomePage() {
     currentPage,
   ]);
 
-  const handleResetFilters = () => {
-    setSelectedCuisine(cuisineOptions[0]);
-    setSelectedRecipeType(recipeTypeOptions[0]);
-    setSelectedTime(timeOptions[0]);
-    setSelectedFavorite(favoriteOptions[0]);
-
-    // Show temporary confirmation
-    setShowResetMessage(true);
-    setTimeout(() => setShowResetMessage(false), 2000);
+  const resetFilter = (type: string) => {
+    if (type === "cuisine") setSelectedCuisine(cuisineOptions[0]);
+    if (type === "recipeType") setSelectedRecipeType(recipeTypeOptions[0]);
+    if (type === "time") setSelectedTime(timeOptions[0]);
+    if (type === "favorite") setSelectedFavorite(favoriteOptions[0]);
   };
 
   const activeFilters = useMemo(() => {
     return [
-      selectedCuisine,
-      selectedRecipeType,
-      selectedTime,
-      selectedFavorite,
-    ].filter((option) => option.id !== "all");
+      { type: "cuisine", value: selectedCuisine },
+      { type: "recipeType", value: selectedRecipeType },
+      { type: "time", value: selectedTime },
+      { type: "favorite", value: selectedFavorite },
+    ].filter((item) => item.value.id !== "all");
   }, [
     selectedCuisine,
     selectedRecipeType,
@@ -134,24 +120,8 @@ export default function HomePage() {
     selectedFavorite,
   ]);
 
-  const retryFetch = () => {
-    setCurrentPage(1);
-  };
-
   return (
     <div className="flex flex-col items-center">
-
-      {/* Error Feedback */}
-      {isError && (
-        <div className="flex flex-col items-center gap-3 mb-6">
-          <p className="text-warning text-sm">
-            We couldn’t load recipes. Please check your connection.
-          </p>
-          <Button onClick={retryFetch} variant="secondary">
-            Retry
-          </Button>
-        </div>
-      )}
 
       <h1 className="font-playfair font-bold text-[40px] text-center mb-10 text-primary-text">
         Check Out Best Recipes
@@ -190,83 +160,71 @@ export default function HomePage() {
           />
         </div>
 
-        <Button onClick={handleResetFilters} className="w-40" variant="secondary">
-          Reset Filters
-        </Button>
-
-        {showResetMessage && (
-          <p className="text-xs text-accent animate-fade-in">
-            Filters reset successfully
-          </p>
-        )}
-
         <p className="text-xs text-secondary-text text-center">
           Filters update recipes automatically
         </p>
       </div>
 
       {/* Results */}
-      <div className="max-w-6xl mx-auto px-6 sm:px-10 lg:px-20 w-full relative">
+      <div className="max-w-6xl mx-auto px-6 sm:px-10 lg:px-20 w-full">
 
-        {/* Loading Overlay */}
-        {isLoading && (
-          <div className="absolute inset-0 bg-white/60 backdrop-blur-sm flex justify-center items-center z-10">
-            <p className="text-sm text-primary-text animate-pulse">
-              Updating recipes...
-            </p>
-          </div>
-        )}
-
-        <p className="text-sm mb-2 text-secondary-text">
-          Showing {recipes.length} recipe{recipes.length !== 1 ? "s" : ""}
-        </p>
-
+        {/* Active Filters (Clickable + Animated) */}
         {activeFilters.length > 0 && (
           <div className="flex flex-wrap gap-2 mb-4">
-            {activeFilters.map((filter) => (
-              <span
-                key={filter.id}
-                className="px-3 py-1 bg-accent/10 text-accent text-sm rounded-full"
+            {activeFilters.map(({ type, value }) => (
+              <button
+                key={value.id}
+                onClick={() => resetFilter(type)}
+                className="px-3 py-1 bg-accent/10 text-accent text-sm rounded-full
+                           hover:bg-accent hover:text-white
+                           transition-all duration-200
+                           hover:scale-105 active:scale-95"
               >
-                {filter.label}
-              </span>
+                {value.label} ×
+              </button>
             ))}
           </div>
         )}
 
-        <div className="grid gap-6 grid-cols-1 md:grid-cols-2 xl:grid-cols-3 place-items-center transition-opacity duration-300">
-          {isLoading && currentPage === 1 ? (
-            Array.from({ length: pageLimit }).map((_, i) => (
-              <RecipeMinimizeCardSkeletonLoader key={i} />
-            ))
-          ) : recipes.length === 0 ? (
+        {/* Subtle Fade While Updating (Optimistic UI) */}
+        <div
+          className={`grid gap-6 grid-cols-1 md:grid-cols-2 xl:grid-cols-3 place-items-center
+                     transition-opacity duration-300 ${
+                       isLoading ? "opacity-50" : "opacity-100"
+                     }`}
+        >
+          {recipes.length === 0 && !isLoading ? (
             <div className="col-span-full flex justify-center items-center h-96">
               <NoRecipesCard
-                title="This kitchen is empty!"
-                description="No recipes match your filters. Try adjusting them."
+                title="No recipes found"
+                description="Try adjusting your filters."
                 buttonText="Create new dish"
               />
             </div>
           ) : (
             recipes.map((recipe) => (
-              <RecipeMinimizeCard
+              <div
                 key={recipe.id}
-                id={recipe.id || ""}
-                title={recipe.title}
-                imageUrl={recipe.image_url || ""}
-                description={recipe.description || ""}
-                authorId={recipe.author_id || ""}
-              />
+                className="transition-transform duration-200 hover:-translate-y-1 hover:shadow-lg"
+              >
+                <RecipeMinimizeCard
+                  id={recipe.id || ""}
+                  title={recipe.title}
+                  imageUrl={recipe.image_url || ""}
+                  description={recipe.description || ""}
+                  authorId={recipe.author_id || ""}
+                />
+              </div>
             ))
           )}
         </div>
       </div>
 
-      {/* Load More Feedback */}
+      {/* Load More with Motion Polish */}
       {hasMore && (
         <Button
           onClick={() => setCurrentPage((prev) => prev + 1)}
-          className="mt-6"
+          className="mt-6 transition-all duration-200 hover:scale-105 active:scale-95"
           isLoading={isFetchingMore}
           disabled={isFetchingMore}
         >
