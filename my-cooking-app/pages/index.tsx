@@ -148,24 +148,39 @@ export default function HomePage() {
       {/* Active Filters */}
       {activeFilters.length > 0 && (
         <div className="flex flex-wrap gap-3 mb-6">
-          {activeFilters.map(({ type, value }) => (
-            <div
-              key={value.id}
-              className="flex items-center gap-2 px-4 py-2 text-sm font-medium border border-accent text-accent rounded-lg bg-white shadow-sm transition-all duration-200"
-            >
-              <span>{value.label}</span>
-              {/* Only show ✕ for cuisine and recipeType */}
-              {(type === "cuisine" || type === "recipeType") && (
-                <button
-                  onClick={() => resetFilter(type)}
-                  aria-label={`Remove ${value.label} filter`}
-                  className="text-xs font-bold ml-1"
-                >
-                  ✕
-                </button>
-              )}
-            </div>
-          ))}
+          {activeFilters.map(({ type, value }) => {
+            // Don't display latest/oldest as a button
+            if (type === "time") return null;
+
+            return (
+              <button
+                key={value.id}
+                onClick={() => resetFilter(type)}
+                className="
+                  flex items-center gap-2
+                  px-4 py-2
+                  text-sm font-medium
+                  border border-accent
+                  text-accent
+                  rounded-lg
+                  bg-white
+                  shadow-sm
+                  transition-all duration-200
+                  hover:bg-accent hover:text-black
+                  hover:shadow-md
+                  active:scale-95
+                  focus:outline-none
+                  focus:ring-2 focus:ring-accent focus:ring-offset-2
+                "
+              >
+                <span>{value.label}</span>
+                {/* Only show ✕ for cuisine and recipeType */}
+                {(type === "cuisine" || type === "recipeType") && (
+                  <span className="text-xs font-bold">✕</span>
+                )}
+              </button>
+            );
+          })}
         </div>
       )}
 
