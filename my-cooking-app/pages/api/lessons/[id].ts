@@ -5,7 +5,7 @@ const CMS_URL = process.env.NEXT_PUBLIC_CMS_URL as string;
 
 export default async function handler(
   req: NextApiRequest,
-  res: NextApiResponse<LessonType | { error: string }>
+  res: NextApiResponse<LessonType | { error: string }>,
 ) {
   if (!CMS_URL) {
     return res.status(500).json({ error: "CMS URL not set" });
@@ -26,6 +26,8 @@ export default async function handler(
     const data = (await cmsRes.json()) as LessonType;
     return res.status(200).json(data);
   } catch (err) {
-    return res.status(500).json({ error: err instanceof Error ? err.message : String(err) });
+    return res
+      .status(500)
+      .json({ error: err instanceof Error ? err.message : String(err) });
   }
 }
