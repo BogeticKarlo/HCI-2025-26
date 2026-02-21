@@ -34,14 +34,21 @@ export default function HomePage() {
 
   const [selectedCuisine, setSelectedCuisine] =
     useState<Option<"cuisine">>(savedFilters.cuisine || cuisineOptions[0]);
+
   const [selectedRecipeType, setSelectedRecipeType] =
-    useState<Option<"recipeType">>(savedFilters.recipeType || recipeTypeOptions[0]);
+    useState<Option<"recipeType">>(
+      savedFilters.recipeType || recipeTypeOptions[0]
+    );
+
   const [selectedTime, setSelectedTime] =
     useState<Option<"time">>(savedFilters.time || timeOptions[0]);
-  const [selectedFavorite, setSelectedFavorite] =
-    useState<Option<"favorite">>(savedFilters.favorite || favoriteOptions[0]);
 
-  // Save filters to localStorage
+  const [selectedFavorite, setSelectedFavorite] =
+    useState<Option<"favorite">>(
+      savedFilters.favorite || favoriteOptions[0]
+    );
+
+  // Save filters
   useEffect(() => {
     const filters = {
       cuisine: selectedCuisine,
@@ -49,6 +56,7 @@ export default function HomePage() {
       time: selectedTime,
       favorite: selectedFavorite,
     };
+
     localStorage.setItem(localStorageKey, JSON.stringify(filters));
   }, [selectedCuisine, selectedRecipeType, selectedTime, selectedFavorite]);
 
@@ -84,7 +92,13 @@ export default function HomePage() {
     };
 
     fetchHomeRecipes();
-  }, [selectedCuisine, selectedRecipeType, selectedTime, selectedFavorite, currentPage]);
+  }, [
+    selectedCuisine,
+    selectedRecipeType,
+    selectedTime,
+    selectedFavorite,
+    currentPage,
+  ]);
 
   const resetFilter = (type: string) => {
     if (type === "cuisine") setSelectedCuisine(cuisineOptions[0]);
@@ -100,7 +114,12 @@ export default function HomePage() {
       { type: "time", value: selectedTime },
       { type: "favorite", value: selectedFavorite },
     ].filter((item) => item.value.id !== "all");
-  }, [selectedCuisine, selectedRecipeType, selectedTime, selectedFavorite]);
+  }, [
+    selectedCuisine,
+    selectedRecipeType,
+    selectedTime,
+    selectedFavorite,
+  ]);
 
   return (
     <div className="flex flex-col items-center">
@@ -145,38 +164,52 @@ export default function HomePage() {
         </p>
       </div>
 
-      {/* Active Filters */}
+      {/* Active Filter Chips */}
       {activeFilters.length > 0 && (
         <div className="flex flex-wrap gap-3 mb-6">
           {activeFilters.map(({ type, value }) => {
-            // Hide latest/oldest completely
+            // Hide latest/oldest filter completely
             if (type === "time") return null;
 
             return (
               <button
                 key={value.id}
                 onClick={() => resetFilter(type)}
+                title={`Remove ${value.label} filter`}
                 className="
+                  group
                   flex items-center gap-2
                   px-4 py-2
                   text-sm font-medium
                   border border-accent
                   text-accent
-                  rounded-lg
+                  rounded-full
                   bg-white
                   shadow-sm
-                  transition-all duration-200 transform
-                  hover:scale-105 hover:shadow-lg hover:bg-accent hover:text-black
+                  transition-all duration-200 ease-in-out
+                  cursor-pointer
+                  transform
+                  hover:scale-105
+                  hover:shadow-xl
+                  hover:bg-accent
+                  hover:text-black
                   active:scale-95
                   focus:outline-none
                   focus:ring-2 focus:ring-accent focus:ring-offset-2
-                  cursor-pointer
                 "
               >
                 <span>{value.label}</span>
-                {/* Show ✕ only for cuisine and recipeType */}
+
                 {(type === "cuisine" || type === "recipeType") && (
-                  <span className="text-xs font-bold">✕</span>
+                  <span
+                    className="
+                      text-xs font-bold
+                      transition-transform duration-200
+                      group-hover:rotate-90
+                    "
+                  >
+                    ✕
+                  </span>
                 )}
               </button>
             );
@@ -184,10 +217,12 @@ export default function HomePage() {
         </div>
       )}
 
-      {/* Recipe Grid */}
+      {/* Recipes Grid */}
       <div
         className={`grid gap-6 grid-cols-1 md:grid-cols-2 xl:grid-cols-3 place-items-center
-                    transition-opacity duration-300 ${isLoading ? "opacity-50" : "opacity-100"}`}
+        transition-opacity duration-300 ${
+          isLoading ? "opacity-50" : "opacity-100"
+        }`}
       >
         {recipes.length === 0 && !isLoading ? (
           <div className="col-span-full flex justify-center items-center h-96">
@@ -215,7 +250,7 @@ export default function HomePage() {
         )}
       </div>
 
-      {/* Load More Button */}
+      {/* Load More */}
       {hasMore && (
         <Button
           onClick={() => setCurrentPage((prev) => prev + 1)}
