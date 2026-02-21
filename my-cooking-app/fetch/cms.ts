@@ -33,8 +33,6 @@ export async function getLessonsPageBySlug(
     CMS_URL,
   ).toString();
 
-  console.log("Fetching lesson page from CMS with URL:", url);
-
   const res = await fetch(url, { cache: "no-store" });
   if (!res.ok) {
     const text = await res.text();
