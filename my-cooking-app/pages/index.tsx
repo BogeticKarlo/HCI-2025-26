@@ -186,8 +186,9 @@ export default function HomePage() {
           bg-white
           shadow-sm
           transition-all duration-200
-          hover:bg-accent hover:text-white
+          hover:bg-accent hover:text-black
           hover:shadow-md
+          hover:bg-red
           active:scale-95
           focus:outline-none
           focus:ring-2 focus:ring-accent focus:ring-offset-2
