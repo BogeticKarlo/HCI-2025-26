@@ -13,8 +13,6 @@ export type NavItem = {
   subnav?: SubNavItem[];
 };
 
-const CMS_URL = process.env.NEXT_PUBLIC_CMS_URL as string;
-
 export default function NavBar() {
   const [learnPages, setLearnPages] = useState<LessonPageType[]>([]);
   const [error, setError] = useState<string | null>(null);
@@ -23,7 +21,7 @@ export default function NavBar() {
     async function load() {
       try {
         // Fetch from your Next.js server-side API, not the external CMS
-        const res = await fetch(`${CMS_URL}/api/lesson-pages`);
+        const res = await fetch(`/api/lesson-page`);
         if (!res.ok) throw new Error(`Failed to fetch: ${res.status}`);
         const data: LessonPageType[] = await res.json();
         setLearnPages(data);
