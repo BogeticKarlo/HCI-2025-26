@@ -170,21 +170,36 @@ export default function HomePage() {
 
         {/* Active Filters (Clickable + Animated) */}
         {activeFilters.length > 0 && (
-          <div className="flex flex-wrap gap-2 mb-4">
-            {activeFilters.map(({ type, value }) => (
-              <button
-                key={value.id}
-                onClick={() => resetFilter(type)}
-                className="px-3 py-1 bg-accent/10 text-accent text-sm rounded-full
-                           hover:bg-accent hover:text-white
-                           transition-all duration-200
-                           hover:scale-105 active:scale-95"
-              >
-                {value.label} ×
-              </button>
-            ))}
-          </div>
-        )}
+  <div className="flex flex-wrap gap-3 mb-6">
+    {activeFilters.map(({ type, value }) => (
+      <button
+        key={value.id}
+        onClick={() => resetFilter(type)}
+        aria-label={`Remove ${value.label} filter`}
+        className="
+          flex items-center gap-2
+          px-4 py-2
+          text-sm font-medium
+          border border-accent
+          text-accent
+          rounded-lg
+          bg-white
+          shadow-sm
+          transition-all duration-200
+          hover:bg-accent hover:text-white
+          hover:shadow-md
+          active:scale-95
+          focus:outline-none
+          focus:ring-2 focus:ring-accent focus:ring-offset-2
+        "
+      >
+        <span>{value.label}</span>
+        <span className="text-xs font-bold">✕</span>
+      </button>
+    ))}
+  </div>
+)}
+
 
         {/* Subtle Fade While Updating (Optimistic UI) */}
         <div
