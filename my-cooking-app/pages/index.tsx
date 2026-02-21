@@ -41,7 +41,6 @@ export default function HomePage() {
   const [selectedFavorite, setSelectedFavorite] =
     useState<Option<"favorite">>(savedFilters.favorite || favoriteOptions[0]);
 
-  // Save filters to localStorage
   useEffect(() => {
     const filters = {
       cuisine: selectedCuisine,
@@ -52,7 +51,6 @@ export default function HomePage() {
     localStorage.setItem(localStorageKey, JSON.stringify(filters));
   }, [selectedCuisine, selectedRecipeType, selectedTime, selectedFavorite]);
 
-  // Fetch recipes
   useEffect(() => {
     const fetchHomeRecipes = async () => {
       try {
@@ -103,29 +101,36 @@ export default function HomePage() {
   }, [selectedCuisine, selectedRecipeType, selectedTime, selectedFavorite]);
 
   return (
-    <div className="flex flex-col items-center">
-      <h1 className="font-playfair font-bold text-[40px] text-center mb-10 text-primary-text">
-        Check Out Best Recipes
+    <div className="flex flex-col items-center px-4">
+
+      {/* Page Title */}
+      <h1 className="font-playfair font-bold text-[40px] text-center mb-4 text-primary-text">
+        Discover Recipes
       </h1>
 
-      {/* Filters */}
-      <div className="flex flex-col w-9/10 items-center gap-8 mb-10">
-        <div className="grid grid-cols-2 gap-5 w-full lg:w-[70%]">
+      <p className="text-secondary-text text-sm mb-10 text-center max-w-xl">
+        Use filters below to refine your search. Results update automatically.
+      </p>
+
+      {/* FILTER SECTION */}
+      <div className="w-full max-w-5xl mb-12">
+        <h2 className="text-lg font-semibold text-primary-text mb-6 tracking-wide uppercase">
+          Filters
+        </h2>
+
+        <div className="grid grid-cols-2 gap-6">
           <Dropdown
-            label="Choose Cuisine"
+            label="Cuisine"
             options={cuisineOptions}
             onSelect={setSelectedCuisine}
             value={selectedCuisine}
           />
           <Dropdown
-            label="Choose Type"
+            label="Recipe Type"
             options={recipeTypeOptions}
             onSelect={setSelectedRecipeType}
             value={selectedRecipeType}
           />
-        </div>
-
-        <div className="grid grid-cols-2 gap-5 w-full lg:w-[70%]">
           <Dropdown
             label="Sort by Date"
             options={timeOptions}
@@ -139,91 +144,114 @@ export default function HomePage() {
             value={selectedFavorite}
           />
         </div>
-
-        <p className="text-xs text-secondary-text text-center">
-          Filters update recipes automatically
-        </p>
       </div>
 
-      {/* Active Filters */}
+      {/* ACTIVE FILTERS */}
       {activeFilters.length > 0 && (
-        <div className="flex flex-wrap gap-3 mb-6">
-          {activeFilters.map(({ type, value }) => {
-            // Hide latest/oldest completely
-            if (type === "time") return null;
+        <div className="w-full max-w-5xl mb-10">
+          <h3 className="text-sm font-semibold text-secondary-text mb-4 uppercase tracking-wide">
+            Active Filters (Click to Remove)
+          </h3>
 
-            return (
+          <div className="flex flex-wrap gap-3">
+            {activeFilters.map(({ type, value }) => (
               <button
                 key={value.id}
                 onClick={() => resetFilter(type)}
                 className="
+                  group
                   flex items-center gap-2
                   px-4 py-2
                   text-sm font-medium
                   border border-accent
                   text-accent
-                  rounded-lg
                   bg-white
+                  rounded-lg
                   shadow-sm
-                  transition-all duration-200 transform
-                  hover:scale-105 hover:shadow-lg hover:bg-accent hover:text-black
+                  transition-all duration-200
+                  hover:bg-accent/5
+                  hover:shadow-md
                   active:scale-95
+                  cursor-pointer
                   focus:outline-none
                   focus:ring-2 focus:ring-accent focus:ring-offset-2
-                  cursor-pointer
                 "
               >
                 <span>{value.label}</span>
-                {/* Show ✕ only for cuisine and recipeType */}
-                {(type === "cuisine" || type === "recipeType") && (
-                  <span className="text-xs font-bold">✕</span>
-                )}
+
+                <span
+                  className="
+                    flex items-center justify-center
+                    w-5 h-5
+                    rounded-full
+                    bg-accent/10
+                    text-accent
+                    text-xs font-bold
+                    transition-all duration-200
+                    group-hover:bg-accent/20
+                  "
+                >
+                  ✕
+                </span>
               </button>
-            );
-          })}
+            ))}
+          </div>
         </div>
       )}
 
-      {/* Recipe Grid */}
-      <div
-        className={`grid gap-6 grid-cols-1 md:grid-cols-2 xl:grid-cols-3 place-items-center
-                    transition-opacity duration-300 ${isLoading ? "opacity-50" : "opacity-100"}`}
-      >
-        {recipes.length === 0 && !isLoading ? (
-          <div className="col-span-full flex justify-center items-center h-96">
+      {/* RESULTS SECTION */}
+      <div className="w-full max-w-6xl">
+        <h2 className="text-lg font-semibold text-primary-text mb-6 tracking-wide uppercase">
+          Results
+        </h2>
+
+        <div
+          className={`grid gap-6 grid-cols-1 md:grid-cols-2 xl:grid-cols-3
+                      transition-opacity duration-300
+                      ${isLoading ? "opacity-50" : "opacity-100"}`}
+        >
+          {recipes.length === 0 && !isLoading ? (
             <NoRecipesCard
               title="No recipes found"
               description="Try adjusting your filters."
               buttonText="Create new dish"
             />
-          </div>
-        ) : (
-          recipes.map((recipe) => (
-            <div
-              key={recipe.id}
-              className="transition-transform duration-200 hover:-translate-y-1 hover:shadow-lg"
-            >
-              <RecipeMinimizeCard
-                id={recipe.id || ""}
-                title={recipe.title}
-                imageUrl={recipe.image_url || ""}
-                description={recipe.description || ""}
-                authorId={recipe.author_id || ""}
-              />
-            </div>
-          ))
-        )}
+          ) : (
+            recipes.map((recipe) => (
+              <div
+                key={recipe.id}
+                className="
+                  cursor-pointer
+                  transition-all duration-200
+                  hover:-translate-y-1
+                  hover:shadow-lg
+                  hover:ring-2
+                  hover:ring-accent/20
+                  rounded-xl
+                "
+              >
+                <RecipeMinimizeCard
+                  id={recipe.id || ""}
+                  title={recipe.title}
+                  imageUrl={recipe.image_url || ""}
+                  description={recipe.description || ""}
+                  authorId={recipe.author_id || ""}
+                />
+              </div>
+            ))
+          )}
+        </div>
       </div>
 
-      {/* Load More Button */}
+      {/* LOAD MORE */}
       {hasMore && (
         <Button
           onClick={() => setCurrentPage((prev) => prev + 1)}
-          className="mt-6 transition-all duration-200 hover:scale-105 active:scale-95"
+          className="mt-10 px-8 transition-all duration-200 hover:scale-105 active:scale-95"
           isLoading={isFetchingMore}
           disabled={isFetchingMore}
         >
-          {isFetchingMore ? "Loading more..." : "Load More"}
+          {isFetchingMore ? "Loading more..." : "Load More ↓"}
         </Button>
       )}
     </div>
