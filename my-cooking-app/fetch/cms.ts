@@ -2,8 +2,11 @@
 import type { LessonType, LessonPageType, ListResponse } from "@/types/cms";
 
 function getCmsUrl(): string {
-  const url = (process.env.CMS_URL || "").replace(/\/$/, "");
-  if (!url) throw new Error("CMS_URL environment variable is not set (server-side only)");
+  const url = (process.env.NEXT_PUBLIC_CMS_URL || "").replace(/\/$/, "");
+  if (!url)
+    throw new Error(
+      "CMS_URL environment variable is not set (server-side only)",
+    );
   return url;
 }
 
@@ -19,17 +22,28 @@ export async function getLessonsById(id: string): Promise<LessonType | null> {
   return data ?? null;
 }
 
-export async function getLessonsPageBySlug(slug: string): Promise<LessonPageType | null> {
+export async function getLessonsPageBySlug(
+  slug: string,
+): Promise<LessonPageType | null> {
+  console.log("getLessonsPageBySlug called with slug:", slug);
+
   const CMS_URL = getCmsUrl();
   const url = new URL(
     `/api/lesson-pages?where[slug][equals]=${encodeURIComponent(slug)}&depth=3&limit=1`,
-    CMS_URL
+    CMS_URL,
   ).toString();
+
+  console.log("Fetching lesson page from CMS with URL:", url);
 
   const res = await fetch(url, { cache: "no-store" });
   if (!res.ok) {
     const text = await res.text();
-    console.error("getLessonsPageBySlug failed:", res.status, res.statusText, text);
+    console.error(
+      "getLessonsPageBySlug failed:",
+      res.status,
+      res.statusText,
+      text,
+    );
     return null;
   }
 
@@ -46,7 +60,10 @@ export async function getLessonsPageBySlug(slug: string): Promise<LessonPageType
 
 export async function getLessonPages(): Promise<LessonPageType[]> {
   const CMS_URL = getCmsUrl();
-  const url = new URL(`/api/lesson-pages?depth=1&sort=order`, CMS_URL).toString();
+  const url = new URL(
+    `/api/lesson-pages?depth=1&sort=order`,
+    CMS_URL,
+  ).toString();
   const res = await fetch(url, { cache: "no-store" });
   if (!res.ok) {
     console.error("getLessonPages failed:", res.status, res.statusText);
