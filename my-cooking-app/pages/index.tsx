@@ -149,7 +149,7 @@ export default function HomePage() {
       {activeFilters.length > 0 && (
         <div className="flex flex-wrap gap-3 mb-6">
           {activeFilters.map(({ type, value }) => {
-            // Don't display latest/oldest as a button
+            // Hide latest/oldest completely
             if (type === "time") return null;
 
             return (
@@ -165,16 +165,16 @@ export default function HomePage() {
                   rounded-lg
                   bg-white
                   shadow-sm
-                  transition-all duration-200
-                  hover:bg-accent hover:text-black
-                  hover:shadow-md
+                  transition-all duration-200 transform
+                  hover:scale-105 hover:shadow-lg hover:bg-accent hover:text-black
                   active:scale-95
                   focus:outline-none
                   focus:ring-2 focus:ring-accent focus:ring-offset-2
+                  cursor-pointer
                 "
               >
                 <span>{value.label}</span>
-                {/* Only show ✕ for cuisine and recipeType */}
+                {/* Show ✕ only for cuisine and recipeType */}
                 {(type === "cuisine" || type === "recipeType") && (
                   <span className="text-xs font-bold">✕</span>
                 )}
