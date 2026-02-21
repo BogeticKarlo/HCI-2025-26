@@ -27,7 +27,9 @@ export default function HomePage() {
 
   const [recipes, setRecipes] = useState<BaseRecipe[]>([]);
   const [isLoading, setIsLoading] = useState(true);
+  const [isFetchingMore, setIsFetchingMore] = useState(false);
   const [isError, setIsError] = useState(false);
+  const [showResetMessage, setShowResetMessage] = useState(false);
 
   const [currentPage, setCurrentPage] = useState(1);
   const [hasMore, setHasMore] = useState(true);
@@ -45,7 +47,7 @@ export default function HomePage() {
     savedFilters.favorite || favoriteOptions[0],
   );
 
-  // Save filters to localStorage
+  // Save filters
   useEffect(() => {
     const filters = {
       cuisine: selectedCuisine,
@@ -56,7 +58,7 @@ export default function HomePage() {
     localStorage.setItem(localStorageKey, JSON.stringify(filters));
   }, [selectedCuisine, selectedRecipeType, selectedTime, selectedFavorite]);
 
-  // Reset pagination when filters change
+  // Reset pagination on filter change
   useEffect(() => {
     setCurrentPage(1);
     setRecipes([]);
@@ -67,7 +69,12 @@ export default function HomePage() {
   useEffect(() => {
     const fetchHomeRecipes = async () => {
       try {
-        setIsLoading(true);
+        if (currentPage === 1) {
+          setIsLoading(true);
+        } else {
+          setIsFetchingMore(true);
+        }
+
         setIsError(false);
 
         const newRecipes = await fetchRecipes({
@@ -89,6 +96,7 @@ export default function HomePage() {
         setIsError(true);
       } finally {
         setIsLoading(false);
+        setIsFetchingMore(false);
       }
     };
 
@@ -106,9 +114,12 @@ export default function HomePage() {
     setSelectedRecipeType(recipeTypeOptions[0]);
     setSelectedTime(timeOptions[0]);
     setSelectedFavorite(favoriteOptions[0]);
+
+    // Show temporary confirmation
+    setShowResetMessage(true);
+    setTimeout(() => setShowResetMessage(false), 2000);
   };
 
-  // Active filters (excluding "all")
   const activeFilters = useMemo(() => {
     return [
       selectedCuisine,
@@ -123,21 +134,32 @@ export default function HomePage() {
     selectedFavorite,
   ]);
 
+  const retryFetch = () => {
+    setCurrentPage(1);
+  };
+
   return (
     <div className="flex flex-col items-center">
 
+      {/* Error Feedback */}
       {isError && (
-        <p className="text-warning text-sm mb-4">
-          We couldn’t load recipes. Please try again.
-        </p>
+        <div className="flex flex-col items-center gap-3 mb-6">
+          <p className="text-warning text-sm">
+            We couldn’t load recipes. Please check your connection.
+          </p>
+          <Button onClick={retryFetch} variant="secondary">
+            Retry
+          </Button>
+        </div>
       )}
 
-      <h1 className="font-playfair font-bold text-[40px] leading-[120%] text-center mb-10 text-primary-text">
+      <h1 className="font-playfair font-bold text-[40px] text-center mb-10 text-primary-text">
         Check Out Best Recipes
       </h1>
 
-      {/* Filters Section */}
-      <div className="flex flex-col w-9/10 items-center justify-center gap-8 mb-10">
+      {/* Filters */}
+      <div className="flex flex-col w-9/10 items-center gap-8 mb-10">
+
         <div className="grid grid-cols-2 gap-5 w-full lg:w-[70%]">
           <Dropdown
             label="Choose Cuisine"
@@ -168,28 +190,37 @@ export default function HomePage() {
           />
         </div>
 
-        <Button
-          onClick={handleResetFilters}
-          className="w-40"
-          variant="secondary"
-        >
+        <Button onClick={handleResetFilters} className="w-40" variant="secondary">
           Reset Filters
         </Button>
+
+        {showResetMessage && (
+          <p className="text-xs text-accent animate-fade-in">
+            Filters reset successfully
+          </p>
+        )}
 
         <p className="text-xs text-secondary-text text-center">
           Filters update recipes automatically
         </p>
       </div>
 
-      {/* Results Section */}
-      <div className="max-w-6xl mx-auto px-6 sm:px-10 lg:px-20 w-full">
+      {/* Results */}
+      <div className="max-w-6xl mx-auto px-6 sm:px-10 lg:px-20 w-full relative">
 
-        {/* Result Count */}
+        {/* Loading Overlay */}
+        {isLoading && (
+          <div className="absolute inset-0 bg-white/60 backdrop-blur-sm flex justify-center items-center z-10">
+            <p className="text-sm text-primary-text animate-pulse">
+              Updating recipes...
+            </p>
+          </div>
+        )}
+
         <p className="text-sm mb-2 text-secondary-text">
           Showing {recipes.length} recipe{recipes.length !== 1 ? "s" : ""}
         </p>
 
-        {/* Active Filters */}
         {activeFilters.length > 0 && (
           <div className="flex flex-wrap gap-2 mb-4">
             {activeFilters.map((filter) => (
@@ -203,8 +234,7 @@ export default function HomePage() {
           </div>
         )}
 
-        {/* Recipe Grid */}
-        <div className="grid gap-6 grid-cols-1 md:grid-cols-2 xl:grid-cols-3 place-items-center">
+        <div className="grid gap-6 grid-cols-1 md:grid-cols-2 xl:grid-cols-3 place-items-center transition-opacity duration-300">
           {isLoading && currentPage === 1 ? (
             Array.from({ length: pageLimit }).map((_, i) => (
               <RecipeMinimizeCardSkeletonLoader key={i} />
@@ -213,7 +243,7 @@ export default function HomePage() {
             <div className="col-span-full flex justify-center items-center h-96">
               <NoRecipesCard
                 title="This kitchen is empty!"
-                description="No recipes match your filters yet. Try adjusting them."
+                description="No recipes match your filters. Try adjusting them."
                 buttonText="Create new dish"
               />
             </div>
@@ -232,15 +262,15 @@ export default function HomePage() {
         </div>
       </div>
 
-      {/* Load More */}
+      {/* Load More Feedback */}
       {hasMore && (
         <Button
           onClick={() => setCurrentPage((prev) => prev + 1)}
           className="mt-6"
-          isLoading={isLoading}
-          disabled={isLoading}
+          isLoading={isFetchingMore}
+          disabled={isFetchingMore}
         >
-          Load More
+          {isFetchingMore ? "Loading more..." : "Load More"}
         </Button>
       )}
     </div>
