@@ -130,7 +130,13 @@ export function RecipeCard({
       <header className="relative flex flex-col items-center gap-4 mb-6">
         <button
           onClick={() => router.back()}
-          className="absolute left-0 top-1/2 -translate-y-1/2 flex items-center gap-2 p-2 transition duration-200 hover:scale-110 hover:opacity-80"
+          className="
+            absolute left-0 top-1/2 -translate-y-1/2
+            flex items-center gap-2 p-2
+            cursor-pointer
+            transition duration-200
+            hover:scale-110 hover:opacity-80
+          "
           title="Go back"
         >
           <Image
@@ -255,7 +261,7 @@ export function RecipeCard({
 
       {/* FEEDBACK */}
       {(errorMessage || successMessage) && (
-        <div className="transition-all duration-500 animate-fade-in">
+        <div className="transition-all duration-500">
           {errorMessage && (
             <div className="bg-red-100 border border-red-300 text-red-700 text-sm px-4 py-2 rounded-lg shadow-sm">
               {errorMessage}
@@ -272,9 +278,7 @@ export function RecipeCard({
       {/* FOOTER */}
       <footer className="flex justify-between items-center pt-4 border-t text-sm">
         <span className={author ? "" : "animate-pulse text-text-muted"}>
-          {author
-            ? author.username?.split("@")[0]
-            : "Loading author..."}
+          {author ? author.username?.split("@")[0] : "Loading author..."}
         </span>
 
         <div className="flex flex-col sm:flex-row items-center gap-6">
@@ -296,13 +300,12 @@ export function RecipeCard({
                 onClick={() => setIsModalOpen(true)}
                 disabled={deleting}
                 className={`
-                  w-10 h-10 flex items-center justify-center
-                  rounded-full
+                  w-10 h-10 flex items-center justify-center rounded-full
                   transition-all duration-200
                   ${
                     deleting
                       ? "bg-red-100 opacity-60 cursor-not-allowed"
-                      : "hover:bg-red-100 hover:scale-110 active:scale-95 text-red-500"
+                      : "cursor-pointer hover:bg-red-100 hover:scale-110 active:scale-95 text-red-500"
                   }
                 `}
                 aria-label="Delete Recipe"
