@@ -195,7 +195,6 @@ export default function HomePage() {
 
       {/* RECIPES GRID + ERROR STATE */}
       <div className="grid gap-6 grid-cols-1 md:grid-cols-2 xl:grid-cols-3 place-items-center min-h-[300px]">
-
         {isError ? (
           <div className="col-span-full flex flex-col items-center gap-4 text-center">
             <p className="text-lg font-semibold text-primary-text">
@@ -224,9 +223,7 @@ export default function HomePage() {
             {recipes.map((recipe) => (
               <div
                 key={recipe.id}
-                className={`transition-transform duration-200 hover:-translate-y-1 hover:shadow-lg
-                  ${isFetchingMore ? "opacity-50 animate-pulse" : "opacity-100"}
-                `}
+                className={`transition-transform duration-200 hover:-translate-y-1 hover:shadow-lg`}
               >
                 <RecipeMinimizeCard
                   id={recipe.id || ""}
@@ -238,12 +235,12 @@ export default function HomePage() {
               </div>
             ))}
 
-            {/* Skeleton placeholders during fetching more */}
+            {/* Skeleton placeholders matching card size */}
             {isFetchingMore &&
               Array.from({ length: pageLimit }).map((_, idx) => (
                 <div
                   key={`skeleton-${idx}`}
-                  className="w-full h-60 bg-gray-200 rounded-lg animate-pulse"
+                  className="w-full max-w-sm h-[260px] bg-gray-200 rounded-lg animate-pulse"
                 />
               ))}
           </>
