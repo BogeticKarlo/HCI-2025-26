@@ -23,11 +23,10 @@ import { LikeButton } from "../LikeButton";
 type Recipe = Database["public"]["Tables"]["recipes"]["Row"];
 type Profile = Database["public"]["Tables"]["profiles"]["Row"];
 
-// Constraints improvements included:
-// 1) Like cooldown to prevent accidental double-like spam.
-// 2) Disable delete wrapper while modal is open OR while deleting.
-// 3) Modal title includes recipe title to prevent deleting wrong item.
-// 4) If delete fails, DO NOT close modal (keep user in control). Close only on success.
+// Included improvements (Knowledge in the World):
+// 1) Action legibility: helper text for Like + Delete (tap guidance + permanence).
+// 2) Metadata near actions: “You are the author” shown for creator.
+// 3) Progressive reveal cue: “Scroll for ingredients and steps ↓” shown briefly before ingredients appear.
 
 export function RecipeCard({
   recipe,
@@ -54,6 +53,9 @@ export function RecipeCard({
   const [showImage, setShowImage] = useState(false);
   const [showIngredients, setShowIngredients] = useState(false);
   const [showInstructions, setShowInstructions] = useState(false);
+
+  // Knowledge-in-the-world cue: prompt users to scroll (only until ingredients appear)
+  const [showScrollCue, setShowScrollCue] = useState(false);
 
   // Like wrapper -> click anywhere to trigger internal LikeButton click
   const likeWrapperRef = useRef<HTMLDivElement | null>(null);
@@ -87,10 +89,19 @@ export function RecipeCard({
     setShowInstructions(false);
     setImageLoaded(false);
 
+    // Show cue briefly, then hide when ingredients appear (or after a short time)
+    setShowScrollCue(true);
+
     const timers: ReturnType<typeof setTimeout>[] = [];
     timers.push(setTimeout(() => setShowImage(true), 100));
-    timers.push(setTimeout(() => setShowIngredients(true), 500));
+    timers.push(
+      setTimeout(() => {
+        setShowIngredients(true);
+        setShowScrollCue(false);
+      }, 500),
+    );
     timers.push(setTimeout(() => setShowInstructions(true), 900));
+    timers.push(setTimeout(() => setShowScrollCue(false), 2500)); // safety hide
 
     return () => timers.forEach(clearTimeout);
   }, [recipe]);
@@ -158,7 +169,7 @@ export function RecipeCard({
       await deleteRecipe(recipe.id, user.id);
 
       setSuccessMessage("Recipe deleted successfully.");
-      setIsModalOpen(false); // ✅ close modal ONLY on success
+      setIsModalOpen(false); // close modal ONLY on success
 
       setTimeout(() => {
         router.back();
@@ -166,7 +177,7 @@ export function RecipeCard({
     } catch (error) {
       console.error("Error deleting recipe:", error);
       setErrorMessage("Failed to delete recipe. Please try again.");
-      // ✅ keep modal open on error (do NOT close)
+      // keep modal open on error
     } finally {
       setDeleting(false);
     }
@@ -245,6 +256,13 @@ export function RecipeCard({
 
       {/* DESCRIPTION */}
       <p className="text-sm leading-relaxed text-body-text">{recipe.description}</p>
+
+      {/* Knowledge-in-the-world cue for progressive reveal */}
+      {showScrollCue && (
+        <div className="text-xs text-text-muted text-center animate-pulse">
+          Scroll for ingredients and steps ↓
+        </div>
+      )}
 
       {/* IMAGE */}
       {publicImageUrl && (
@@ -355,7 +373,7 @@ export function RecipeCard({
         </span>
 
         <div className="flex flex-col sm:flex-row items-center gap-6">
-          {/* LIKE: whole wrapper clickable + cooldown constraint */}
+          {/* LIKE: action legibility helper text */}
           {!isCreator && (
             <div
               ref={likeWrapperRef}
@@ -378,14 +396,18 @@ export function RecipeCard({
                 select-none
                 ${likeCooldown ? "opacity-90" : ""}
               `}
-              title="Like this recipe"
+              title="Tap to like / tap again to unlike"
             >
-              <span className="text-xs text-text-muted mb-1">Like this recipe</span>
+              <span className="text-xs text-text-muted">Like this recipe</span>
+              <span className="text-[11px] text-text-muted/80 mb-1">
+                Tap to like · tap again to unlike
+              </span>
+
               <LikeButton recipeId={recipe.id} />
             </div>
           )}
 
-          {/* DELETE: whole wrapper clickable + disabled while modal open */}
+          {/* DELETE: metadata + permanence helper text */}
           {isCreator && (
             <button
               type="button"
@@ -411,8 +433,13 @@ export function RecipeCard({
                 }
               `}
             >
-              <span className="text-xs text-red-500 font-medium mb-1">
+              <span className="text-xs text-red-500 font-medium">
                 Delete your recipe
+              </span>
+
+              {/* Knowledge in the world: confirm role + permanence */}
+              <span className="text-[11px] text-text-muted/80 mb-1">
+                You are the author · Removes permanently
               </span>
 
               <span
