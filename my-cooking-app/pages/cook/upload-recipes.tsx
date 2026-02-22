@@ -37,7 +37,6 @@ export default function UploadRecipes() {
   const [image, setImage] = useState<File | null>(null);
 
   const [errors, setErrors] = useState<Record<string, string>>({});
-
   const hasErrors = Object.values(errors).some((error) => error);
 
   if (!user) return null;
@@ -110,33 +109,54 @@ export default function UploadRecipes() {
     setSelectedCuisine(cuisineOptions[0]);
     setSelectedRecipeType(recipeTypeOptions[0]);
     setImage(null);
+    setErrors({});
 
     setIsLoading(false);
   };
 
   return (
     <div>
-      {/* PAGE TITLE + INSTRUCTION (Discoverability) */}
       <h1 className="font-playfair font-bold text-[32px] leading-[120%] md:text-[40px] text-center mb-2 text-primary-text">
         Upload Your Recipe
       </h1>
 
-      <p className="text-center text-sm text-secondary-text mb-8">
-        Fill out the form below to share your recipe with the community.
+      <p className="text-center text-sm text-secondary-text mb-4">
+        Follow the steps below to publish your recipe.
       </p>
 
-      {/* FORM CARD */}
-      <div className="bg-section-bg shadow-md border border-input-border rounded-2xl flex flex-col items-center w-full max-w-[360px] md:max-w-[720px] mx-auto p-6 gap-8">
-        {/* SECTION: BASIC INFO */}
-        <div className="w-full">
-          <h2 className="text-xl font-semibold text-primary-text font-playfair mb-1">
-            Basic Information
-          </h2>
-          <p className="text-xs text-secondary-text mb-4">
-            Start with the core details of your recipe.
-          </p>
+      {/* Signifier: Required fields legend */}
+      <div className="max-w-[360px] md:max-w-[720px] mx-auto mb-6 px-2">
+        <div className="flex items-center justify-between text-xs text-secondary-text">
+          <span>
+            <span className="text-error-border font-semibold">*</span> Required
+            fields
+          </span>
+          <span className="text-secondary-text">
+            Step 1 → Step 2 → Step 3
+          </span>
+        </div>
+      </div>
 
-          <div className="flex flex-col w-full gap-6">
+      <div className="bg-section-bg shadow-md border border-input-border rounded-2xl flex flex-col items-center w-full max-w-[360px] md:max-w-[720px] mx-auto p-6 gap-8">
+        {/* Signifier: top error callout if any errors */}
+        {hasErrors && (
+          <div className="w-full border border-error-border text-error-border bg-error p-3 rounded-2xl text-sm text-center">
+            Some required fields are missing. Please fix the highlighted inputs.
+          </div>
+        )}
+
+        {/* STEP 1 */}
+        <div className="w-full">
+          <div className="flex items-center justify-between mb-3">
+            <h2 className="text-xl font-semibold text-primary-text font-playfair">
+              Step 1: Basic Information
+            </h2>
+            <span className="text-xs text-secondary-text">
+              Start here
+            </span>
+          </div>
+
+          <div className="flex flex-col w-full gap-6 border-l-2 border-gray-200 pl-4">
             <Input
               label="Recipe Title *"
               placeholder="e.g. Delicious Pancakes"
@@ -176,17 +196,18 @@ export default function UploadRecipes() {
           </div>
         </div>
 
-        {/* SECTION: INGREDIENTS & STEPS */}
+        {/* STEP 2 */}
         <div className="w-full border-t pt-6">
-          <h2 className="text-xl font-semibold text-primary-text font-playfair mb-1">
-            Ingredients & Instructions
-          </h2>
-          <p className="text-xs text-secondary-text mb-4">
-            Add all ingredients and step-by-step instructions. You can add up to
-            20 items.
-          </p>
+          <div className="flex items-center justify-between mb-3">
+            <h2 className="text-xl font-semibold text-primary-text font-playfair">
+              Step 2: Ingredients & Steps
+            </h2>
+            <span className="text-xs text-secondary-text">
+              Up to 20 items
+            </span>
+          </div>
 
-          <div className="flex flex-col w-full gap-6">
+          <div className="flex flex-col w-full gap-6 border-l-2 border-gray-200 pl-4">
             <InputList
               label="Ingredients *"
               values={ingredients}
@@ -213,50 +234,57 @@ export default function UploadRecipes() {
           </div>
         </div>
 
-        {/* SECTION: IMAGE */}
+        {/* STEP 3 */}
         <div className="w-full border-t pt-6">
-          <h2 className="text-xl font-semibold text-primary-text font-playfair mb-1">
-            Recipe Image (Optional)
-          </h2>
-          <p className="text-xs text-secondary-text mb-4">
-            Upload a photo to make your recipe more appealing.
-          </p>
+          <div className="flex items-center justify-between mb-3">
+            <h2 className="text-xl font-semibold text-primary-text font-playfair">
+              Step 3: Add a Photo (Optional)
+            </h2>
+            <span className="text-xs text-secondary-text">
+              Recommended
+            </span>
+          </div>
 
-          <ImageInput
-            value={image}
-            onChange={(file) => {
-              setImage(file);
-              setErrors((prev) => ({ ...prev, image: "" }));
-            }}
-            error={errors.image}
-          />
+          <div className="flex flex-col w-full gap-4 border-l-2 border-gray-200 pl-4">
+            <p className="text-xs text-secondary-text">
+              A photo makes your recipe easier to notice and more likely to be
+              clicked.
+            </p>
+
+            <ImageInput
+              value={image}
+              onChange={(file) => {
+                setImage(file);
+                setErrors((prev) => ({ ...prev, image: "" }));
+              }}
+              error={errors.image}
+            />
+          </div>
         </div>
 
-        {/* PRIMARY ACTION (More Discoverable CTA) */}
-        <div className="flex flex-col items-center gap-2 w-full">
+        {/* CTA */}
+        <div className="flex flex-col items-center gap-2 w-full pt-2">
+          <p className="text-xs text-secondary-text text-center">
+            Ready to publish? Click the button below.
+          </p>
+
           <Button
             variant="primary"
-            className="w-2/3 mx-auto mt-2"
+            className="w-2/3 mx-auto mt-1"
             onClick={handleUploadRecipe}
             isLoading={isLoading}
+            disabled={isLoading} // Signifier + constraint: prevents double submission
           >
             Upload Recipe
           </Button>
 
           <p className="text-xs text-secondary-text text-center">
-            Make sure all required fields (*) are filled before uploading.
+            Required fields are marked with{" "}
+            <span className="text-error-border font-semibold">*</span>
           </p>
         </div>
-
-        {/* GLOBAL ERROR FEEDBACK */}
-        {hasErrors && (
-          <div className="w-full border border-error-border text-error-border bg-error p-3 rounded-2xl flex items-center justify-center text-sm text-center">
-            Please complete all required fields before uploading your recipe.
-          </div>
-        )}
       </div>
 
-      {/* BANNER NOTIFICATION */}
       {banner && (
         <div className="fixed bottom-4 right-4 z-50">
           <Banner
