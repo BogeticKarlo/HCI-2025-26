@@ -30,7 +30,6 @@ export function RecipeCard({
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [deleting, setDeleting] = useState(false);
 
-  // Progressive display
   const [showImage, setShowImage] = useState(false);
   const [showIngredients, setShowIngredients] = useState(false);
   const [showInstructions, setShowInstructions] = useState(false);
@@ -87,35 +86,38 @@ export function RecipeCard({
   return (
     <article className="w-full max-w-[360px] md:max-w-[720px] bg-section-bg rounded-3xl p-8 shadow-md text-body-text flex flex-col gap-6 relative">
       {/* Header */}
-      <header className="flex items-center gap-3">
+      <header className="flex items-center gap-3 flex-wrap">
         <button
           onClick={() => router.back()}
-          className="cursor-pointer transition duration-200 hover:scale-110 hover:opacity-80"
-          aria-label="Go back"
+          className="flex items-center gap-2 p-2 cursor-pointer transition duration-200 hover:scale-110 hover:opacity-80"
+          title="Go back to recipes"
         >
           <Image
             src={backArrow}
             alt="Back"
-            width={48}
-            height={48}
-            className="w-15 md:w-12 aspect-square"
+            width={32}
+            height={32}
+            className="w-8 aspect-square"
           />
+          <span className="text-sm font-semibold text-primary-text">
+            Back
+          </span>
         </button>
 
-        <h1 className="text-3xl font-bold text-primary-text font-playfair lg:mr-5">
+        <h1 className="text-3xl font-bold text-primary-text font-playfair lg:mr-5 break-words">
           {recipe.title}
         </h1>
 
-        <h3 className="text-primary-text">
-          <span className="font-playfair font-semibold text-text-muted text-sm">
+        <h3 className="text-primary-text text-sm">
+          <span className="font-playfair font-semibold text-text-muted">
             Cuisine:
           </span>{" "}
-          <span className="font-normal text-primary-text">{recipe.cuisine}</span>
+          <span className="font-normal">{recipe.cuisine}</span>
           <br />
-          <span className="font-playfair font-semibold text-text-muted text-sm">
+          <span className="font-playfair font-semibold text-text-muted">
             Type:
           </span>{" "}
-          <span className="font-normal text-primary-text">
+          <span className="font-normal">
             {recipe.recipe_type?.replace("_", " ")}
           </span>
         </h3>
@@ -124,7 +126,7 @@ export function RecipeCard({
       {/* Description */}
       <p className="text-sm leading-relaxed text-body-text">{recipe.description}</p>
 
-      {/* Main Recipe Image (object-contain so full picture visible) */}
+      {/* Main Recipe Image */}
       {publicImageUrl && (
         <div
           className={`relative w-full h-[300px] rounded-2xl overflow-hidden transition-opacity duration-700 ${
