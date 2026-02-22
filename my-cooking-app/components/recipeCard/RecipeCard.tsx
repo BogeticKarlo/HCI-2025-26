@@ -85,40 +85,38 @@ export function RecipeCard({
   };
 
   return (
-    <article className="w-full max-w-[900px] min-w-[320px] lg:max-w-[1000px] bg-section-bg rounded-3xl p-10 lg:p-12 shadow-md text-body-text flex flex-col gap-6 relative mx-auto">
-      {/* ---------------- Header Section ---------------- */}
-      <header className="relative flex flex-col items-center gap-4 mb-8">
-        {/* Back button (absolute left) */}
+    <article className="w-full max-w-[720px] min-w-[320px] mx-auto bg-section-bg rounded-3xl p-8 shadow-md text-body-text flex flex-col gap-6 relative">
+      {/* Header */}
+      <header className="flex items-center gap-4 justify-center relative">
         <button
           onClick={() => router.back()}
-          className="absolute left-0 top-1/2 -translate-y-1/2 flex items-center gap-2 p-2 cursor-pointer transition duration-200 hover:scale-110 hover:opacity-80"
-          title="Go back to recipes"
+          className="absolute left-0 cursor-pointer transition duration-200 hover:scale-110 hover:opacity-80"
+          aria-label="Go back"
         >
           <Image
             src={backArrow}
             alt="Back"
-            width={32}
-            height={32}
-            className="w-8 aspect-square"
+            width={48}
+            height={48}
+            className="w-12 aspect-square"
           />
-          <span className="text-sm font-semibold text-primary-text">Back</span>
         </button>
 
-        {/* Centered title and metadata */}
-        <div className="flex flex-col items-center text-center gap-2">
-          <h1 className="text-3xl md:text-4xl font-bold text-primary-text font-playfair break-words">
+        <div className="text-center">
+          <h1 className="text-3xl font-bold text-primary-text font-playfair">
             {recipe.title}
           </h1>
-          <h3 className="text-primary-text text-sm md:text-base">
-            <span className="font-playfair font-semibold text-text-muted">
+
+          <h3 className="text-primary-text mt-1">
+            <span className="font-playfair font-semibold text-text-muted text-sm">
               Cuisine:
             </span>{" "}
-            <span className="font-normal">{recipe.cuisine}</span>
+            <span className="font-normal text-primary-text">{recipe.cuisine}</span>
             <br />
-            <span className="font-playfair font-semibold text-text-muted">
+            <span className="font-playfair font-semibold text-text-muted text-sm">
               Type:
             </span>{" "}
-            <span className="font-normal">
+            <span className="font-normal text-primary-text">
               {recipe.recipe_type?.replace("_", " ")}
             </span>
           </h3>
@@ -131,7 +129,7 @@ export function RecipeCard({
       {/* Main Recipe Image */}
       {publicImageUrl && (
         <div
-          className={`relative w-full h-[400px] md:h-[500px] rounded-2xl overflow-hidden transition-opacity duration-700 ${
+          className={`relative w-full h-[400px] rounded-2xl overflow-hidden transition-opacity duration-700 ${
             showImage ? "opacity-100" : "opacity-0"
           }`}
         >
@@ -204,26 +202,15 @@ export function RecipeCard({
         <span>{author?.username?.split("@")[0]}</span>
 
         <div className="flex flex-col sm:flex-row items-center gap-5">
-          {/* Like button discoverability */}
-          {!isCreator && (
-            <div className="flex flex-col items-center">
-              <span className="text-xs text-text-muted mb-1">Like this recipe</span>
-              <LikeButton recipeId={recipe.id} />
-            </div>
-          )}
-
-          {/* Delete button discoverability */}
+          {!isCreator && <LikeButton recipeId={recipe.id} />}
           {isCreator && (
-            <div className="flex flex-col items-center">
-              <span className="text-xs text-text-muted mb-1">Delete your recipe</span>
-              <button
-                onClick={() => setIsModalOpen(true)}
-                className="w-8 h-8 flex items-center justify-center cursor-pointer transition-all duration-200 hover:scale-110 active:scale-95 hover:text-error-border"
-                aria-label="Delete Recipe"
-              >
-                <TrashIcon className="w-7 h-7" />
-              </button>
-            </div>
+            <button
+              onClick={() => setIsModalOpen(true)}
+              className="w-8 h-8 flex items-center justify-center cursor-pointer transition-all duration-200 hover:scale-110 active:scale-95 hover:text-error-border"
+              aria-label="Delete Recipe"
+            >
+              <TrashIcon className="w-7 h-7" />
+            </button>
           )}
         </div>
       </footer>
