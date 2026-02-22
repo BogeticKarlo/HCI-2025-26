@@ -23,10 +23,13 @@ import { LikeButton } from "../LikeButton";
 type Recipe = Database["public"]["Tables"]["recipes"]["Row"];
 type Profile = Database["public"]["Tables"]["profiles"]["Row"];
 
-// Included improvements (Knowledge in the World):
-// 1) Action legibility: helper text for Like + Delete (tap guidance + permanence).
-// 2) Metadata near actions: “You are the author” shown for creator.
-// 3) Progressive reveal cue: “Scroll for ingredients and steps ↓” shown briefly before ingredients appear.
+/**
+ * Visual weight improvements included (all 4):
+ * 1) Stronger hierarchy: title block gets subtle divider + more spacing, Cuisine/Type is more muted & smaller.
+ * 2) Decorative images reduced dominance: slightly smaller on mobile + opacity.
+ * 3) Better scanability: Ingredients + Instructions list items have subtle “row” background + padding.
+ * 4) Footer balance: author name slightly stronger; Like/Delete wrappers are lighter by default, strengthen on hover.
+ */
 
 export function RecipeCard({
   recipe,
@@ -89,7 +92,6 @@ export function RecipeCard({
     setShowInstructions(false);
     setImageLoaded(false);
 
-    // Show cue briefly, then hide when ingredients appear (or after a short time)
     setShowScrollCue(true);
 
     const timers: ReturnType<typeof setTimeout>[] = [];
@@ -101,7 +103,7 @@ export function RecipeCard({
       }, 500),
     );
     timers.push(setTimeout(() => setShowInstructions(true), 900));
-    timers.push(setTimeout(() => setShowScrollCue(false), 2500)); // safety hide
+    timers.push(setTimeout(() => setShowScrollCue(false), 2500));
 
     return () => timers.forEach(clearTimeout);
   }, [recipe]);
@@ -125,7 +127,6 @@ export function RecipeCard({
   const triggerInnerLikeClick = () => {
     const root = likeWrapperRef.current;
     if (!root) return;
-
     const innerButton = root.querySelector("button") as HTMLButtonElement | null;
     innerButton?.click();
   };
@@ -169,7 +170,7 @@ export function RecipeCard({
       await deleteRecipe(recipe.id, user.id);
 
       setSuccessMessage("Recipe deleted successfully.");
-      setIsModalOpen(false); // close modal ONLY on success
+      setIsModalOpen(false);
 
       setTimeout(() => {
         router.back();
@@ -208,7 +209,7 @@ export function RecipeCard({
       "
     >
       {/* HEADER */}
-      <header className="relative flex flex-col items-center gap-4 mb-6">
+      <header className="relative flex flex-col items-center gap-4 mb-2">
         <button
           onClick={() => router.back()}
           className="
@@ -235,29 +236,31 @@ export function RecipeCard({
           <span className="text-sm font-semibold text-primary-text">Back</span>
         </button>
 
-        <div className="flex flex-col items-center text-center gap-2">
-          <h1 className="text-3xl md:text-4xl font-bold text-primary-text font-playfair">
+        {/* Title area gets more weight + divider */}
+        <div className="flex flex-col items-center text-center gap-3 w-full">
+          <h1 className="text-3xl md:text-4xl font-bold text-primary-text font-playfair tracking-tight">
             {recipe.title}
           </h1>
 
-          <h3 className="text-sm md:text-base text-primary-text">
-            <span className="font-playfair font-semibold text-text-muted">
-              Cuisine:
-            </span>{" "}
-            {recipe.cuisine}
-            <br />
-            <span className="font-playfair font-semibold text-text-muted">
-              Type:
-            </span>{" "}
-            {recipe.recipe_type?.replace("_", " ")}
+          {/* Muted metadata so it doesn't compete with title */}
+          <h3 className="text-xs md:text-sm text-text-muted leading-relaxed">
+            <span className="font-playfair font-semibold">Cuisine:</span>{" "}
+            <span className="text-primary-text/90">{recipe.cuisine}</span>
+            <span className="mx-2 text-text-muted/60">•</span>
+            <span className="font-playfair font-semibold">Type:</span>{" "}
+            <span className="text-primary-text/90">
+              {recipe.recipe_type?.replace("_", " ")}
+            </span>
           </h3>
+
+          <div className="w-full border-t border-gray-200/70" />
         </div>
       </header>
 
       {/* DESCRIPTION */}
       <p className="text-sm leading-relaxed text-body-text">{recipe.description}</p>
 
-      {/* Knowledge-in-the-world cue for progressive reveal */}
+      {/* Scroll cue */}
       {showScrollCue && (
         <div className="text-xs text-text-muted text-center animate-pulse">
           Scroll for ingredients and steps ↓
@@ -301,19 +304,27 @@ export function RecipeCard({
           </h2>
         </div>
 
-        <ul className="list-disc ml-6 text-sm flex flex-col gap-1">
+        {/* Scanability: subtle row background */}
+        <ul className="ml-1 text-sm flex flex-col gap-2">
           {recipe.ingredients.map((item, index) => (
-            <li key={index}>{item}</li>
+            <li
+              key={index}
+              className="flex items-start gap-3 rounded-lg px-3 py-2 bg-white/40"
+            >
+              <span className="mt-[6px] w-1.5 h-1.5 rounded-full bg-accent shrink-0" />
+              <span className="text-body-text">{item}</span>
+            </li>
           ))}
         </ul>
 
+        {/* Decorative image de-weighted */}
         <div className="w-24 h-20 mt-6 flex items-center justify-center">
           <Image
             src={CakeImage}
             alt="Decoration"
-            width={90}
-            height={90}
-            className="object-contain -rotate-12"
+            width={84}
+            height={84}
+            className="object-contain -rotate-12 opacity-80"
           />
         </div>
       </section>
@@ -333,19 +344,28 @@ export function RecipeCard({
           </h2>
         </div>
 
-        <ol className="list-decimal ml-6 text-sm flex flex-col gap-2">
+        {/* Scanability: subtle row background */}
+        <ol className="ml-1 text-sm flex flex-col gap-2">
           {recipe.instructions.map((step, index) => (
-            <li key={index}>{step}</li>
+            <li key={index} className="flex items-start gap-3">
+              <span className="inline-flex items-center justify-center w-6 h-6 rounded-full bg-white/60 border border-gray-200/70 text-xs font-semibold text-primary-text shrink-0">
+                {index + 1}
+              </span>
+              <span className="rounded-lg px-3 py-2 bg-white/40 flex-1">
+                {step}
+              </span>
+            </li>
           ))}
         </ol>
 
+        {/* Decorative image de-weighted */}
         <div className="w-24 h-20 mt-6 flex items-center justify-center">
           <Image
             src={SoupImage}
             alt="Decoration"
-            width={80}
-            height={80}
-            className="object-contain rotate-12"
+            width={76}
+            height={76}
+            className="object-contain rotate-12 opacity-80"
           />
         </div>
       </section>
@@ -368,27 +388,44 @@ export function RecipeCard({
 
       {/* FOOTER */}
       <footer className="flex justify-between items-center pt-4 border-t text-sm">
-        <span className={author ? "" : "animate-pulse text-text-muted"}>
+        {/* Footer balance: give author a bit more weight */}
+        <span
+          className={`${
+            author ? "font-semibold text-primary-text" : "animate-pulse text-text-muted"
+          }`}
+        >
           {author ? author.username?.split("@")[0] : "Loading author..."}
         </span>
 
         <div className="flex flex-col sm:flex-row items-center gap-6">
-          {/* LIKE: action legibility helper text */}
+          {/* LIKE (lighter default; stronger on hover already) */}
           {!isCreator && (
             <div
               ref={likeWrapperRef}
               role="button"
               tabIndex={0}
               aria-label="Like this recipe"
-              onClick={handleLikeWrapperClick}
+              onClick={(e) => {
+                // keep behavior identical
+                if (likeCooldown) return;
+                const root = likeWrapperRef.current;
+                if (!root) return;
+                const innerButton = root.querySelector("button") as HTMLButtonElement | null;
+                if (innerButton && e.target instanceof Node && innerButton.contains(e.target)) {
+                  startLikeCooldown();
+                  return;
+                }
+                triggerInnerLikeClick();
+                startLikeCooldown();
+              }}
               onKeyDown={handleLikeWrapperKeyDown}
               className={`
                 flex flex-col items-center
-                border border-accent/40
+                border border-accent/25
                 rounded-xl px-4 py-3
-                bg-white/60
+                bg-white/50
                 transition-all duration-200
-                hover:border-accent hover:shadow-md hover:-translate-y-[1px] hover:scale-[1.02]
+                hover:border-accent hover:bg-white/70 hover:shadow-md hover:-translate-y-[1px] hover:scale-[1.02]
                 active:scale-[0.98] active:translate-y-0
                 cursor-pointer
                 focus:outline-none
@@ -407,7 +444,7 @@ export function RecipeCard({
             </div>
           )}
 
-          {/* DELETE: metadata + permanence helper text */}
+          {/* DELETE (lighter default border; stronger on hover) */}
           {isCreator && (
             <button
               type="button"
@@ -420,16 +457,16 @@ export function RecipeCard({
               className={`
                 group
                 flex flex-col items-center
-                border border-red-300/70
+                border border-red-300/40
                 rounded-xl px-4 py-3
-                bg-white/60
+                bg-white/50
                 transition-all duration-200
                 focus-visible:outline-none
                 focus-visible:ring-2 focus-visible:ring-red-400 focus-visible:ring-offset-2
                 ${
                   deleteWrapperDisabled
                     ? "opacity-60 cursor-not-allowed"
-                    : "cursor-pointer hover:border-red-400 hover:shadow-md hover:-translate-y-[1px] hover:scale-[1.02] active:scale-[0.98]"
+                    : "cursor-pointer hover:border-red-400 hover:bg-white/70 hover:shadow-md hover:-translate-y-[1px] hover:scale-[1.02] active:scale-[0.98]"
                 }
               `}
             >
@@ -437,7 +474,6 @@ export function RecipeCard({
                 Delete your recipe
               </span>
 
-              {/* Knowledge in the world: confirm role + permanence */}
               <span className="text-[11px] text-text-muted/80 mb-1">
                 You are the author · Removes permanently
               </span>
@@ -468,11 +504,7 @@ export function RecipeCard({
         <Modal
           handleAction={handleDelete}
           setIsModalOpen={setIsModalOpen}
-          title={
-            deleting
-              ? `Deleting "${recipe.title}"...`
-              : `Delete "${recipe.title}"?`
-          }
+          title={deleting ? `Deleting "${recipe.title}"...` : `Delete "${recipe.title}"?`}
         />
       )}
     </article>
