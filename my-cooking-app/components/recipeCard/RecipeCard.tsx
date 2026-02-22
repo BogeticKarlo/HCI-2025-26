@@ -28,16 +28,20 @@ export function RecipeCard({
   const { user } = useAuth();
   const [author, setAuthor] = useState<Profile>();
   const [isModalOpen, setIsModalOpen] = useState(false);
+  const [deleting, setDeleting] = useState(false);
 
-  // ✅ Creator check (clean solution)
   const isCreator = user?.id === recipe?.author_id;
 
   useEffect(() => {
     if (!recipe?.author_id) return;
 
     const fetchData = async () => {
-      const author = await fetchUserById(recipe.author_id);
-      setAuthor(author);
+      try {
+        const author = await fetchUserById(recipe.author_id);
+        setAuthor(author);
+      } catch (err) {
+        console.error("Failed to fetch author", err);
+      }
     };
 
     fetchData();
@@ -48,24 +52,28 @@ export function RecipeCard({
   const publicImageUrl = `https://xhebsnwjpfcdttydwuhg.supabase.co/storage/v1/object/public/recipe-images/${recipe.author_id}/${recipe.image_url}`;
 
   const handleDelete = async () => {
+    if (!user || !recipe) return;
+    setDeleting(true);
     try {
-      if (!user) return;
       await deleteRecipe(recipe.id, user.id);
+      router.back();
     } catch (error) {
       console.error("Error deleting recipe:", error);
+      alert("Failed to delete recipe. Please try again.");
+    } finally {
+      setDeleting(false);
+      setIsModalOpen(false);
     }
-
-    setIsModalOpen(false);
-    router.back();
   };
 
   return (
-    <article className="w-full max-w-[360px] md:max-w-[720px] bg-section-bg rounded-3xl p-8 shadow-md text-body-text flex flex-col gap-6">
+    <article className="w-full max-w-[360px] md:max-w-[720px] bg-section-bg rounded-3xl p-8 shadow-md text-body-text flex flex-col gap-6 relative">
       {/* Header */}
       <header className="flex items-center gap-3">
         <button
           onClick={() => router.back()}
           className="cursor-pointer transition duration-200 hover:scale-110 hover:opacity-80"
+          aria-label="Go back"
         >
           <Image
             src={backArrow}
@@ -84,9 +92,7 @@ export function RecipeCard({
           <span className="font-playfair font-semibold text-text-muted text-sm">
             Cuisine:
           </span>{" "}
-          <span className="font-normal text-primary-text">
-            {recipe.cuisine}
-          </span>
+          <span className="font-normal text-primary-text">{recipe.cuisine}</span>
           <br />
           <span className="font-playfair font-semibold text-text-muted text-sm">
             Type:
@@ -98,14 +104,12 @@ export function RecipeCard({
       </header>
 
       {/* Description */}
-      <p className="text-sm leading-relaxed text-body-text">
-        {recipe.description}
-      </p>
+      <p className="text-sm leading-relaxed text-body-text">{recipe.description}</p>
 
       {/* Ingredients & Instructions */}
-      <section className="flex flex-col md:flex-row items-start">
+      <section className="flex flex-col md:flex-row items-start gap-4">
         {/* Ingredients */}
-        <div className="flex items-start justify-center lg:w-1/2">
+        <div className="flex items-start justify-center lg:w-1/2 gap-4">
           <div className="md:w-1/2 flex flex-col gap-4">
             <h2 className="text-xl font-semibold mb-2 text-primary-text font-playfair">
               Ingredients
@@ -131,7 +135,7 @@ export function RecipeCard({
         </div>
 
         {/* Instructions */}
-        <div className="flex justify-center items-start lg:w-1/2">
+        <div className="flex justify-center items-start lg:w-1/2 gap-4">
           <div className="md:w-1/2 flex flex-col gap-4">
             <h2 className="text-xl font-semibold mb-2 text-primary-text font-playfair">
               Instructions
@@ -160,13 +164,7 @@ export function RecipeCard({
       {/* Main Recipe Image */}
       {publicImageUrl && (
         <div className="relative w-full h-48 rounded-2xl overflow-hidden">
-          <Image
-            src={publicImageUrl}
-            alt={recipe.title}
-            fill
-            sizes="100%"
-            className="object-cover"
-          />
+          <Image src={publicImageUrl} alt={recipe.title} fill sizes="100%" className="object-cover" />
         </div>
       )}
 
@@ -175,14 +173,12 @@ export function RecipeCard({
         <span>{author?.username?.split("@")[0]}</span>
 
         <div className="flex flex-col sm:flex-row items-center gap-5">
-          {/* ✅ Hide Like button if creator */}
           {!isCreator && <LikeButton recipeId={recipe.id} />}
-
-          {/* ✅ Show Delete only to creator */}
           {isCreator && (
             <button
               onClick={() => setIsModalOpen(true)}
               className="w-8 h-8 flex items-center justify-center cursor-pointer transition-all duration-200 hover:scale-110 active:scale-95 hover:text-error-border"
+              aria-label="Delete Recipe"
             >
               <TrashIcon className="w-7 h-7" />
             </button>
@@ -190,11 +186,12 @@ export function RecipeCard({
         </div>
       </footer>
 
+      {/* Modal (self-closing, no children prop) */}
       {isModalOpen && (
         <Modal
           handleAction={handleDelete}
           setIsModalOpen={setIsModalOpen}
-          title="Are you sure you want to delete this recipe?"
+          title={deleting ? "Deleting recipe..." : "Are you sure you want to delete this recipe?"}
         />
       )}
     </article>
