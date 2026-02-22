@@ -61,7 +61,7 @@ export default function HomePage() {
     localStorage.setItem(localStorageKey, JSON.stringify(filters));
   }, [selectedCuisine, selectedRecipeType, selectedTime, selectedFavorite]);
 
-  /* ---------------- RESET PAGE WHEN FILTERS CHANGE ---------------- */
+  /* ---------------- RESET PAGE ON FILTER CHANGE ---------------- */
 
   useEffect(() => {
     setCurrentPage(1);
@@ -131,21 +131,96 @@ export default function HomePage() {
     selectedFavorite,
   ]);
 
-  /* ================= RENDER ================= */
-
   return (
     <div className="flex flex-col items-center">
       <h1 className="font-playfair font-bold text-[40px] text-center mb-10 text-primary-text">
         Check Out Best Recipes
       </h1>
 
-      {/* Filters section unchanged for brevity */}
+      {/* ---------------- FILTERS ---------------- */}
 
-      {/* Recipes Grid */}
+      <div className="flex flex-col w-9/10 items-center gap-8 mb-10">
+        <div className="grid grid-cols-2 gap-5 w-full lg:w-[70%]">
+          <Dropdown
+            label="Choose Cuisine"
+            options={cuisineOptions}
+            onSelect={setSelectedCuisine}
+            value={selectedCuisine}
+          />
+          <Dropdown
+            label="Choose Type"
+            options={recipeTypeOptions}
+            onSelect={setSelectedRecipeType}
+            value={selectedRecipeType}
+          />
+        </div>
+
+        <div className="grid grid-cols-2 gap-5 w-full lg:w-[70%]">
+          <Dropdown
+            label="Sort by Date"
+            options={timeOptions}
+            onSelect={setSelectedTime}
+            value={selectedTime}
+          />
+          <Dropdown
+            label="Sort by Popularity"
+            options={favoriteOptions}
+            onSelect={setSelectedFavorite}
+            value={selectedFavorite}
+          />
+        </div>
+
+        <p className="text-xs text-secondary-text text-center">
+          Filters update recipes automatically
+        </p>
+      </div>
+
+      {/* ---------------- ACTIVE FILTER CHIPS ---------------- */}
+
+      {activeFilters.length > 0 && (
+        <div className="flex flex-wrap gap-3 mb-6">
+          {activeFilters.map(({ type, value }) => {
+            if (type === "time") return null;
+
+            return (
+              <button
+                key={value.id}
+                onClick={() => resetFilter(type)}
+                className="group flex items-center gap-2 px-4 py-2 text-sm font-medium border border-accent text-accent rounded-full bg-white shadow-sm cursor-pointer transition-all duration-200 ease-in-out transform hover:scale-105 hover:shadow-xl hover:bg-accent hover:text-black active:scale-95 focus:outline-none focus:ring-2 focus:ring-accent focus:ring-offset-2"
+              >
+                <span>{value.label}</span>
+                <span className="text-xs font-bold transition-transform duration-200 group-hover:rotate-90">
+                  ✕
+                </span>
+              </button>
+            );
+          })}
+        </div>
+      )}
+
+      {/* ---------------- DIVIDER ---------------- */}
+
+      <div className="w-full max-w-6xl px-6 sm:px-10 lg:px-20">
+        <div className="border-t border-gray-200 my-6" />
+      </div>
+
+      {/* ---------------- RESULTS LABEL (FULL BLACK) ---------------- */}
+
+      <div className="w-full max-w-6xl px-6 sm:px-10 lg:px-20 mb-4">
+        <p
+          className={`text-sm font-medium text-primary-text transition-opacity duration-200 ${
+            isLoading ? "opacity-50" : "opacity-100"
+          }`}
+        >
+          Showing {recipes.length}{" "}
+          {recipes.length === 1 ? "recipe" : "recipes"}
+        </p>
+      </div>
+
+      {/* ---------------- RECIPES GRID ---------------- */}
 
       <div
-        className={`grid gap-6 grid-cols-1 md:grid-cols-2 xl:grid-cols-3 place-items-center
-        transition-opacity duration-300 ${
+        className={`grid gap-6 grid-cols-1 md:grid-cols-2 xl:grid-cols-3 place-items-center transition-opacity duration-300 ${
           isLoading ? "opacity-50" : "opacity-100"
         }`}
       >
@@ -175,7 +250,7 @@ export default function HomePage() {
         )}
       </div>
 
-      {/* ---------------- LOAD MORE (Improved Constraint) ---------------- */}
+      {/* ---------------- LOAD MORE (Constraint Improved) ---------------- */}
 
       {hasMore && (
         <Button
