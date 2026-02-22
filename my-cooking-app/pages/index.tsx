@@ -69,36 +69,36 @@ export default function HomePage() {
 
   /* ---------------- FETCH RECIPES ---------------- */
 
+  const fetchHomeRecipes = async () => {
+    try {
+      if (currentPage === 1) setIsLoading(true);
+      else setIsFetchingMore(true);
+
+      setIsError(false);
+
+      const newRecipes = await fetchRecipes({
+        cuisine: selectedCuisine.id,
+        recipeType: selectedRecipeType.id,
+        time: selectedTime.id,
+        favorite: selectedFavorite.id,
+        limit: pageLimit,
+        page: currentPage,
+      });
+
+      setRecipes((prev) =>
+        currentPage === 1 ? newRecipes : [...prev, ...newRecipes]
+      );
+
+      setHasMore(newRecipes.length === pageLimit);
+    } catch (err) {
+      setIsError(true);
+    } finally {
+      setIsLoading(false);
+      setIsFetchingMore(false);
+    }
+  };
+
   useEffect(() => {
-    const fetchHomeRecipes = async () => {
-      try {
-        if (currentPage === 1) setIsLoading(true);
-        else setIsFetchingMore(true);
-
-        setIsError(false);
-
-        const newRecipes = await fetchRecipes({
-          cuisine: selectedCuisine.id,
-          recipeType: selectedRecipeType.id,
-          time: selectedTime.id,
-          favorite: selectedFavorite.id,
-          limit: pageLimit,
-          page: currentPage,
-        });
-
-        setRecipes((prev) =>
-          currentPage === 1 ? newRecipes : [...prev, ...newRecipes]
-        );
-
-        setHasMore(newRecipes.length === pageLimit);
-      } catch (err) {
-        setIsError(true);
-      } finally {
-        setIsLoading(false);
-        setIsFetchingMore(false);
-      }
-    };
-
     fetchHomeRecipes();
   }, [
     selectedCuisine,
@@ -137,8 +137,7 @@ export default function HomePage() {
         Check Out Best Recipes
       </h1>
 
-      {/* ---------------- FILTERS ---------------- */}
-
+      {/* FILTERS (unchanged) */}
       <div className="flex flex-col w-9/10 items-center gap-8 mb-10">
         <div className="grid grid-cols-2 gap-5 w-full lg:w-[70%]">
           <Dropdown
@@ -175,21 +174,19 @@ export default function HomePage() {
         </p>
       </div>
 
-      {/* ---------------- ACTIVE FILTER CHIPS ---------------- */}
-
+      {/* ACTIVE CHIPS (unchanged) */}
       {activeFilters.length > 0 && (
         <div className="flex flex-wrap gap-3 mb-6">
           {activeFilters.map(({ type, value }) => {
             if (type === "time") return null;
-
             return (
               <button
                 key={value.id}
                 onClick={() => resetFilter(type)}
-                className="group flex items-center gap-2 px-4 py-2 text-sm font-medium border border-accent text-accent rounded-full bg-white shadow-sm cursor-pointer transition-all duration-200 ease-in-out transform hover:scale-105 hover:shadow-xl hover:bg-accent hover:text-black active:scale-95 focus:outline-none focus:ring-2 focus:ring-accent focus:ring-offset-2"
+                className="group flex items-center gap-2 px-4 py-2 text-sm font-medium border border-accent text-accent rounded-full bg-white shadow-sm cursor-pointer transition-all duration-200 hover:scale-105 hover:shadow-xl hover:bg-accent hover:text-black"
               >
                 <span>{value.label}</span>
-                <span className="text-xs font-bold transition-transform duration-200 group-hover:rotate-90">
+                <span className="text-xs font-bold group-hover:rotate-90 transition-transform duration-200">
                   ✕
                 </span>
               </button>
@@ -198,33 +195,38 @@ export default function HomePage() {
         </div>
       )}
 
-      {/* ---------------- DIVIDER ---------------- */}
-
+      {/* DIVIDER */}
       <div className="w-full max-w-6xl px-6 sm:px-10 lg:px-20">
         <div className="border-t border-gray-200 my-6" />
       </div>
 
-      {/* ---------------- RESULTS LABEL (FULL BLACK) ---------------- */}
-
+      {/* RESULTS LABEL */}
       <div className="w-full max-w-6xl px-6 sm:px-10 lg:px-20 mb-4">
-        <p
-          className={`text-sm font-medium text-primary-text transition-opacity duration-200 ${
-            isLoading ? "opacity-50" : "opacity-100"
-          }`}
-        >
+        <p className="text-sm font-medium text-primary-text">
           Showing {recipes.length}{" "}
           {recipes.length === 1 ? "recipe" : "recipes"}
         </p>
       </div>
 
-      {/* ---------------- RECIPES GRID ---------------- */}
+      {/* RECIPES GRID + ERROR STATE */}
+      <div className="grid gap-6 grid-cols-1 md:grid-cols-2 xl:grid-cols-3 place-items-center min-h-[300px]">
 
-      <div
-        className={`grid gap-6 grid-cols-1 md:grid-cols-2 xl:grid-cols-3 place-items-center transition-opacity duration-300 ${
-          isLoading ? "opacity-50" : "opacity-100"
-        }`}
-      >
-        {recipes.length === 0 && !isLoading ? (
+        {isError ? (
+          <div className="col-span-full flex flex-col items-center gap-4 text-center">
+            <p className="text-lg font-semibold text-primary-text">
+              We couldn’t load recipes.
+            </p>
+            <p className="text-sm text-secondary-text">
+              Please check your connection and try again.
+            </p>
+            <Button
+              onClick={() => fetchHomeRecipes()}
+              disabled={isLoading || isFetchingMore}
+            >
+              Retry
+            </Button>
+          </div>
+        ) : recipes.length === 0 && !isLoading ? (
           <div className="col-span-full flex justify-center items-center h-96">
             <NoRecipesCard
               title="No recipes found"
@@ -250,16 +252,15 @@ export default function HomePage() {
         )}
       </div>
 
-      {/* ---------------- LOAD MORE (Constraint Improved) ---------------- */}
-
-      {hasMore && (
+      {/* LOAD MORE */}
+      {hasMore && !isError && (
         <Button
           onClick={() => {
             if (!isFetchingMore && !isLoading) {
               setCurrentPage((prev) => prev + 1);
             }
           }}
-          className="mt-6 transition-all duration-200 hover:scale-105 active:scale-95"
+          className="mt-6"
           isLoading={isFetchingMore}
           disabled={isFetchingMore || isLoading}
         >
