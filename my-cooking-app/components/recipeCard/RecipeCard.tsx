@@ -126,6 +126,7 @@ export function RecipeCard({
     >
       {/* HEADER */}
       <header className="relative flex flex-col items-center gap-4 mb-6">
+        {/* Back button: strong affordance mapping (cursor + focus ring) */}
         <button
           onClick={() => router.back()}
           className="
@@ -148,9 +149,7 @@ export function RecipeCard({
             height={36}
             className="w-9 aspect-square"
           />
-          <span className="text-sm font-semibold text-primary-text">
-            Back
-          </span>
+          <span className="text-sm font-semibold text-primary-text">Back</span>
         </button>
 
         <div className="flex flex-col items-center text-center gap-2">
@@ -173,17 +172,13 @@ export function RecipeCard({
       </header>
 
       {/* DESCRIPTION */}
-      <p className="text-sm leading-relaxed text-body-text">
-        {recipe.description}
-      </p>
+      <p className="text-sm leading-relaxed text-body-text">{recipe.description}</p>
 
       {/* IMAGE */}
       {publicImageUrl && (
         <div
           className={`relative w-full h-[420px] md:h-[520px] rounded-2xl overflow-hidden transition-all duration-700 ${
-            showImage
-              ? "opacity-100 translate-y-0"
-              : "opacity-0 translate-y-4"
+            showImage ? "opacity-100 translate-y-0" : "opacity-0 translate-y-4"
           }`}
         >
           {!imageLoaded && (
@@ -206,9 +201,7 @@ export function RecipeCard({
       {/* INGREDIENTS */}
       <section
         className={`transition-all duration-700 ${
-          showIngredients
-            ? "opacity-100 translate-y-0"
-            : "opacity-0 translate-y-4"
+          showIngredients ? "opacity-100 translate-y-0" : "opacity-0 translate-y-4"
         }`}
       >
         <div className="flex items-center gap-3 mb-3 border-b pb-1">
@@ -240,9 +233,7 @@ export function RecipeCard({
       {/* INSTRUCTIONS */}
       <section
         className={`transition-all duration-700 ${
-          showInstructions
-            ? "opacity-100 translate-y-0"
-            : "opacity-0 translate-y-4"
+          showInstructions ? "opacity-100 translate-y-0" : "opacity-0 translate-y-4"
         }`}
       >
         <div className="flex items-center gap-3 mb-3 border-b pb-1">
@@ -294,34 +285,43 @@ export function RecipeCard({
         </span>
 
         <div className="flex flex-col sm:flex-row items-center gap-6">
+          {/* Like: improve affordance mapping using focus-within ring */}
           {!isCreator && (
-            <div className="flex flex-col items-center">
-              <span className="text-xs text-text-muted mb-1">
-                Like this recipe
-              </span>
+            <div
+              className="
+                flex flex-col items-center
+                rounded-xl px-2 py-1
+                focus-within:ring-2 focus-within:ring-accent focus-within:ring-offset-2
+              "
+            >
+              <span className="text-xs text-text-muted mb-1">Like this recipe</span>
               <LikeButton recipeId={recipe.id} />
             </div>
           )}
 
+          {/* Delete: stronger destructive mapping + clear focus/hover affordance */}
           {isCreator && (
             <div className="flex flex-col items-center">
               <span className="text-xs text-red-500 font-medium mb-1">
                 Delete your recipe
               </span>
+
               <button
                 onClick={() => setIsModalOpen(true)}
                 disabled={deleting}
+                title="Delete recipe"
+                aria-label="Delete Recipe"
                 className={`
                   w-10 h-10 flex items-center justify-center rounded-full
                   transition-all duration-200
+                  focus-visible:outline-none
+                  focus-visible:ring-2 focus-visible:ring-red-400 focus-visible:ring-offset-2
                   ${
                     deleting
                       ? "bg-red-100 opacity-60 cursor-not-allowed"
-                      : "cursor-pointer hover:bg-red-100 hover:scale-110 active:scale-95 text-red-500"
+                      : "cursor-pointer text-red-500 hover:bg-red-100 hover:scale-110 active:scale-95"
                   }
                 `}
-                aria-label="Delete Recipe"
-                title="Delete recipe"
               >
                 {deleting ? (
                   <span className="text-xs animate-pulse">...</span>
@@ -338,11 +338,7 @@ export function RecipeCard({
         <Modal
           handleAction={handleDelete}
           setIsModalOpen={setIsModalOpen}
-          title={
-            deleting
-              ? "Deleting recipe..."
-              : "Are you sure you want to delete this recipe?"
-          }
+          title={deleting ? "Deleting recipe..." : "Are you sure you want to delete this recipe?"}
         />
       )}
     </article>
