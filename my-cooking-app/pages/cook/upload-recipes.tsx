@@ -3,7 +3,7 @@
 import { Input } from "@/components/input/Input";
 import { TextArea } from "@/components/textArea/TextArea";
 import { InputList } from "@/components/inputList/InputList";
-import { useState } from "react";
+import { useMemo, useState } from "react";
 import { Dropdown } from "@/components/dropdown/Dropdown";
 import { Option } from "@/components/dropdown/Dropdown.types";
 import {
@@ -25,6 +25,11 @@ export default function UploadRecipes() {
 
   const [isLoading, setIsLoading] = useState(false);
 
+  // Feedback state (Norman: visible system status + clear guidance)
+  const [status, setStatus] = useState<
+    "idle" | "validating" | "uploadingImage" | "uploadingRecipe" | "success" | "error"
+  >("idle");
+
   const [title, setTitle] = useState("");
   const [description, setDescription] = useState("");
   const [ingredients, setIngredients] = useState<string[]>([""]);
@@ -41,8 +46,39 @@ export default function UploadRecipes() {
 
   if (!user) return null;
 
+  // Norman feedback: show "draft progress" signifier (simple + robust)
+  const completedCount = useMemo(() => {
+    let count = 0;
+    if (title.trim()) count += 1;
+    if (description.trim()) count += 1;
+    if (ingredients.some((v) => v.trim())) count += 1;
+    if (steps.some((v) => v.trim())) count += 1;
+    if (selectedCuisine.id !== "all") count += 1;
+    if (selectedRecipeType.id !== "all") count += 1;
+    return count; // out of 6 core inputs
+  }, [title, description, ingredients, steps, selectedCuisine.id, selectedRecipeType.id]);
+
+  const statusText = useMemo(() => {
+    switch (status) {
+      case "validating":
+        return "Checking your recipe…";
+      case "uploadingImage":
+        return "Uploading image…";
+      case "uploadingRecipe":
+        return "Uploading recipe…";
+      case "success":
+        return "Upload complete ✅";
+      case "error":
+        return "Upload failed. Please try again.";
+      default:
+        return null;
+    }
+  }, [status]);
+
   const handleUploadRecipe = async () => {
+    // Immediate feedback
     setIsLoading(true);
+    setStatus("validating");
 
     const formData = {
       title,
@@ -64,12 +100,25 @@ export default function UploadRecipes() {
         }
       });
       setErrors(fieldErrors);
+
+      // Norman: clear feedback + what to do next
+      setStatus("error");
       setIsLoading(false);
+
+      // Optional: also use banner for consistent global feedback
+      showBanner(
+        "Missing information",
+        "Please fix the highlighted fields and try again.",
+        "error",
+      );
       return;
     }
 
     let imagePath = null;
+
     if (image) {
+      setStatus("uploadingImage");
+
       const fullPath = await uploadRecipeImage(image, user.id);
       if (!fullPath) {
         showBanner(
@@ -77,6 +126,7 @@ export default function UploadRecipes() {
           "Error uploading image. Please try again.",
           "error",
         );
+        setStatus("error");
         setIsLoading(false);
         return;
       }
@@ -86,7 +136,11 @@ export default function UploadRecipes() {
     const recipe = recipeDataFormating(formData, user.id, imagePath);
 
     try {
+      setStatus("uploadingRecipe");
       await uploadRecipe(recipe);
+
+      // Norman: explicit success feedback
+      setStatus("success");
       showBanner(
         "Recipe Uploaded",
         "Your recipe has been uploaded successfully!",
@@ -98,10 +152,12 @@ export default function UploadRecipes() {
         "Error uploading recipe. Please try again.",
         "error",
       );
+      setStatus("error");
       setIsLoading(false);
       return;
     }
 
+    // Reset after success
     setTitle("");
     setDescription("");
     setIngredients([""]);
@@ -110,7 +166,11 @@ export default function UploadRecipes() {
     setSelectedRecipeType(recipeTypeOptions[0]);
     setImage(null);
     setErrors({});
+
     setIsLoading(false);
+
+    // Keep success visible briefly, then return to idle (optional but nice feedback loop)
+    setTimeout(() => setStatus("idle"), 1200);
   };
 
   return (
@@ -119,26 +179,48 @@ export default function UploadRecipes() {
         Upload Your Recipe
       </h1>
 
-      {/* Discoverability text (now high contrast) */}
       <p className="text-center text-sm text-primary-text opacity-80 mb-4">
         Follow the steps below to publish your recipe.
       </p>
 
-      {/* Required fields legend (signifier visibility fixed) */}
-      <div className="max-w-[360px] md:max-w-[720px] mx-auto mb-6 px-2">
+      {/* Required fields legend */}
+      <div className="max-w-[360px] md:max-w-[720px] mx-auto mb-4 px-2">
         <div className="flex items-center justify-between text-xs text-primary-text">
           <span>
             <span className="font-semibold">*</span> Required fields
           </span>
           <span className="opacity-80">Step 1 → Step 2 → Step 3</span>
         </div>
+
+        {/* Norman feedback: progress + system status */}
+        <div className="mt-2 flex items-center justify-between text-xs text-primary-text">
+          <span className="opacity-80">
+            Progress: <span className="font-semibold">{completedCount}</span>/6 filled
+          </span>
+
+          {statusText && (
+            <span
+              className={`font-semibold ${
+                status === "error"
+                  ? "text-error-border"
+                  : status === "success"
+                    ? "text-green-700"
+                    : "text-primary-text"
+              }`}
+              aria-live="polite"
+            >
+              {statusText}
+            </span>
+          )}
+        </div>
       </div>
 
       <div className="bg-section-bg shadow-md border border-input-border rounded-2xl flex flex-col items-center w-full max-w-[360px] md:max-w-[720px] mx-auto p-6 gap-8">
-        {/* Top error signifier */}
+        {/* Top error signifier + next-step guidance */}
         {hasErrors && (
           <div className="w-full border border-error-border text-error-border bg-error p-3 rounded-2xl text-sm text-center">
-            Some required fields are missing. Please fix the highlighted inputs.
+            Some required fields are missing. Please fix the highlighted inputs below,
+            then try uploading again.
           </div>
         )}
 
@@ -161,6 +243,7 @@ export default function UploadRecipes() {
               onChange={(e) => {
                 setTitle(e.target.value);
                 setErrors((prev) => ({ ...prev, title: "" }));
+                setStatus("idle");
               }}
               error={errors.title}
             />
@@ -171,6 +254,7 @@ export default function UploadRecipes() {
               onChange={(value) => {
                 setDescription(value);
                 setErrors((prev) => ({ ...prev, description: "" }));
+                setStatus("idle");
               }}
               maxLength={200}
               placeholder="Describe your recipe in a short and clear way..."
@@ -180,14 +264,22 @@ export default function UploadRecipes() {
             <Dropdown
               label="Choose Cuisine *"
               options={cuisineOptions}
-              onSelect={setSelectedCuisine}
+              onSelect={(opt) => {
+                setSelectedCuisine(opt);
+                setErrors((prev) => ({ ...prev, selectedCuisine: "" }));
+                setStatus("idle");
+              }}
               value={selectedCuisine}
             />
 
             <Dropdown
               label="Choose Recipe Type *"
               options={recipeTypeOptions}
-              onSelect={setSelectedRecipeType}
+              onSelect={(opt) => {
+                setSelectedRecipeType(opt);
+                setErrors((prev) => ({ ...prev, selectedRecipeType: "" }));
+                setStatus("idle");
+              }}
               value={selectedRecipeType}
             />
           </div>
@@ -211,6 +303,7 @@ export default function UploadRecipes() {
               onChange={(newValues) => {
                 setIngredients(newValues);
                 setErrors((prev) => ({ ...prev, ingredients: "" }));
+                setStatus("idle");
               }}
               placeholder="e.g. 2 eggs, 1 cup flour"
               maxItems={20}
@@ -223,6 +316,7 @@ export default function UploadRecipes() {
               onChange={(newValues) => {
                 setSteps(newValues);
                 setErrors((prev) => ({ ...prev, steps: "" }));
+                setStatus("idle");
               }}
               placeholder="e.g. Mix ingredients, then bake for 20 minutes"
               maxItems={20}
@@ -244,8 +338,7 @@ export default function UploadRecipes() {
 
           <div className="flex flex-col w-full gap-4 border-l-2 border-gray-300 pl-4">
             <p className="text-xs text-primary-text opacity-80">
-              A photo makes your recipe easier to notice and more likely to be
-              clicked.
+              A photo makes your recipe easier to notice and more likely to be clicked.
             </p>
 
             <ImageInput
@@ -253,6 +346,7 @@ export default function UploadRecipes() {
               onChange={(file) => {
                 setImage(file);
                 setErrors((prev) => ({ ...prev, image: "" }));
+                setStatus("idle");
               }}
               error={errors.image}
             />
@@ -272,12 +366,15 @@ export default function UploadRecipes() {
             isLoading={isLoading}
             disabled={isLoading}
           >
-            Upload Recipe
+            {status === "uploadingImage"
+              ? "Uploading Image..."
+              : status === "uploadingRecipe"
+                ? "Uploading Recipe..."
+                : "Upload Recipe"}
           </Button>
 
           <p className="text-xs text-primary-text opacity-80 text-center">
-            Required fields are marked with{" "}
-            <span className="font-semibold">*</span>
+            Required fields are marked with <span className="font-semibold">*</span>
           </p>
         </div>
       </div>
