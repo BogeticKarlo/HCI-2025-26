@@ -61,7 +61,7 @@ export default function HomePage() {
     localStorage.setItem(localStorageKey, JSON.stringify(filters));
   }, [selectedCuisine, selectedRecipeType, selectedTime, selectedFavorite]);
 
-  /* ---------------- RESET PAGE ON FILTER CHANGE ---------------- */
+  /* ---------------- RESET PAGE WHEN FILTERS CHANGE ---------------- */
 
   useEffect(() => {
     setCurrentPage(1);
@@ -228,24 +228,21 @@ export default function HomePage() {
         </div>
       )}
 
-      {/* ---------------- CONCEPTUAL DIVIDER ---------------- */}
+      {/* ---------------- DIVIDER ---------------- */}
 
       <div className="w-full max-w-6xl px-6 sm:px-10 lg:px-20">
         <div className="border-t border-gray-200 my-6" />
       </div>
 
-      {/* ---------------- RESULTS CONTEXT LABEL ---------------- */}
+      {/* ---------------- RESULTS LABEL (FULL BLACK) ---------------- */}
 
       <div className="w-full max-w-6xl px-6 sm:px-10 lg:px-20 mb-4">
         <p
-          className={`text-sm text-secondary-text transition-opacity duration-200 ${
+          className={`text-sm font-medium text-primary-text transition-opacity duration-200 ${
             isLoading ? "opacity-50" : "opacity-100"
           }`}
         >
-          Showing{" "}
-          <span className="font-semibold text-primary-text">
-            {recipes.length}
-          </span>{" "}
+          Showing {recipes.length}{" "}
           {recipes.length === 1 ? "recipe" : "recipes"}
         </p>
       </div>
