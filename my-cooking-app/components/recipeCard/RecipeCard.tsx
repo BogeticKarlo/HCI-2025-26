@@ -57,15 +57,14 @@ export function RecipeCard({
   const [showIngredients, setShowIngredients] = useState(false);
   const [showInstructions, setShowInstructions] = useState(false);
 
-  // Knowledge-in-the-world cue: prompt users to scroll (only until ingredients appear)
-  const [showScrollCue, setShowScrollCue] = useState(false);
-
   // Like wrapper -> click anywhere to trigger internal LikeButton click
   const likeWrapperRef = useRef<HTMLDivElement | null>(null);
 
   // Constraint: prevent rapid double-like toggles
   const [likeCooldown, setLikeCooldown] = useState(false);
-  const likeCooldownTimerRef = useRef<ReturnType<typeof setTimeout> | null>(null);
+  const likeCooldownTimerRef = useRef<ReturnType<typeof setTimeout> | null>(
+    null,
+  );
 
   const isCreator = user?.id === recipe?.author_id;
 
@@ -92,25 +91,18 @@ export function RecipeCard({
     setShowInstructions(false);
     setImageLoaded(false);
 
-    setShowScrollCue(true);
-
     const timers: ReturnType<typeof setTimeout>[] = [];
     timers.push(setTimeout(() => setShowImage(true), 100));
-    timers.push(
-      setTimeout(() => {
-        setShowIngredients(true);
-        setShowScrollCue(false);
-      }, 500),
-    );
+    timers.push(setTimeout(() => setShowIngredients(true), 500));
     timers.push(setTimeout(() => setShowInstructions(true), 900));
-    timers.push(setTimeout(() => setShowScrollCue(false), 2500));
 
     return () => timers.forEach(clearTimeout);
   }, [recipe]);
 
   useEffect(() => {
     return () => {
-      if (likeCooldownTimerRef.current) clearTimeout(likeCooldownTimerRef.current);
+      if (likeCooldownTimerRef.current)
+        clearTimeout(likeCooldownTimerRef.current);
     };
   }, []);
 
@@ -120,7 +112,8 @@ export function RecipeCard({
 
   const startLikeCooldown = () => {
     setLikeCooldown(true);
-    if (likeCooldownTimerRef.current) clearTimeout(likeCooldownTimerRef.current);
+    if (likeCooldownTimerRef.current)
+      clearTimeout(likeCooldownTimerRef.current);
     likeCooldownTimerRef.current = setTimeout(() => setLikeCooldown(false), 450);
   };
 
@@ -140,7 +133,11 @@ export function RecipeCard({
     const innerButton = root.querySelector("button") as HTMLButtonElement | null;
 
     // If user clicked the actual LikeButton, let it handle it (avoid double toggle)
-    if (innerButton && e.target instanceof Node && innerButton.contains(e.target)) {
+    if (
+      innerButton &&
+      e.target instanceof Node &&
+      innerButton.contains(e.target)
+    ) {
       startLikeCooldown();
       return;
     }
@@ -258,14 +255,9 @@ export function RecipeCard({
       </header>
 
       {/* DESCRIPTION */}
-      <p className="text-sm leading-relaxed text-body-text">{recipe.description}</p>
-
-      {/* Scroll cue */}
-      {showScrollCue && (
-        <div className="text-xs text-text-muted text-center animate-pulse">
-          Scroll for ingredients and steps ↓
-        </div>
-      )}
+      <p className="text-sm leading-relaxed text-body-text">
+        {recipe.description}
+      </p>
 
       {/* IMAGE */}
       {publicImageUrl && (
@@ -274,7 +266,9 @@ export function RecipeCard({
             showImage ? "opacity-100 translate-y-0" : "opacity-0 translate-y-4"
           }`}
         >
-          {!imageLoaded && <div className="absolute inset-0 bg-gray-200 animate-pulse" />}
+          {!imageLoaded && (
+            <div className="absolute inset-0 bg-gray-200 animate-pulse" />
+          )}
 
           <Image
             src={publicImageUrl}
@@ -292,7 +286,9 @@ export function RecipeCard({
       {/* INGREDIENTS */}
       <section
         className={`transition-all duration-700 ${
-          showIngredients ? "opacity-100 translate-y-0" : "opacity-0 translate-y-4"
+          showIngredients
+            ? "opacity-100 translate-y-0"
+            : "opacity-0 translate-y-4"
         }`}
       >
         <div className="flex items-center gap-3 mb-3 border-b pb-1">
@@ -332,7 +328,9 @@ export function RecipeCard({
       {/* INSTRUCTIONS */}
       <section
         className={`transition-all duration-700 ${
-          showInstructions ? "opacity-100 translate-y-0" : "opacity-0 translate-y-4"
+          showInstructions
+            ? "opacity-100 translate-y-0"
+            : "opacity-0 translate-y-4"
         }`}
       >
         <div className="flex items-center gap-3 mb-3 border-b pb-1">
@@ -391,7 +389,9 @@ export function RecipeCard({
         {/* Footer balance: give author a bit more weight */}
         <span
           className={`${
-            author ? "font-semibold text-primary-text" : "animate-pulse text-text-muted"
+            author
+              ? "font-semibold text-primary-text"
+              : "animate-pulse text-text-muted"
           }`}
         >
           {author ? author.username?.split("@")[0] : "Loading author..."}
@@ -405,19 +405,7 @@ export function RecipeCard({
               role="button"
               tabIndex={0}
               aria-label="Like this recipe"
-              onClick={(e) => {
-                // keep behavior identical
-                if (likeCooldown) return;
-                const root = likeWrapperRef.current;
-                if (!root) return;
-                const innerButton = root.querySelector("button") as HTMLButtonElement | null;
-                if (innerButton && e.target instanceof Node && innerButton.contains(e.target)) {
-                  startLikeCooldown();
-                  return;
-                }
-                triggerInnerLikeClick();
-                startLikeCooldown();
-              }}
+              onClick={handleLikeWrapperClick}
               onKeyDown={handleLikeWrapperKeyDown}
               className={`
                 flex flex-col items-center
@@ -452,7 +440,11 @@ export function RecipeCard({
                 if (!deleteWrapperDisabled) setIsModalOpen(true);
               }}
               disabled={deleteWrapperDisabled}
-              title={deleteWrapperDisabled ? "Delete is currently unavailable" : "Delete recipe"}
+              title={
+                deleteWrapperDisabled
+                  ? "Delete is currently unavailable"
+                  : "Delete recipe"
+              }
               aria-label="Delete recipe"
               className={`
                 group
@@ -504,7 +496,9 @@ export function RecipeCard({
         <Modal
           handleAction={handleDelete}
           setIsModalOpen={setIsModalOpen}
-          title={deleting ? `Deleting "${recipe.title}"...` : `Delete "${recipe.title}"?`}
+          title={
+            deleting ? `Deleting "${recipe.title}"...` : `Delete "${recipe.title}"?`
+          }
         />
       )}
     </article>
