@@ -30,11 +30,15 @@ export function RecipeCard({
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [deleting, setDeleting] = useState(false);
 
+  // Controls for progressive display
+  const [showImage, setShowImage] = useState(false);
+  const [showIngredients, setShowIngredients] = useState(false);
+  const [showInstructions, setShowInstructions] = useState(false);
+
   const isCreator = user?.id === recipe?.author_id;
 
   useEffect(() => {
     if (!recipe?.author_id) return;
-
     const fetchData = async () => {
       try {
         const author = await fetchUserById(recipe.author_id);
@@ -43,9 +47,24 @@ export function RecipeCard({
         console.error("Failed to fetch author", err);
       }
     };
-
     fetchData();
   }, [recipe?.author_id]);
+
+  // Progressive display effect
+  useEffect(() => {
+    if (!recipe) return;
+    setShowImage(false);
+    setShowIngredients(false);
+    setShowInstructions(false);
+
+    const timers: NodeJS.Timeout[] = [];
+
+    timers.push(setTimeout(() => setShowImage(true), 100));
+    timers.push(setTimeout(() => setShowIngredients(true), 500));
+    timers.push(setTimeout(() => setShowInstructions(true), 900));
+
+    return () => timers.forEach(clearTimeout);
+  }, [recipe]);
 
   if (isLoading || !recipe) return <RecipeCardSkeleton />;
 
@@ -106,10 +125,31 @@ export function RecipeCard({
       {/* Description */}
       <p className="text-sm leading-relaxed text-body-text">{recipe.description}</p>
 
+      {/* Main Recipe Image */}
+      {publicImageUrl && (
+        <div
+          className={`relative w-full h-48 rounded-2xl overflow-hidden transition-opacity duration-700 ${
+            showImage ? "opacity-100" : "opacity-0"
+          }`}
+        >
+          <Image
+            src={publicImageUrl}
+            alt={recipe.title}
+            fill
+            sizes="100%"
+            className="object-cover"
+          />
+        </div>
+      )}
+
       {/* Ingredients & Instructions */}
       <section className="flex flex-col md:flex-row items-start gap-4">
         {/* Ingredients */}
-        <div className="flex items-start justify-center lg:w-1/2 gap-4">
+        <div
+          className={`flex items-start justify-center lg:w-1/2 gap-4 transition-opacity duration-700 ${
+            showIngredients ? "opacity-100" : "opacity-0"
+          }`}
+        >
           <div className="md:w-1/2 flex flex-col gap-4">
             <h2 className="text-xl font-semibold mb-2 text-primary-text font-playfair">
               Ingredients
@@ -135,7 +175,11 @@ export function RecipeCard({
         </div>
 
         {/* Instructions */}
-        <div className="flex justify-center items-start lg:w-1/2 gap-4">
+        <div
+          className={`flex justify-center items-start lg:w-1/2 gap-4 transition-opacity duration-700 ${
+            showInstructions ? "opacity-100" : "opacity-0"
+          }`}
+        >
           <div className="md:w-1/2 flex flex-col gap-4">
             <h2 className="text-xl font-semibold mb-2 text-primary-text font-playfair">
               Instructions
@@ -161,13 +205,6 @@ export function RecipeCard({
         </div>
       </section>
 
-      {/* Main Recipe Image */}
-      {publicImageUrl && (
-        <div className="relative w-full h-48 rounded-2xl overflow-hidden">
-          <Image src={publicImageUrl} alt={recipe.title} fill sizes="100%" className="object-cover" />
-        </div>
-      )}
-
       {/* Footer */}
       <footer className="flex justify-between items-center text-sm text-body-text">
         <span>{author?.username?.split("@")[0]}</span>
@@ -186,7 +223,7 @@ export function RecipeCard({
         </div>
       </footer>
 
-      {/* Modal (self-closing, no children prop) */}
+      {/* Modal */}
       {isModalOpen && (
         <Modal
           handleAction={handleDelete}
