@@ -30,6 +30,7 @@ export function RecipeCard({
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [deleting, setDeleting] = useState(false);
 
+  // Progressive display
   const [showImage, setShowImage] = useState(false);
   const [showIngredients, setShowIngredients] = useState(false);
   const [showInstructions, setShowInstructions] = useState(false);
@@ -84,12 +85,12 @@ export function RecipeCard({
   };
 
   return (
-    <article className="w-full max-w-[360px] md:max-w-[720px] bg-section-bg rounded-3xl p-8 shadow-lg text-body-text flex flex-col gap-8 relative">
+    <article className="w-full max-w-[900px] lg:max-w-[1000px] bg-section-bg rounded-3xl p-10 lg:p-12 shadow-md text-body-text flex flex-col gap-6 relative mx-auto">
       {/* ---------------- Header Section ---------------- */}
-      <header className="flex flex-col sm:flex-row sm:items-center gap-4 sm:gap-6 mb-8">
+      <header className="flex flex-col sm:flex-row sm:items-center gap-4 sm:gap-8 mb-8">
         <button
           onClick={() => router.back()}
-          className="flex items-center gap-2 p-2 cursor-pointer transition duration-200 hover:scale-110 hover:opacity-80"
+          className="flex items-center gap-2 p-2 cursor-pointer transition duration-200 hover:scale-110 hover:opacity-80 mr-4"
           title="Go back to recipes"
         >
           <Image
@@ -122,24 +123,15 @@ export function RecipeCard({
         </div>
       </header>
 
-      {/* ---------------- Description Section ---------------- */}
-      <section className="mb-8 p-4 bg-white rounded-2xl shadow-sm" aria-labelledby="recipe-description">
-        <h2
-          id="recipe-description"
-          className="text-2xl font-semibold mb-2 text-primary-text font-playfair border-b border-gray-200 pb-1"
-        >
-          Description
-        </h2>
-        <p className="text-sm leading-relaxed text-body-text">{recipe.description}</p>
-      </section>
+      {/* Description */}
+      <p className="text-sm leading-relaxed text-body-text">{recipe.description}</p>
 
-      {/* ---------------- Main Image Section ---------------- */}
+      {/* Main Recipe Image */}
       {publicImageUrl && (
-        <section
-          className={`relative w-full h-[400px] md:h-[500px] rounded-2xl overflow-hidden shadow-md transition-opacity duration-700 mb-8 ${
+        <div
+          className={`relative w-full h-[400px] md:h-[500px] rounded-2xl overflow-hidden transition-opacity duration-700 ${
             showImage ? "opacity-100" : "opacity-0"
           }`}
-          aria-label="Recipe main image"
         >
           <Image
             src={publicImageUrl}
@@ -148,23 +140,19 @@ export function RecipeCard({
             sizes="100%"
             className="object-contain"
           />
-        </section>
+        </div>
       )}
 
-      {/* ---------------- Ingredients Section ---------------- */}
+      {/* Ingredients */}
       <section
-        className={`transition-opacity duration-700 mb-8 p-4 bg-white rounded-2xl shadow-sm ${
+        className={`transition-opacity duration-700 ${
           showIngredients ? "opacity-100" : "opacity-0"
         }`}
-        aria-labelledby="recipe-ingredients"
       >
-        <h2
-          id="recipe-ingredients"
-          className="text-2xl font-semibold mb-2 text-primary-text font-playfair border-b border-gray-200 pb-1"
-        >
+        <h2 className="text-xl font-semibold mb-2 text-primary-text font-playfair">
           Ingredients
         </h2>
-        <ul className="list-disc ml-5 text-sm flex flex-col gap-1 mt-2">
+        <ul className="list-disc ml-5 text-sm flex flex-col gap-1">
           {recipe.ingredients.map((item, i) => (
             <li key={i} className="text-body-text">
               {item}
@@ -182,20 +170,16 @@ export function RecipeCard({
         </div>
       </section>
 
-      {/* ---------------- Instructions Section ---------------- */}
+      {/* Instructions */}
       <section
-        className={`transition-opacity duration-700 mb-8 p-4 bg-white rounded-2xl shadow-sm ${
+        className={`transition-opacity duration-700 ${
           showInstructions ? "opacity-100" : "opacity-0"
         }`}
-        aria-labelledby="recipe-instructions"
       >
-        <h2
-          id="recipe-instructions"
-          className="text-2xl font-semibold mb-2 text-primary-text font-playfair border-b border-gray-200 pb-1"
-        >
+        <h2 className="text-xl font-semibold mb-2 text-primary-text font-playfair">
           Instructions
         </h2>
-        <ol className="list-decimal ml-5 text-sm flex flex-col gap-1 mt-2">
+        <ol className="list-decimal ml-5 text-sm flex flex-col gap-1">
           {recipe.instructions.map((step, i) => (
             <li key={i} className="text-body-text">
               {step}
@@ -213,43 +197,34 @@ export function RecipeCard({
         </div>
       </section>
 
-      {/* ---------------- Footer Section ---------------- */}
+      {/* Footer */}
       <footer className="flex justify-between items-center text-sm text-body-text">
-        <span className="font-medium">{author?.username?.split("@")[0]}</span>
+        <span>{author?.username?.split("@")[0]}</span>
 
         <div className="flex flex-col sm:flex-row items-center gap-5">
-          {!isCreator && (
-            <div className="relative group">
-              <LikeButton recipeId={recipe.id} />
-              <span className="absolute bottom-full mb-1 left-1/2 -translate-x-1/2 text-xs text-white bg-black/70 px-2 py-1 rounded opacity-0 group-hover:opacity-100 transition-opacity">
-                Like this recipe
-              </span>
-            </div>
-          )}
-
+          {!isCreator && <LikeButton recipeId={recipe.id} />}
           {isCreator && (
-            <div className="relative group">
-              <button
-                onClick={() => setIsModalOpen(true)}
-                className="w-8 h-8 flex items-center justify-center cursor-pointer transition-all duration-200 hover:scale-110 active:scale-95 hover:text-error-border"
-                aria-label="Delete Recipe"
-              >
-                <TrashIcon className="w-7 h-7 text-red-600" />
-              </button>
-              <span className="absolute bottom-full mb-1 left-1/2 -translate-x-1/2 text-xs text-white bg-red-600/80 px-2 py-1 rounded opacity-0 group-hover:opacity-100 transition-opacity">
-                Delete this recipe
-              </span>
-            </div>
+            <button
+              onClick={() => setIsModalOpen(true)}
+              className="w-8 h-8 flex items-center justify-center cursor-pointer transition-all duration-200 hover:scale-110 active:scale-95 hover:text-error-border"
+              aria-label="Delete Recipe"
+            >
+              <TrashIcon className="w-7 h-7" />
+            </button>
           )}
         </div>
       </footer>
 
-      {/* ---------------- Modal ---------------- */}
+      {/* Modal */}
       {isModalOpen && (
         <Modal
           handleAction={handleDelete}
           setIsModalOpen={setIsModalOpen}
-          title={deleting ? "Deleting recipe..." : "Are you sure you want to delete this recipe?"}
+          title={
+            deleting
+              ? "Deleting recipe..."
+              : "Are you sure you want to delete this recipe?"
+          }
         />
       )}
     </article>
