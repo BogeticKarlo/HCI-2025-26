@@ -126,7 +126,6 @@ export function RecipeCard({
     >
       {/* HEADER */}
       <header className="relative flex flex-col items-center gap-4 mb-6">
-        {/* Back button: strong affordance mapping (cursor + focus ring) */}
         <button
           onClick={() => router.back()}
           className="
@@ -285,21 +284,28 @@ export function RecipeCard({
         </span>
 
         <div className="flex flex-col sm:flex-row items-center gap-6">
-          {/* Like: improve affordance mapping using focus-within ring */}
+          {/* Like: visible border even before interaction */}
           {!isCreator && (
             <div
               className="
                 flex flex-col items-center
-                rounded-xl px-2 py-1
+                border border-accent/40
+                rounded-xl px-3 py-2
+                bg-white/60
+                transition-all duration-200
+                hover:border-accent hover:shadow-sm
                 focus-within:ring-2 focus-within:ring-accent focus-within:ring-offset-2
               "
             >
               <span className="text-xs text-text-muted mb-1">Like this recipe</span>
-              <LikeButton recipeId={recipe.id} />
+
+              <div className="cursor-pointer flex items-center justify-center">
+                <LikeButton recipeId={recipe.id} />
+              </div>
             </div>
           )}
 
-          {/* Delete: stronger destructive mapping + clear focus/hover affordance */}
+          {/* Delete */}
           {isCreator && (
             <div className="flex flex-col items-center">
               <span className="text-xs text-red-500 font-medium mb-1">
@@ -338,7 +344,11 @@ export function RecipeCard({
         <Modal
           handleAction={handleDelete}
           setIsModalOpen={setIsModalOpen}
-          title={deleting ? "Deleting recipe..." : "Are you sure you want to delete this recipe?"}
+          title={
+            deleting
+              ? "Deleting recipe..."
+              : "Are you sure you want to delete this recipe?"
+          }
         />
       )}
     </article>
