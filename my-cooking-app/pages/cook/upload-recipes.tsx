@@ -25,9 +25,14 @@ export default function UploadRecipes() {
 
   const [isLoading, setIsLoading] = useState(false);
 
-  // Feedback state (Norman: visible system status + clear guidance)
+  // Feedback state
   const [status, setStatus] = useState<
-    "idle" | "validating" | "uploadingImage" | "uploadingRecipe" | "success" | "error"
+    | "idle"
+    | "validating"
+    | "uploadingImage"
+    | "uploadingRecipe"
+    | "success"
+    | "error"
   >("idle");
 
   const [title, setTitle] = useState("");
@@ -46,7 +51,7 @@ export default function UploadRecipes() {
 
   if (!user) return null;
 
-  // Norman feedback: show "draft progress" signifier (simple + robust)
+  // Progress includes image now (7 total)
   const completedCount = useMemo(() => {
     let count = 0;
     if (title.trim()) count += 1;
@@ -55,8 +60,17 @@ export default function UploadRecipes() {
     if (steps.some((v) => v.trim())) count += 1;
     if (selectedCuisine.id !== "all") count += 1;
     if (selectedRecipeType.id !== "all") count += 1;
-    return count; // out of 6 core inputs
-  }, [title, description, ingredients, steps, selectedCuisine.id, selectedRecipeType.id]);
+    if (image) count += 1;
+    return count; // out of 7
+  }, [
+    title,
+    description,
+    ingredients,
+    steps,
+    selectedCuisine.id,
+    selectedRecipeType.id,
+    image,
+  ]);
 
   const statusText = useMemo(() => {
     switch (status) {
@@ -76,7 +90,6 @@ export default function UploadRecipes() {
   }, [status]);
 
   const handleUploadRecipe = async () => {
-    // Immediate feedback
     setIsLoading(true);
     setStatus("validating");
 
@@ -101,11 +114,9 @@ export default function UploadRecipes() {
       });
       setErrors(fieldErrors);
 
-      // Norman: clear feedback + what to do next
       setStatus("error");
       setIsLoading(false);
 
-      // Optional: also use banner for consistent global feedback
       showBanner(
         "Missing information",
         "Please fix the highlighted fields and try again.",
@@ -114,24 +125,35 @@ export default function UploadRecipes() {
       return;
     }
 
-    let imagePath = null;
+    // Image is REQUIRED now
+    if (!image) {
+      setErrors((prev) => ({ ...prev, image: "Image is required." }));
+      setStatus("error");
+      setIsLoading(false);
 
-    if (image) {
-      setStatus("uploadingImage");
-
-      const fullPath = await uploadRecipeImage(image, user.id);
-      if (!fullPath) {
-        showBanner(
-          "Something went wrong",
-          "Error uploading image. Please try again.",
-          "error",
-        );
-        setStatus("error");
-        setIsLoading(false);
-        return;
-      }
-      imagePath = fullPath.split("/").pop();
+      showBanner(
+        "Missing image",
+        "Please upload a recipe image to continue.",
+        "error",
+      );
+      return;
     }
+
+    setStatus("uploadingImage");
+
+    const fullPath = await uploadRecipeImage(image, user.id);
+    if (!fullPath) {
+      showBanner(
+        "Something went wrong",
+        "Error uploading image. Please try again.",
+        "error",
+      );
+      setStatus("error");
+      setIsLoading(false);
+      return;
+    }
+
+    const imagePath = fullPath.split("/").pop();
 
     const recipe = recipeDataFormating(formData, user.id, imagePath);
 
@@ -139,7 +161,6 @@ export default function UploadRecipes() {
       setStatus("uploadingRecipe");
       await uploadRecipe(recipe);
 
-      // Norman: explicit success feedback
       setStatus("success");
       showBanner(
         "Recipe Uploaded",
@@ -157,7 +178,6 @@ export default function UploadRecipes() {
       return;
     }
 
-    // Reset after success
     setTitle("");
     setDescription("");
     setIngredients([""]);
@@ -166,10 +186,8 @@ export default function UploadRecipes() {
     setSelectedRecipeType(recipeTypeOptions[0]);
     setImage(null);
     setErrors({});
-
     setIsLoading(false);
 
-    // Keep success visible briefly, then return to idle (optional but nice feedback loop)
     setTimeout(() => setStatus("idle"), 1200);
   };
 
@@ -183,7 +201,6 @@ export default function UploadRecipes() {
         Follow the steps below to publish your recipe.
       </p>
 
-      {/* Required fields legend */}
       <div className="max-w-[360px] md:max-w-[720px] mx-auto mb-4 px-2">
         <div className="flex items-center justify-between text-xs text-primary-text">
           <span>
@@ -192,10 +209,10 @@ export default function UploadRecipes() {
           <span className="opacity-80">Step 1 → Step 2 → Step 3</span>
         </div>
 
-        {/* Norman feedback: progress + system status */}
         <div className="mt-2 flex items-center justify-between text-xs text-primary-text">
           <span className="opacity-80">
-            Progress: <span className="font-semibold">{completedCount}</span>/6 filled
+            Progress: <span className="font-semibold">{completedCount}</span>/7
+            filled
           </span>
 
           {statusText && (
@@ -216,11 +233,10 @@ export default function UploadRecipes() {
       </div>
 
       <div className="bg-section-bg shadow-md border border-input-border rounded-2xl flex flex-col items-center w-full max-w-[360px] md:max-w-[720px] mx-auto p-6 gap-8">
-        {/* Top error signifier + next-step guidance */}
         {hasErrors && (
           <div className="w-full border border-error-border text-error-border bg-error p-3 rounded-2xl text-sm text-center">
-            Some required fields are missing. Please fix the highlighted inputs below,
-            then try uploading again.
+            Some required fields are missing. Please fix the highlighted inputs
+            below, then try uploading again.
           </div>
         )}
 
@@ -325,20 +341,21 @@ export default function UploadRecipes() {
           </div>
         </div>
 
-        {/* STEP 3 */}
+        {/* STEP 3 (Image REQUIRED now) */}
         <div className="w-full border-t pt-6">
           <div className="flex items-center justify-between mb-3">
             <h2 className="text-xl font-semibold text-primary-text font-playfair">
-              Step 3: Add a Photo (Optional)
+              Step 3: Add a Photo *
             </h2>
             <span className="text-xs text-primary-text opacity-80">
-              Recommended
+              Required
             </span>
           </div>
 
           <div className="flex flex-col w-full gap-4 border-l-2 border-gray-300 pl-4">
             <p className="text-xs text-primary-text opacity-80">
-              A photo makes your recipe easier to notice and more likely to be clicked.
+              Please upload a clear photo of your recipe. This is required to
+              publish.
             </p>
 
             <ImageInput
