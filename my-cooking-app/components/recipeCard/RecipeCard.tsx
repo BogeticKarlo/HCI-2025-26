@@ -30,7 +30,7 @@ export function RecipeCard({
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [deleting, setDeleting] = useState(false);
 
-  // Progressive display
+  // Progressive reveal
   const [showImage, setShowImage] = useState(false);
   const [showIngredients, setShowIngredients] = useState(false);
   const [showInstructions, setShowInstructions] = useState(false);
@@ -39,6 +39,7 @@ export function RecipeCard({
 
   useEffect(() => {
     if (!recipe?.author_id) return;
+
     const fetchData = async () => {
       try {
         const author = await fetchUserById(recipe.author_id);
@@ -47,17 +48,19 @@ export function RecipeCard({
         console.error("Failed to fetch author", err);
       }
     };
+
     fetchData();
   }, [recipe?.author_id]);
 
-  // Progressive reveal
   useEffect(() => {
     if (!recipe) return;
+
     setShowImage(false);
     setShowIngredients(false);
     setShowInstructions(false);
 
     const timers: NodeJS.Timeout[] = [];
+
     timers.push(setTimeout(() => setShowImage(true), 100));
     timers.push(setTimeout(() => setShowIngredients(true), 500));
     timers.push(setTimeout(() => setShowInstructions(true), 900));
@@ -71,7 +74,9 @@ export function RecipeCard({
 
   const handleDelete = async () => {
     if (!user || !recipe) return;
+
     setDeleting(true);
+
     try {
       await deleteRecipe(recipe.id, user.id);
       router.back();
@@ -85,53 +90,76 @@ export function RecipeCard({
   };
 
   return (
-    <article className="w-full max-w-[900px] min-w-[320px] lg:max-w-[1000px] bg-section-bg rounded-3xl p-10 lg:p-12 shadow-md text-body-text flex flex-col gap-6 relative mx-auto">
-      {/* ---------------- Header Section ---------------- */}
-      <header className="relative flex flex-col items-center gap-4 mb-8">
-        {/* Back button (absolute left) */}
+    <article
+      className="
+        w-[95%]
+        sm:w-[90%]
+        md:w-[85%]
+        lg:w-[75%]
+        xl:w-[65%]
+        max-w-[1100px]
+        mx-auto
+        bg-section-bg
+        rounded-3xl
+        p-8
+        lg:p-12
+        shadow-md
+        text-body-text
+        flex
+        flex-col
+        gap-8
+        relative
+      "
+    >
+      {/* HEADER */}
+      <header className="relative flex flex-col items-center gap-4 mb-6">
+        {/* Back Button */}
         <button
           onClick={() => router.back()}
-          className="absolute left-0 top-1/2 -translate-y-1/2 flex items-center gap-2 p-2 cursor-pointer transition duration-200 hover:scale-110 hover:opacity-80"
-          title="Go back to recipes"
+          className="absolute left-0 top-1/2 -translate-y-1/2 flex items-center gap-2 p-2 transition duration-200 hover:scale-110 hover:opacity-80"
+          title="Go back"
         >
           <Image
             src={backArrow}
             alt="Back"
-            width={32}
-            height={32}
-            className="w-8 aspect-square"
+            width={36}
+            height={36}
+            className="w-9 aspect-square"
           />
-          <span className="text-sm font-semibold text-primary-text">Back</span>
+          <span className="text-sm font-semibold text-primary-text">
+            Back
+          </span>
         </button>
 
-        {/* Centered title and metadata */}
+        {/* Centered Title */}
         <div className="flex flex-col items-center text-center gap-2">
-          <h1 className="text-3xl md:text-4xl font-bold text-primary-text font-playfair break-words">
+          <h1 className="text-3xl md:text-4xl font-bold text-primary-text font-playfair">
             {recipe.title}
           </h1>
-          <h3 className="text-primary-text text-sm md:text-base">
+
+          <h3 className="text-sm md:text-base text-primary-text">
             <span className="font-playfair font-semibold text-text-muted">
               Cuisine:
             </span>{" "}
-            <span className="font-normal">{recipe.cuisine}</span>
+            {recipe.cuisine}
             <br />
             <span className="font-playfair font-semibold text-text-muted">
               Type:
             </span>{" "}
-            <span className="font-normal">
-              {recipe.recipe_type?.replace("_", " ")}
-            </span>
+            {recipe.recipe_type?.replace("_", " ")}
           </h3>
         </div>
       </header>
 
-      {/* Description */}
-      <p className="text-sm leading-relaxed text-body-text">{recipe.description}</p>
+      {/* DESCRIPTION */}
+      <p className="text-sm leading-relaxed text-body-text">
+        {recipe.description}
+      </p>
 
-      {/* Main Recipe Image */}
+      {/* MAIN IMAGE */}
       {publicImageUrl && (
         <div
-          className={`relative w-full h-[400px] md:h-[500px] rounded-2xl overflow-hidden transition-opacity duration-700 ${
+          className={`relative w-full h-[420px] md:h-[520px] rounded-2xl overflow-hidden transition-opacity duration-700 ${
             showImage ? "opacity-100" : "opacity-0"
           }`}
         >
@@ -145,26 +173,26 @@ export function RecipeCard({
         </div>
       )}
 
-      {/* Ingredients */}
+      {/* INGREDIENTS */}
       <section
         className={`transition-opacity duration-700 ${
           showIngredients ? "opacity-100" : "opacity-0"
         }`}
       >
-        <h2 className="text-xl font-semibold mb-2 text-primary-text font-playfair">
+        <h2 className="text-xl font-semibold mb-3 text-primary-text font-playfair border-b pb-1">
           Ingredients
         </h2>
-        <ul className="list-disc ml-5 text-sm flex flex-col gap-1">
-          {recipe.ingredients.map((item, i) => (
-            <li key={i} className="text-body-text">
-              {item}
-            </li>
+
+        <ul className="list-disc ml-6 text-sm flex flex-col gap-1">
+          {recipe.ingredients.map((item, index) => (
+            <li key={index}>{item}</li>
           ))}
         </ul>
-        <div className="w-24 h-20 mt-4 flex items-center justify-center">
+
+        <div className="w-24 h-20 mt-6 flex items-center justify-center">
           <Image
             src={CakeImage}
-            alt="Cake"
+            alt="Decoration"
             width={90}
             height={90}
             className="object-contain -rotate-12"
@@ -172,53 +200,57 @@ export function RecipeCard({
         </div>
       </section>
 
-      {/* Instructions */}
+      {/* INSTRUCTIONS */}
       <section
         className={`transition-opacity duration-700 ${
           showInstructions ? "opacity-100" : "opacity-0"
         }`}
       >
-        <h2 className="text-xl font-semibold mb-2 text-primary-text font-playfair">
+        <h2 className="text-xl font-semibold mb-3 text-primary-text font-playfair border-b pb-1">
           Instructions
         </h2>
-        <ol className="list-decimal ml-5 text-sm flex flex-col gap-1">
-          {recipe.instructions.map((step, i) => (
-            <li key={i} className="text-body-text">
-              {step}
-            </li>
+
+        <ol className="list-decimal ml-6 text-sm flex flex-col gap-2">
+          {recipe.instructions.map((step, index) => (
+            <li key={index}>{step}</li>
           ))}
         </ol>
-        <div className="w-24 h-20 mt-4 flex items-center justify-center">
+
+        <div className="w-24 h-20 mt-6 flex items-center justify-center">
           <Image
             src={SoupImage}
-            alt="Soup"
+            alt="Decoration"
             width={80}
             height={80}
-            className="object-contain rotate-20"
+            className="object-contain rotate-12"
           />
         </div>
       </section>
 
-      {/* Footer */}
-      <footer className="flex justify-between items-center text-sm text-body-text">
+      {/* FOOTER */}
+      <footer className="flex justify-between items-center pt-4 border-t text-sm">
         <span>{author?.username?.split("@")[0]}</span>
 
-        <div className="flex flex-col sm:flex-row items-center gap-5">
-          {/* Like button discoverability */}
+        <div className="flex flex-col sm:flex-row items-center gap-6">
+          {/* Like Discoverability */}
           {!isCreator && (
             <div className="flex flex-col items-center">
-              <span className="text-xs text-text-muted mb-1">Like this recipe</span>
+              <span className="text-xs text-text-muted mb-1">
+                Like this recipe
+              </span>
               <LikeButton recipeId={recipe.id} />
             </div>
           )}
 
-          {/* Delete button discoverability */}
+          {/* Delete Discoverability */}
           {isCreator && (
             <div className="flex flex-col items-center">
-              <span className="text-xs text-text-muted mb-1">Delete your recipe</span>
+              <span className="text-xs text-text-muted mb-1">
+                Delete your recipe
+              </span>
               <button
                 onClick={() => setIsModalOpen(true)}
-                className="w-8 h-8 flex items-center justify-center cursor-pointer transition-all duration-200 hover:scale-110 active:scale-95 hover:text-error-border"
+                className="w-9 h-9 flex items-center justify-center transition-all duration-200 hover:scale-110 active:scale-95 hover:text-error-border"
                 aria-label="Delete Recipe"
               >
                 <TrashIcon className="w-7 h-7" />
@@ -228,7 +260,7 @@ export function RecipeCard({
         </div>
       </footer>
 
-      {/* Modal */}
+      {/* MODAL */}
       {isModalOpen && (
         <Modal
           handleAction={handleDelete}
