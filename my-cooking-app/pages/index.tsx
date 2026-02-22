@@ -133,9 +133,9 @@ export default function HomePage() {
   const handleRecipeClick = async (recipeId: string) => {
     setLoadingRecipeId(recipeId);
     try {
-      // simulate navigation delay
+      // simulate navigation/loading delay
       await new Promise((res) => setTimeout(res, 600));
-      // Navigate to recipe detail page here
+      // navigate to recipe detail page here
       // router.push(`/recipes/${recipeId}`);
     } finally {
       setLoadingRecipeId(null);
@@ -214,8 +214,7 @@ export default function HomePage() {
       {/* RESULTS LABEL */}
       <div className="w-full max-w-6xl px-6 sm:px-10 lg:px-20 mb-4">
         <p className="text-sm font-medium text-primary-text">
-          Showing {recipes.length}{" "}
-          {recipes.length === 1 ? "recipe" : "recipes"}
+          Showing {recipes.length} {recipes.length === 1 ? "recipe" : "recipes"}
         </p>
       </div>
 
@@ -259,8 +258,12 @@ export default function HomePage() {
                 authorId={recipe.author_id || ""}
               />
               {loadingRecipeId === recipe.id && (
-                <div className="absolute inset-0 bg-black bg-opacity-40 flex justify-center items-center rounded-lg">
-                  <div className="w-12 h-12 border-4 border-gray-200 border-t-accent rounded-full animate-spin" />
+                <div className="absolute inset-0 flex justify-center items-center">
+                  <div className="flex space-x-2">
+                    <div className="w-3 h-3 bg-accent rounded-full animate-bounce" />
+                    <div className="w-3 h-3 bg-accent rounded-full animate-bounce200" />
+                    <div className="w-3 h-3 bg-accent rounded-full animate-bounce400" />
+                  </div>
                 </div>
               )}
             </div>
@@ -283,6 +286,20 @@ export default function HomePage() {
           {isFetchingMore ? "Loading more..." : "Load More"}
         </Button>
       )}
+
+      {/* Tailwind keyframes for staggered bounce */}
+      <style jsx>{`
+        .animate-bounce200 {
+          animation: bounce 0.6s infinite 0.1s;
+        }
+        .animate-bounce400 {
+          animation: bounce 0.6s infinite 0.2s;
+        }
+        @keyframes bounce {
+          0%, 80%, 100% { transform: scale(0); }
+          40% { transform: scale(1); }
+        }
+      `}</style>
     </div>
   );
 }
