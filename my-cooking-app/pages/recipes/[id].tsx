@@ -4,7 +4,6 @@ import { useEffect, useState } from "react";
 import { RecipeCard } from "../../components/recipeCard/RecipeCard";
 import { RecipeCardSkeleton } from "../../components/recipeCard/RecipeSkeletonLoaderCard";
 import { fetchRecipeById } from "../../fetch/fetch";
-
 import { Database } from "@/types/supabase";
 
 type Recipe = Database["public"]["Tables"]["recipes"]["Row"];
@@ -14,19 +13,16 @@ type RecipePageProps = {
 };
 
 const RecipePage: NextPage<RecipePageProps> = ({ recipe }) => {
-  // Show skeleton on first paint for smooth UX
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
-    // Delay one tick so the skeleton shows before hydration
     const timeout = setTimeout(() => setLoading(false), 150);
     return () => clearTimeout(timeout);
   }, []);
 
   return (
-    <div className="relative flex justify-center mt-2">
-      {/* Centered Card */}
-      <div>
+    <main className="w-full min-h-screen bg-main-bg py-12">
+      <div className="w-full flex justify-center">
         {loading ? (
           <RecipeCardSkeleton />
         ) : recipe ? (
@@ -35,15 +31,14 @@ const RecipePage: NextPage<RecipePageProps> = ({ recipe }) => {
           <p className="text-primary-text">Recipe not found.</p>
         )}
       </div>
-    </div>
+    </main>
   );
 };
 
 export const getServerSideProps: GetServerSideProps<RecipePageProps> = async (
-  context,
+  context
 ) => {
   const { id } = context.params as { id: string };
-
   const recipeId = id.slice(0, 36);
 
   try {
