@@ -30,11 +30,11 @@ export function RecipeCard({
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [deleting, setDeleting] = useState(false);
 
-  // 🔥 FEEDBACK STATES
+  // Feedback
   const [errorMessage, setErrorMessage] = useState<string | null>(null);
   const [successMessage, setSuccessMessage] = useState<string | null>(null);
 
-  // 🔥 IMAGE LOADING STATE
+  // Image loading
   const [imageLoaded, setImageLoaded] = useState(false);
 
   // Progressive reveal
@@ -80,7 +80,6 @@ export function RecipeCard({
 
   const publicImageUrl = `https://xhebsnwjpfcdttydwuhg.supabase.co/storage/v1/object/public/recipe-images/${recipe.author_id}/${recipe.image_url}`;
 
-  // 🔥 IMPROVED DELETE HANDLER
   const handleDelete = async () => {
     if (!user || !recipe) return;
 
@@ -95,7 +94,7 @@ export function RecipeCard({
 
       setTimeout(() => {
         router.back();
-      }, 800);
+      }, 900);
     } catch (error) {
       console.error("Error deleting recipe:", error);
       setErrorMessage("Failed to delete recipe. Please try again.");
@@ -170,11 +169,13 @@ export function RecipeCard({
         {recipe.description}
       </p>
 
-      {/* MAIN IMAGE WITH LOADING FEEDBACK */}
+      {/* IMAGE */}
       {publicImageUrl && (
         <div
-          className={`relative w-full h-[420px] md:h-[520px] rounded-2xl overflow-hidden transition-opacity duration-700 ${
-            showImage ? "opacity-100" : "opacity-0"
+          className={`relative w-full h-[420px] md:h-[520px] rounded-2xl overflow-hidden transition-all duration-700 ${
+            showImage
+              ? "opacity-100 translate-y-0"
+              : "opacity-0 translate-y-4"
           }`}
         >
           {!imageLoaded && (
@@ -196,8 +197,10 @@ export function RecipeCard({
 
       {/* INGREDIENTS */}
       <section
-        className={`transition-opacity duration-700 ${
-          showIngredients ? "opacity-100" : "opacity-0"
+        className={`transition-all duration-700 ${
+          showIngredients
+            ? "opacity-100 translate-y-0"
+            : "opacity-0 translate-y-4"
         }`}
       >
         <h2 className="text-xl font-semibold mb-3 text-primary-text font-playfair border-b pb-1">
@@ -223,8 +226,10 @@ export function RecipeCard({
 
       {/* INSTRUCTIONS */}
       <section
-        className={`transition-opacity duration-700 ${
-          showInstructions ? "opacity-100" : "opacity-0"
+        className={`transition-all duration-700 ${
+          showInstructions
+            ? "opacity-100 translate-y-0"
+            : "opacity-0 translate-y-4"
         }`}
       >
         <h2 className="text-xl font-semibold mb-3 text-primary-text font-playfair border-b pb-1">
@@ -248,16 +253,19 @@ export function RecipeCard({
         </div>
       </section>
 
-      {/* FEEDBACK MESSAGES */}
-      {errorMessage && (
-        <div className="bg-red-100 text-red-700 text-sm px-4 py-2 rounded-lg">
-          {errorMessage}
-        </div>
-      )}
-
-      {successMessage && (
-        <div className="bg-green-100 text-green-700 text-sm px-4 py-2 rounded-lg">
-          {successMessage}
+      {/* FEEDBACK */}
+      {(errorMessage || successMessage) && (
+        <div className="transition-all duration-500 animate-fade-in">
+          {errorMessage && (
+            <div className="bg-red-100 border border-red-300 text-red-700 text-sm px-4 py-2 rounded-lg shadow-sm">
+              {errorMessage}
+            </div>
+          )}
+          {successMessage && (
+            <div className="bg-green-100 border border-green-300 text-green-700 text-sm px-4 py-2 rounded-lg shadow-sm">
+              {successMessage}
+            </div>
+          )}
         </div>
       )}
 
@@ -281,20 +289,20 @@ export function RecipeCard({
 
           {isCreator && (
             <div className="flex flex-col items-center">
-              <span className="text-xs text-text-muted mb-1">
+              <span className="text-xs text-red-500 font-medium mb-1">
                 Delete your recipe
               </span>
               <button
                 onClick={() => setIsModalOpen(true)}
                 disabled={deleting}
                 className={`
-                  w-9 h-9 flex items-center justify-center
+                  w-10 h-10 flex items-center justify-center
+                  rounded-full
                   transition-all duration-200
-                  hover:scale-110 active:scale-95
                   ${
                     deleting
-                      ? "opacity-50 cursor-not-allowed"
-                      : "hover:text-error-border"
+                      ? "bg-red-100 opacity-60 cursor-not-allowed"
+                      : "hover:bg-red-100 hover:scale-110 active:scale-95 text-red-500"
                   }
                 `}
                 aria-label="Delete Recipe"
@@ -302,7 +310,7 @@ export function RecipeCard({
                 {deleting ? (
                   <span className="text-xs animate-pulse">...</span>
                 ) : (
-                  <TrashIcon className="w-7 h-7" />
+                  <TrashIcon className="w-6 h-6" />
                 )}
               </button>
             </div>
@@ -310,7 +318,6 @@ export function RecipeCard({
         </div>
       </footer>
 
-      {/* MODAL */}
       {isModalOpen && (
         <Modal
           handleAction={handleDelete}
