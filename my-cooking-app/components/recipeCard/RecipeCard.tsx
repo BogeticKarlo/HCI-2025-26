@@ -202,7 +202,17 @@ export function RecipeCard({
         <span>{author?.username?.split("@")[0]}</span>
 
         <div className="flex flex-col sm:flex-row items-center gap-5">
-          {!isCreator && <LikeButton recipeId={recipe.id} />}
+          {/* Like button discoverability */}
+          {!isCreator && (
+            <div className="relative group">
+              <LikeButton recipeId={recipe.id} />
+              <span className="absolute bottom-full mb-1 left-1/2 -translate-x-1/2 text-xs text-white bg-black/70 px-2 py-1 rounded opacity-0 group-hover:opacity-100 transition-opacity">
+                Like this recipe
+              </span>
+            </div>
+          )}
+
+          {/* Delete button */}
           {isCreator && (
             <button
               onClick={() => setIsModalOpen(true)}
