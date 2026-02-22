@@ -36,20 +36,15 @@ export default function HomePage() {
     useState<Option<"cuisine">>(savedFilters.cuisine || cuisineOptions[0]);
 
   const [selectedRecipeType, setSelectedRecipeType] =
-    useState<Option<"recipeType">>(
-      savedFilters.recipeType || recipeTypeOptions[0]
-    );
+    useState<Option<"recipeType">>(savedFilters.recipeType || recipeTypeOptions[0]);
 
   const [selectedTime, setSelectedTime] =
     useState<Option<"time">>(savedFilters.time || timeOptions[0]);
 
   const [selectedFavorite, setSelectedFavorite] =
-    useState<Option<"favorite">>(
-      savedFilters.favorite || favoriteOptions[0]
-    );
+    useState<Option<"favorite">>(savedFilters.favorite || favoriteOptions[0]);
 
   /* ---------------- SAVE FILTERS ---------------- */
-
   useEffect(() => {
     const filters = {
       cuisine: selectedCuisine,
@@ -57,18 +52,15 @@ export default function HomePage() {
       time: selectedTime,
       favorite: selectedFavorite,
     };
-
     localStorage.setItem(localStorageKey, JSON.stringify(filters));
   }, [selectedCuisine, selectedRecipeType, selectedTime, selectedFavorite]);
 
   /* ---------------- RESET PAGE ON FILTER CHANGE ---------------- */
-
   useEffect(() => {
     setCurrentPage(1);
   }, [selectedCuisine, selectedRecipeType, selectedTime, selectedFavorite]);
 
   /* ---------------- FETCH RECIPES ---------------- */
-
   const fetchHomeRecipes = async () => {
     try {
       if (currentPage === 1) setIsLoading(true);
@@ -109,7 +101,6 @@ export default function HomePage() {
   ]);
 
   /* ---------------- FILTER RESET ---------------- */
-
   const resetFilter = (type: string) => {
     if (type === "cuisine") setSelectedCuisine(cuisineOptions[0]);
     if (type === "recipeType") setSelectedRecipeType(recipeTypeOptions[0]);
@@ -124,12 +115,7 @@ export default function HomePage() {
       { type: "time", value: selectedTime },
       { type: "favorite", value: selectedFavorite },
     ].filter((item) => item.value.id !== "all");
-  }, [
-    selectedCuisine,
-    selectedRecipeType,
-    selectedTime,
-    selectedFavorite,
-  ]);
+  }, [selectedCuisine, selectedRecipeType, selectedTime, selectedFavorite]);
 
   return (
     <div className="flex flex-col items-center">
@@ -137,7 +123,7 @@ export default function HomePage() {
         Check Out Best Recipes
       </h1>
 
-      {/* FILTERS (unchanged) */}
+      {/* FILTERS */}
       <div className="flex flex-col w-9/10 items-center gap-8 mb-10">
         <div className="grid grid-cols-2 gap-5 w-full lg:w-[70%]">
           <Dropdown
@@ -174,7 +160,7 @@ export default function HomePage() {
         </p>
       </div>
 
-      {/* ACTIVE CHIPS (unchanged) */}
+      {/* ACTIVE FILTER CHIPS */}
       {activeFilters.length > 0 && (
         <div className="flex flex-wrap gap-3 mb-6">
           {activeFilters.map(({ type, value }) => {
@@ -203,8 +189,7 @@ export default function HomePage() {
       {/* RESULTS LABEL */}
       <div className="w-full max-w-6xl px-6 sm:px-10 lg:px-20 mb-4">
         <p className="text-sm font-medium text-primary-text">
-          Showing {recipes.length}{" "}
-          {recipes.length === 1 ? "recipe" : "recipes"}
+          Showing {recipes.length} {recipes.length === 1 ? "recipe" : "recipes"}
         </p>
       </div>
 
@@ -235,20 +220,33 @@ export default function HomePage() {
             />
           </div>
         ) : (
-          recipes.map((recipe) => (
-            <div
-              key={recipe.id}
-              className="transition-transform duration-200 hover:-translate-y-1 hover:shadow-lg"
-            >
-              <RecipeMinimizeCard
-                id={recipe.id || ""}
-                title={recipe.title}
-                imageUrl={recipe.image_url || ""}
-                description={recipe.description || ""}
-                authorId={recipe.author_id || ""}
-              />
-            </div>
-          ))
+          <>
+            {recipes.map((recipe) => (
+              <div
+                key={recipe.id}
+                className={`transition-transform duration-200 hover:-translate-y-1 hover:shadow-lg
+                  ${isFetchingMore ? "opacity-50 animate-pulse" : "opacity-100"}
+                `}
+              >
+                <RecipeMinimizeCard
+                  id={recipe.id || ""}
+                  title={recipe.title}
+                  imageUrl={recipe.image_url || ""}
+                  description={recipe.description || ""}
+                  authorId={recipe.author_id || ""}
+                />
+              </div>
+            ))}
+
+            {/* Skeleton placeholders during fetching more */}
+            {isFetchingMore &&
+              Array.from({ length: pageLimit }).map((_, idx) => (
+                <div
+                  key={`skeleton-${idx}`}
+                  className="w-full h-60 bg-gray-200 rounded-lg animate-pulse"
+                />
+              ))}
+          </>
         )}
       </div>
 
@@ -256,9 +254,7 @@ export default function HomePage() {
       {hasMore && !isError && (
         <Button
           onClick={() => {
-            if (!isFetchingMore && !isLoading) {
-              setCurrentPage((prev) => prev + 1);
-            }
+            if (!isFetchingMore && !isLoading) setCurrentPage((prev) => prev + 1);
           }}
           className="mt-6"
           isLoading={isFetchingMore}
