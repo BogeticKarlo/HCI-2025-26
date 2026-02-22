@@ -48,7 +48,8 @@ export default function HomePage() {
       savedFilters.favorite || favoriteOptions[0]
     );
 
-  // Save filters
+  /* ---------------- SAVE FILTERS ---------------- */
+
   useEffect(() => {
     const filters = {
       cuisine: selectedCuisine,
@@ -60,7 +61,14 @@ export default function HomePage() {
     localStorage.setItem(localStorageKey, JSON.stringify(filters));
   }, [selectedCuisine, selectedRecipeType, selectedTime, selectedFavorite]);
 
-  // Fetch recipes
+  /* ---------------- RESET PAGE ON FILTER CHANGE ---------------- */
+
+  useEffect(() => {
+    setCurrentPage(1);
+  }, [selectedCuisine, selectedRecipeType, selectedTime, selectedFavorite]);
+
+  /* ---------------- FETCH RECIPES ---------------- */
+
   useEffect(() => {
     const fetchHomeRecipes = async () => {
       try {
@@ -100,6 +108,8 @@ export default function HomePage() {
     currentPage,
   ]);
 
+  /* ---------------- FILTER RESET ---------------- */
+
   const resetFilter = (type: string) => {
     if (type === "cuisine") setSelectedCuisine(cuisineOptions[0]);
     if (type === "recipeType") setSelectedRecipeType(recipeTypeOptions[0]);
@@ -121,13 +131,16 @@ export default function HomePage() {
     selectedFavorite,
   ]);
 
+  /* ================= RENDER ================= */
+
   return (
     <div className="flex flex-col items-center">
       <h1 className="font-playfair font-bold text-[40px] text-center mb-10 text-primary-text">
         Check Out Best Recipes
       </h1>
 
-      {/* Filters */}
+      {/* ---------------- FILTERS ---------------- */}
+
       <div className="flex flex-col w-9/10 items-center gap-8 mb-10">
         <div className="grid grid-cols-2 gap-5 w-full lg:w-[70%]">
           <Dropdown
@@ -164,11 +177,11 @@ export default function HomePage() {
         </p>
       </div>
 
-      {/* Active Filter Chips */}
+      {/* ---------------- ACTIVE FILTER CHIPS ---------------- */}
+
       {activeFilters.length > 0 && (
         <div className="flex flex-wrap gap-3 mb-6">
           {activeFilters.map(({ type, value }) => {
-            // Hide latest/oldest completely
             if (type === "time") return null;
 
             return (
@@ -186,8 +199,8 @@ export default function HomePage() {
                   rounded-full
                   bg-white
                   shadow-sm
-                  transition-all duration-200 ease-in-out
                   cursor-pointer
+                  transition-all duration-200 ease-in-out
                   transform
                   hover:scale-105
                   hover:shadow-xl
@@ -200,27 +213,45 @@ export default function HomePage() {
               >
                 <span>{value.label}</span>
 
-                {/* Show ✕ for cuisine, recipeType, and favorite */}
-                {(type === "cuisine" ||
-                  type === "recipeType" ||
-                  type === "favorite") && (
-                  <span
-                    className="
-                      text-xs font-bold
-                      transition-transform duration-200
-                      group-hover:rotate-90
-                    "
-                  >
-                    ✕
-                  </span>
-                )}
+                <span
+                  className="
+                    text-xs font-bold
+                    transition-transform duration-200
+                    group-hover:rotate-90
+                  "
+                >
+                  ✕
+                </span>
               </button>
             );
           })}
         </div>
       )}
 
-      {/* Recipes Grid */}
+      {/* ---------------- CONCEPTUAL DIVIDER ---------------- */}
+
+      <div className="w-full max-w-6xl px-6 sm:px-10 lg:px-20">
+        <div className="border-t border-gray-200 my-6" />
+      </div>
+
+      {/* ---------------- RESULTS CONTEXT LABEL ---------------- */}
+
+      <div className="w-full max-w-6xl px-6 sm:px-10 lg:px-20 mb-4">
+        <p
+          className={`text-sm text-secondary-text transition-opacity duration-200 ${
+            isLoading ? "opacity-50" : "opacity-100"
+          }`}
+        >
+          Showing{" "}
+          <span className="font-semibold text-primary-text">
+            {recipes.length}
+          </span>{" "}
+          {recipes.length === 1 ? "recipe" : "recipes"}
+        </p>
+      </div>
+
+      {/* ---------------- RECIPES GRID ---------------- */}
+
       <div
         className={`grid gap-6 grid-cols-1 md:grid-cols-2 xl:grid-cols-3 place-items-center
         transition-opacity duration-300 ${
@@ -253,7 +284,8 @@ export default function HomePage() {
         )}
       </div>
 
-      {/* Load More */}
+      {/* ---------------- LOAD MORE ---------------- */}
+
       {hasMore && (
         <Button
           onClick={() => setCurrentPage((prev) => prev + 1)}
