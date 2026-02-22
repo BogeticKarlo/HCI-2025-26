@@ -30,6 +30,13 @@ export function RecipeCard({
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [deleting, setDeleting] = useState(false);
 
+  // 🔥 FEEDBACK STATES
+  const [errorMessage, setErrorMessage] = useState<string | null>(null);
+  const [successMessage, setSuccessMessage] = useState<string | null>(null);
+
+  // 🔥 IMAGE LOADING STATE
+  const [imageLoaded, setImageLoaded] = useState(false);
+
   // Progressive reveal
   const [showImage, setShowImage] = useState(false);
   const [showIngredients, setShowIngredients] = useState(false);
@@ -58,6 +65,7 @@ export function RecipeCard({
     setShowImage(false);
     setShowIngredients(false);
     setShowInstructions(false);
+    setImageLoaded(false);
 
     const timers: NodeJS.Timeout[] = [];
 
@@ -72,17 +80,25 @@ export function RecipeCard({
 
   const publicImageUrl = `https://xhebsnwjpfcdttydwuhg.supabase.co/storage/v1/object/public/recipe-images/${recipe.author_id}/${recipe.image_url}`;
 
+  // 🔥 IMPROVED DELETE HANDLER
   const handleDelete = async () => {
     if (!user || !recipe) return;
 
     setDeleting(true);
+    setErrorMessage(null);
+    setSuccessMessage(null);
 
     try {
       await deleteRecipe(recipe.id, user.id);
-      router.back();
+
+      setSuccessMessage("Recipe deleted successfully.");
+
+      setTimeout(() => {
+        router.back();
+      }, 800);
     } catch (error) {
       console.error("Error deleting recipe:", error);
-      alert("Failed to delete recipe. Please try again.");
+      setErrorMessage("Failed to delete recipe. Please try again.");
     } finally {
       setDeleting(false);
       setIsModalOpen(false);
@@ -113,7 +129,6 @@ export function RecipeCard({
     >
       {/* HEADER */}
       <header className="relative flex flex-col items-center gap-4 mb-6">
-        {/* Back Button */}
         <button
           onClick={() => router.back()}
           className="absolute left-0 top-1/2 -translate-y-1/2 flex items-center gap-2 p-2 transition duration-200 hover:scale-110 hover:opacity-80"
@@ -131,7 +146,6 @@ export function RecipeCard({
           </span>
         </button>
 
-        {/* Centered Title */}
         <div className="flex flex-col items-center text-center gap-2">
           <h1 className="text-3xl md:text-4xl font-bold text-primary-text font-playfair">
             {recipe.title}
@@ -156,19 +170,26 @@ export function RecipeCard({
         {recipe.description}
       </p>
 
-      {/* MAIN IMAGE */}
+      {/* MAIN IMAGE WITH LOADING FEEDBACK */}
       {publicImageUrl && (
         <div
           className={`relative w-full h-[420px] md:h-[520px] rounded-2xl overflow-hidden transition-opacity duration-700 ${
             showImage ? "opacity-100" : "opacity-0"
           }`}
         >
+          {!imageLoaded && (
+            <div className="absolute inset-0 bg-gray-200 animate-pulse" />
+          )}
+
           <Image
             src={publicImageUrl}
             alt={recipe.title}
             fill
             sizes="100%"
-            className="object-contain"
+            onLoadingComplete={() => setImageLoaded(true)}
+            className={`object-contain transition-opacity duration-500 ${
+              imageLoaded ? "opacity-100" : "opacity-0"
+            }`}
           />
         </div>
       )}
@@ -227,12 +248,28 @@ export function RecipeCard({
         </div>
       </section>
 
+      {/* FEEDBACK MESSAGES */}
+      {errorMessage && (
+        <div className="bg-red-100 text-red-700 text-sm px-4 py-2 rounded-lg">
+          {errorMessage}
+        </div>
+      )}
+
+      {successMessage && (
+        <div className="bg-green-100 text-green-700 text-sm px-4 py-2 rounded-lg">
+          {successMessage}
+        </div>
+      )}
+
       {/* FOOTER */}
       <footer className="flex justify-between items-center pt-4 border-t text-sm">
-        <span>{author?.username?.split("@")[0]}</span>
+        <span className={author ? "" : "animate-pulse text-text-muted"}>
+          {author
+            ? author.username?.split("@")[0]
+            : "Loading author..."}
+        </span>
 
         <div className="flex flex-col sm:flex-row items-center gap-6">
-          {/* Like Discoverability */}
           {!isCreator && (
             <div className="flex flex-col items-center">
               <span className="text-xs text-text-muted mb-1">
@@ -242,7 +279,6 @@ export function RecipeCard({
             </div>
           )}
 
-          {/* Delete Discoverability */}
           {isCreator && (
             <div className="flex flex-col items-center">
               <span className="text-xs text-text-muted mb-1">
@@ -250,10 +286,24 @@ export function RecipeCard({
               </span>
               <button
                 onClick={() => setIsModalOpen(true)}
-                className="w-9 h-9 flex items-center justify-center transition-all duration-200 hover:scale-110 active:scale-95 hover:text-error-border"
+                disabled={deleting}
+                className={`
+                  w-9 h-9 flex items-center justify-center
+                  transition-all duration-200
+                  hover:scale-110 active:scale-95
+                  ${
+                    deleting
+                      ? "opacity-50 cursor-not-allowed"
+                      : "hover:text-error-border"
+                  }
+                `}
                 aria-label="Delete Recipe"
               >
-                <TrashIcon className="w-7 h-7" />
+                {deleting ? (
+                  <span className="text-xs animate-pulse">...</span>
+                ) : (
+                  <TrashIcon className="w-7 h-7" />
+                )}
               </button>
             </div>
           )}
