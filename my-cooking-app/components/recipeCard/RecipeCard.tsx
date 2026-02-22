@@ -42,6 +42,7 @@ export function RecipeCard({
   const [showIngredients, setShowIngredients] = useState(false);
   const [showInstructions, setShowInstructions] = useState(false);
 
+  // Like wrapper -> click anywhere to trigger internal LikeButton click
   const likeWrapperRef = useRef<HTMLDivElement | null>(null);
 
   const isCreator = user?.id === recipe?.author_id;
@@ -111,6 +112,23 @@ export function RecipeCard({
     innerButton?.click();
   };
 
+  const handleLikeWrapperClick = (e: React.MouseEvent<HTMLDivElement>) => {
+    const root = likeWrapperRef.current;
+    if (!root) return;
+
+    const innerButton = root.querySelector("button") as HTMLButtonElement | null;
+    // If user clicked the actual LikeButton, let it handle the click (avoid double toggle)
+    if (
+      innerButton &&
+      e.target instanceof Node &&
+      innerButton.contains(e.target)
+    ) {
+      return;
+    }
+
+    triggerInnerLikeClick();
+  };
+
   return (
     <article
       className="
@@ -141,8 +159,9 @@ export function RecipeCard({
             absolute left-0 top-1/2 -translate-y-1/2
             flex items-center gap-2 p-2
             cursor-pointer
-            transition duration-200
+            transition-all duration-200
             hover:scale-110 hover:opacity-80
+            active:scale-95
             focus-visible:outline-none
             focus-visible:ring-2 focus-visible:ring-accent focus-visible:ring-offset-2
             rounded-lg
@@ -293,14 +312,14 @@ export function RecipeCard({
         </span>
 
         <div className="flex flex-col sm:flex-row items-center gap-6">
-          {/* LIKE: whole wrapper clickable */}
+          {/* LIKE: whole wrapper clickable + clearer hover/active animation */}
           {!isCreator && (
             <div
               ref={likeWrapperRef}
               role="button"
               tabIndex={0}
               aria-label="Like this recipe"
-              onClick={triggerInnerLikeClick}
+              onClick={handleLikeWrapperClick}
               onKeyDown={(e) => {
                 if (e.key === "Enter" || e.key === " ") {
                   e.preventDefault();
@@ -310,10 +329,11 @@ export function RecipeCard({
               className="
                 flex flex-col items-center
                 border border-accent/40
-                rounded-xl px-3 py-2
+                rounded-xl px-4 py-3
                 bg-white/60
                 transition-all duration-200
-                hover:border-accent hover:shadow-sm
+                hover:border-accent hover:shadow-md hover:-translate-y-[1px] hover:scale-[1.02]
+                active:scale-[0.98] active:translate-y-0
                 cursor-pointer
                 focus:outline-none
                 focus-visible:ring-2 focus-visible:ring-accent focus-visible:ring-offset-2
@@ -322,13 +342,11 @@ export function RecipeCard({
               title="Like this recipe"
             >
               <span className="text-xs text-text-muted mb-1">Like this recipe</span>
-
-              {/* keep LikeButton as-is (no nested button issues) */}
               <LikeButton recipeId={recipe.id} />
             </div>
           )}
 
-          {/* DELETE: whole wrapper clickable */}
+          {/* DELETE: whole wrapper clickable + clearer hover/active animation */}
           {isCreator && (
             <button
               type="button"
@@ -339,11 +357,15 @@ export function RecipeCard({
               className={`
                 group
                 flex flex-col items-center
-                rounded-xl px-3 py-2
+                rounded-xl px-4 py-3
                 transition-all duration-200
                 focus-visible:outline-none
                 focus-visible:ring-2 focus-visible:ring-red-400 focus-visible:ring-offset-2
-                ${deleting ? "opacity-60 cursor-not-allowed" : "cursor-pointer"}
+                ${
+                  deleting
+                    ? "opacity-60 cursor-not-allowed"
+                    : "cursor-pointer hover:shadow-md hover:-translate-y-[1px] hover:scale-[1.02] active:scale-[0.98]"
+                }
               `}
             >
               <span className="text-xs text-red-500 font-medium mb-1">
@@ -354,7 +376,11 @@ export function RecipeCard({
                 className={`
                   w-10 h-10 flex items-center justify-center rounded-full
                   transition-all duration-200
-                  ${deleting ? "bg-red-100" : "text-red-500 group-hover:bg-red-100 group-hover:scale-110 active:scale-95"}
+                  ${
+                    deleting
+                      ? "bg-red-100"
+                      : "text-red-500 group-hover:bg-red-100 group-hover:scale-110 active:scale-95"
+                  }
                 `}
               >
                 {deleting ? (
@@ -372,7 +398,11 @@ export function RecipeCard({
         <Modal
           handleAction={handleDelete}
           setIsModalOpen={setIsModalOpen}
-          title={deleting ? "Deleting recipe..." : "Are you sure you want to delete this recipe?"}
+          title={
+            deleting
+              ? "Deleting recipe..."
+              : "Are you sure you want to delete this recipe?"
+          }
         />
       )}
     </article>
