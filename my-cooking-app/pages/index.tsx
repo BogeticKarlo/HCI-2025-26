@@ -133,9 +133,9 @@ export default function HomePage() {
   const handleRecipeClick = async (recipeId: string) => {
     setLoadingRecipeId(recipeId);
     try {
-      // simulate navigation delay or data fetch
+      // simulate navigation delay
       await new Promise((res) => setTimeout(res, 600));
-      // Navigate to recipe detail page here (example)
+      // Navigate to recipe detail page here
       // router.push(`/recipes/${recipeId}`);
     } finally {
       setLoadingRecipeId(null);
@@ -259,8 +259,8 @@ export default function HomePage() {
                 authorId={recipe.author_id || ""}
               />
               {loadingRecipeId === recipe.id && (
-                <div className="absolute inset-0 bg-white bg-opacity-70 flex justify-center items-center rounded-lg">
-                  <div className="w-8 h-8 border-4 border-gray-300 border-t-accent rounded-full animate-spin" />
+                <div className="absolute inset-0 bg-black bg-opacity-40 flex justify-center items-center rounded-lg">
+                  <div className="w-12 h-12 border-4 border-gray-200 border-t-accent rounded-full animate-spin" />
                 </div>
               )}
             </div>
