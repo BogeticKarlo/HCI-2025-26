@@ -68,7 +68,6 @@ export function RecipeCard({
     setImageLoaded(false);
 
     const timers: NodeJS.Timeout[] = [];
-
     timers.push(setTimeout(() => setShowImage(true), 100));
     timers.push(setTimeout(() => setShowIngredients(true), 500));
     timers.push(setTimeout(() => setShowInstructions(true), 900));
@@ -126,7 +125,7 @@ export function RecipeCard({
         relative
       "
     >
-      {/* HEADER */}
+      {/* NAVIGATION ZONE (Better mapping: left = back) */}
       <header className="relative flex flex-col items-center gap-4 mb-6">
         <button
           onClick={() => router.back()}
@@ -136,8 +135,12 @@ export function RecipeCard({
             cursor-pointer
             transition duration-200
             hover:scale-110 hover:opacity-80
+            focus-visible:outline-none
+            focus-visible:ring-2 focus-visible:ring-accent focus-visible:ring-offset-2
+            rounded-lg
           "
           title="Go back"
+          aria-label="Go back to previous page"
         >
           <Image
             src={backArrow}
@@ -146,9 +149,7 @@ export function RecipeCard({
             height={36}
             className="w-9 aspect-square"
           />
-          <span className="text-sm font-semibold text-primary-text">
-            Back
-          </span>
+          <span className="text-sm font-semibold text-primary-text">Back</span>
         </button>
 
         <div className="flex flex-col items-center text-center gap-2">
@@ -179,10 +180,9 @@ export function RecipeCard({
       {publicImageUrl && (
         <div
           className={`relative w-full h-[420px] md:h-[520px] rounded-2xl overflow-hidden transition-all duration-700 ${
-            showImage
-              ? "opacity-100 translate-y-0"
-              : "opacity-0 translate-y-4"
+            showImage ? "opacity-100 translate-y-0" : "opacity-0 translate-y-4"
           }`}
+          aria-label="Recipe image"
         >
           {!imageLoaded && (
             <div className="absolute inset-0 bg-gray-200 animate-pulse" />
@@ -201,17 +201,26 @@ export function RecipeCard({
         </div>
       )}
 
-      {/* INGREDIENTS */}
+      {/* INGREDIENTS (Mapping: show order + visual cue) */}
       <section
         className={`transition-all duration-700 ${
           showIngredients
             ? "opacity-100 translate-y-0"
             : "opacity-0 translate-y-4"
         }`}
+        aria-labelledby="ingredients-heading"
       >
-        <h2 className="text-xl font-semibold mb-3 text-primary-text font-playfair border-b pb-1">
-          Ingredients
-        </h2>
+        <div className="flex items-center gap-3 mb-3 border-b pb-1">
+          <span className="inline-flex items-center justify-center w-6 h-6 rounded-full bg-accent text-black text-xs font-bold">
+            1
+          </span>
+          <h2
+            id="ingredients-heading"
+            className="text-xl font-semibold text-primary-text font-playfair"
+          >
+            Ingredients
+          </h2>
+        </div>
 
         <ul className="list-disc ml-6 text-sm flex flex-col gap-1">
           {recipe.ingredients.map((item, index) => (
@@ -230,17 +239,26 @@ export function RecipeCard({
         </div>
       </section>
 
-      {/* INSTRUCTIONS */}
+      {/* INSTRUCTIONS (Mapping: show order + visual cue) */}
       <section
         className={`transition-all duration-700 ${
           showInstructions
             ? "opacity-100 translate-y-0"
             : "opacity-0 translate-y-4"
         }`}
+        aria-labelledby="instructions-heading"
       >
-        <h2 className="text-xl font-semibold mb-3 text-primary-text font-playfair border-b pb-1">
-          Instructions
-        </h2>
+        <div className="flex items-center gap-3 mb-3 border-b pb-1">
+          <span className="inline-flex items-center justify-center w-6 h-6 rounded-full bg-accent text-black text-xs font-bold">
+            2
+          </span>
+          <h2
+            id="instructions-heading"
+            className="text-xl font-semibold text-primary-text font-playfair"
+          >
+            Instructions
+          </h2>
+        </div>
 
         <ol className="list-decimal ml-6 text-sm flex flex-col gap-2">
           {recipe.instructions.map((step, index) => (
@@ -281,43 +299,51 @@ export function RecipeCard({
           {author ? author.username?.split("@")[0] : "Loading author..."}
         </span>
 
-        <div className="flex flex-col sm:flex-row items-center gap-6">
-          {!isCreator && (
-            <div className="flex flex-col items-center">
-              <span className="text-xs text-text-muted mb-1">
-                Like this recipe
-              </span>
-              <LikeButton recipeId={recipe.id} />
-            </div>
-          )}
+        {/* ACTIONS ZONE (Better mapping: right side = actions) */}
+        <div className="flex flex-col items-end gap-2">
+          <span className="text-xs text-text-muted">Actions</span>
 
-          {isCreator && (
-            <div className="flex flex-col items-center">
-              <span className="text-xs text-red-500 font-medium mb-1">
-                Delete your recipe
-              </span>
-              <button
-                onClick={() => setIsModalOpen(true)}
-                disabled={deleting}
-                className={`
-                  w-10 h-10 flex items-center justify-center rounded-full
-                  transition-all duration-200
-                  ${
-                    deleting
-                      ? "bg-red-100 opacity-60 cursor-not-allowed"
-                      : "cursor-pointer hover:bg-red-100 hover:scale-110 active:scale-95 text-red-500"
-                  }
-                `}
-                aria-label="Delete Recipe"
-              >
-                {deleting ? (
-                  <span className="text-xs animate-pulse">...</span>
-                ) : (
-                  <TrashIcon className="w-6 h-6" />
-                )}
-              </button>
-            </div>
-          )}
+          <div className="flex flex-col sm:flex-row items-center gap-6">
+            {!isCreator && (
+              <div className="flex flex-col items-center">
+                <span className="text-xs text-text-muted mb-1">
+                  Like this recipe
+                </span>
+                <LikeButton recipeId={recipe.id} />
+              </div>
+            )}
+
+            {isCreator && (
+              <div className="flex flex-col items-center">
+                <span className="text-xs text-red-500 font-medium mb-1">
+                  Delete your recipe
+                </span>
+                <button
+                  onClick={() => setIsModalOpen(true)}
+                  disabled={deleting}
+                  className={`
+                    w-10 h-10 flex items-center justify-center rounded-full
+                    transition-all duration-200
+                    focus-visible:outline-none
+                    focus-visible:ring-2 focus-visible:ring-red-400 focus-visible:ring-offset-2
+                    ${
+                      deleting
+                        ? "bg-red-100 opacity-60 cursor-not-allowed"
+                        : "cursor-pointer hover:bg-red-100 hover:scale-110 active:scale-95 text-red-500"
+                    }
+                  `}
+                  aria-label="Delete Recipe"
+                  title="Delete recipe"
+                >
+                  {deleting ? (
+                    <span className="text-xs animate-pulse">...</span>
+                  ) : (
+                    <TrashIcon className="w-6 h-6" />
+                  )}
+                </button>
+              </div>
+            )}
+          </div>
         </div>
       </footer>
 
