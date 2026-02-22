@@ -14,17 +14,14 @@ import { useAuth } from "@/context/AuthContext";
 import Modal from "../modal/Modal";
 import { LikeButton } from "../LikeButton";
 
-// Extend Recipe type with optional likes_count
-type RecipeWithLikes = Database["public"]["Tables"]["recipes"]["Row"] & {
-  likes_count?: number; // optional, defaults to 0 if missing
-};
+type Recipe = Database["public"]["Tables"]["recipes"]["Row"];
 type Profile = Database["public"]["Tables"]["profiles"]["Row"];
 
 export function RecipeCard({
   recipe,
   isLoading,
 }: {
-  recipe?: RecipeWithLikes;
+  recipe?: Recipe;
   isLoading?: boolean;
 }) {
   const router = useRouter();
@@ -71,6 +68,7 @@ export function RecipeCard({
     setImageLoaded(false);
 
     const timers: NodeJS.Timeout[] = [];
+
     timers.push(setTimeout(() => setShowImage(true), 100));
     timers.push(setTimeout(() => setShowIngredients(true), 500));
     timers.push(setTimeout(() => setShowInstructions(true), 900));
@@ -91,8 +89,12 @@ export function RecipeCard({
 
     try {
       await deleteRecipe(recipe.id, user.id);
+
       setSuccessMessage("Recipe deleted successfully.");
-      setTimeout(() => router.back(), 900);
+
+      setTimeout(() => {
+        router.back();
+      }, 900);
     } catch (error) {
       console.error("Error deleting recipe:", error);
       setErrorMessage("Failed to delete recipe. Please try again.");
@@ -105,34 +107,50 @@ export function RecipeCard({
   return (
     <article
       className="
-        w-[95%] sm:w-[90%] md:w-[85%] lg:w-[75%] xl:w-[65%] max-w-[1100px]
-        mx-auto bg-section-bg rounded-3xl p-8 lg:p-12 shadow-md text-body-text
-        flex flex-col gap-8 relative
+        w-[95%]
+        sm:w-[90%]
+        md:w-[85%]
+        lg:w-[75%]
+        xl:w-[65%]
+        max-w-[1100px]
+        mx-auto
+        bg-section-bg
+        rounded-3xl
+        p-8
+        lg:p-12
+        shadow-md
+        text-body-text
+        flex
+        flex-col
+        gap-8
+        relative
       "
     >
-      {/* BACK BUTTON - STICKY */}
-      <button
-        onClick={() => router.back()}
-        className="
-          fixed top-4 left-4 flex items-center gap-2 p-3
-          rounded-full bg-white shadow-md z-50
-          cursor-pointer transition duration-200
-          hover:scale-110 hover:opacity-90
-        "
-        title="Go back"
-      >
-        <Image
-          src={backArrow}
-          alt="Back"
-          width={36}
-          height={36}
-          className="w-9 aspect-square"
-        />
-        <span className="text-sm font-semibold text-primary-text">Back</span>
-      </button>
-
       {/* HEADER */}
       <header className="relative flex flex-col items-center gap-4 mb-6">
+        <button
+          onClick={() => router.back()}
+          className="
+            absolute left-0 top-1/2 -translate-y-1/2
+            flex items-center gap-2 p-2
+            cursor-pointer
+            transition duration-200
+            hover:scale-110 hover:opacity-80
+          "
+          title="Go back"
+        >
+          <Image
+            src={backArrow}
+            alt="Back"
+            width={36}
+            height={36}
+            className="w-9 aspect-square"
+          />
+          <span className="text-sm font-semibold text-primary-text">
+            Back
+          </span>
+        </button>
+
         <div className="flex flex-col items-center text-center gap-2">
           <h1 className="text-3xl md:text-4xl font-bold text-primary-text font-playfair">
             {recipe.title}
@@ -149,47 +167,7 @@ export function RecipeCard({
             </span>{" "}
             {recipe.recipe_type?.replace("_", " ")}
           </h3>
-
-          {/* LIKE BUTTON - NEAR TITLE WITH COUNT */}
-          {!isCreator && (
-            <div className="flex items-center gap-2 mt-2">
-              <LikeButton recipeId={recipe.id} />
-              <span className="text-xs text-text-muted">
-                {recipe.likes_count ?? 0} likes
-              </span>
-            </div>
-          )}
         </div>
-
-        {/* DELETE BUTTON - MOVED TO HEADER */}
-        {isCreator && (
-          <div className="absolute top-0 right-0 flex flex-col items-center mt-4 mr-4">
-            <span className="text-xs text-red-500 font-medium mb-1">
-              Delete Recipe
-            </span>
-            <button
-              onClick={() => setIsModalOpen(true)}
-              disabled={deleting}
-              className={`
-                flex items-center gap-1 px-3 py-2 rounded-full
-                transition-all duration-200
-                ${
-                  deleting
-                    ? "bg-red-100 opacity-60 cursor-not-allowed"
-                    : "bg-red-50 hover:bg-red-100 hover:scale-105 text-red-500"
-                }
-              `}
-              aria-label="Delete Recipe"
-            >
-              <TrashIcon className="w-6 h-6" />
-              {deleting ? (
-                <span className="text-xs animate-pulse">Deleting...</span>
-              ) : (
-                <span>Delete</span>
-              )}
-            </button>
-          </div>
-        )}
       </header>
 
       {/* DESCRIPTION */}
@@ -201,13 +179,13 @@ export function RecipeCard({
       {publicImageUrl && (
         <div
           className={`relative w-full h-[420px] md:h-[520px] rounded-2xl overflow-hidden transition-all duration-700 ${
-            showImage ? "opacity-100 translate-y-0" : "opacity-0 translate-y-4"
+            showImage
+              ? "opacity-100 translate-y-0"
+              : "opacity-0 translate-y-4"
           }`}
         >
           {!imageLoaded && (
-            <div className="absolute inset-0 bg-gray-200 animate-pulse flex items-center justify-center">
-              <span className="text-gray-500">Loading image...</span>
-            </div>
+            <div className="absolute inset-0 bg-gray-200 animate-pulse" />
           )}
 
           <Image
@@ -226,7 +204,9 @@ export function RecipeCard({
       {/* INGREDIENTS */}
       <section
         className={`transition-all duration-700 ${
-          showIngredients ? "opacity-100 translate-y-0" : "opacity-0 translate-y-4"
+          showIngredients
+            ? "opacity-100 translate-y-0"
+            : "opacity-0 translate-y-4"
         }`}
       >
         <h2 className="text-xl font-semibold mb-3 text-primary-text font-playfair border-b pb-1">
@@ -253,7 +233,9 @@ export function RecipeCard({
       {/* INSTRUCTIONS */}
       <section
         className={`transition-all duration-700 ${
-          showInstructions ? "opacity-100 translate-y-0" : "opacity-0 translate-y-4"
+          showInstructions
+            ? "opacity-100 translate-y-0"
+            : "opacity-0 translate-y-4"
         }`}
       >
         <h2 className="text-xl font-semibold mb-3 text-primary-text font-playfair border-b pb-1">
@@ -306,6 +288,34 @@ export function RecipeCard({
                 Like this recipe
               </span>
               <LikeButton recipeId={recipe.id} />
+            </div>
+          )}
+
+          {isCreator && (
+            <div className="flex flex-col items-center">
+              <span className="text-xs text-red-500 font-medium mb-1">
+                Delete your recipe
+              </span>
+              <button
+                onClick={() => setIsModalOpen(true)}
+                disabled={deleting}
+                className={`
+                  w-10 h-10 flex items-center justify-center rounded-full
+                  transition-all duration-200
+                  ${
+                    deleting
+                      ? "bg-red-100 opacity-60 cursor-not-allowed"
+                      : "cursor-pointer hover:bg-red-100 hover:scale-110 active:scale-95 text-red-500"
+                  }
+                `}
+                aria-label="Delete Recipe"
+              >
+                {deleting ? (
+                  <span className="text-xs animate-pulse">...</span>
+                ) : (
+                  <TrashIcon className="w-6 h-6" />
+                )}
+              </button>
             </div>
           )}
         </div>
