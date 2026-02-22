@@ -17,6 +17,9 @@ import { LikeButton } from "../LikeButton";
 type Recipe = Database["public"]["Tables"]["recipes"]["Row"];
 type Profile = Database["public"]["Tables"]["profiles"]["Row"];
 
+// NOTE: This component assumes LikeButton renders a <button> internally.
+// We make the entire wrapper clickable by forwarding clicks to that button.
+
 export function RecipeCard({
   recipe,
   isLoading,
@@ -117,12 +120,9 @@ export function RecipeCard({
     if (!root) return;
 
     const innerButton = root.querySelector("button") as HTMLButtonElement | null;
+
     // If user clicked the actual LikeButton, let it handle the click (avoid double toggle)
-    if (
-      innerButton &&
-      e.target instanceof Node &&
-      innerButton.contains(e.target)
-    ) {
+    if (innerButton && e.target instanceof Node && innerButton.contains(e.target)) {
       return;
     }
 
@@ -208,9 +208,7 @@ export function RecipeCard({
             showImage ? "opacity-100 translate-y-0" : "opacity-0 translate-y-4"
           }`}
         >
-          {!imageLoaded && (
-            <div className="absolute inset-0 bg-gray-200 animate-pulse" />
-          )}
+          {!imageLoaded && <div className="absolute inset-0 bg-gray-200 animate-pulse" />}
 
           <Image
             src={publicImageUrl}
@@ -247,13 +245,7 @@ export function RecipeCard({
         </ul>
 
         <div className="w-24 h-20 mt-6 flex items-center justify-center">
-          <Image
-            src={CakeImage}
-            alt="Decoration"
-            width={90}
-            height={90}
-            className="object-contain -rotate-12"
-          />
+          <Image src={CakeImage} alt="Decoration" width={90} height={90} className="object-contain -rotate-12" />
         </div>
       </section>
 
@@ -279,13 +271,7 @@ export function RecipeCard({
         </ol>
 
         <div className="w-24 h-20 mt-6 flex items-center justify-center">
-          <Image
-            src={SoupImage}
-            alt="Decoration"
-            width={80}
-            height={80}
-            className="object-contain rotate-12"
-          />
+          <Image src={SoupImage} alt="Decoration" width={80} height={80} className="object-contain rotate-12" />
         </div>
       </section>
 
@@ -312,7 +298,7 @@ export function RecipeCard({
         </span>
 
         <div className="flex flex-col sm:flex-row items-center gap-6">
-          {/* LIKE: whole wrapper clickable + clearer hover/active animation */}
+          {/* LIKE: whole wrapper clickable + responsive hover/active animation */}
           {!isCreator && (
             <div
               ref={likeWrapperRef}
@@ -346,7 +332,7 @@ export function RecipeCard({
             </div>
           )}
 
-          {/* DELETE: whole wrapper clickable + clearer hover/active animation */}
+          {/* DELETE: add border like Like button + responsive hover/active animation */}
           {isCreator && (
             <button
               type="button"
@@ -357,14 +343,16 @@ export function RecipeCard({
               className={`
                 group
                 flex flex-col items-center
+                border border-red-300/70
                 rounded-xl px-4 py-3
+                bg-white/60
                 transition-all duration-200
                 focus-visible:outline-none
                 focus-visible:ring-2 focus-visible:ring-red-400 focus-visible:ring-offset-2
                 ${
                   deleting
                     ? "opacity-60 cursor-not-allowed"
-                    : "cursor-pointer hover:shadow-md hover:-translate-y-[1px] hover:scale-[1.02] active:scale-[0.98]"
+                    : "cursor-pointer hover:border-red-400 hover:shadow-md hover:-translate-y-[1px] hover:scale-[1.02] active:scale-[0.98]"
                 }
               `}
             >
@@ -398,11 +386,7 @@ export function RecipeCard({
         <Modal
           handleAction={handleDelete}
           setIsModalOpen={setIsModalOpen}
-          title={
-            deleting
-              ? "Deleting recipe..."
-              : "Are you sure you want to delete this recipe?"
-          }
+          title={deleting ? "Deleting recipe..." : "Are you sure you want to delete this recipe?"}
         />
       )}
     </article>
