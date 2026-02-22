@@ -87,10 +87,11 @@ export function RecipeCard({
   return (
     <article className="w-full max-w-[900px] lg:max-w-[1000px] bg-section-bg rounded-3xl p-10 lg:p-12 shadow-md text-body-text flex flex-col gap-6 relative mx-auto">
       {/* ---------------- Header Section ---------------- */}
-      <header className="flex flex-col sm:flex-row sm:items-center gap-4 sm:gap-8 mb-8">
+      <header className="relative flex flex-col items-center gap-4 mb-8">
+        {/* Back button (absolute left) */}
         <button
           onClick={() => router.back()}
-          className="flex items-center gap-2 p-2 cursor-pointer transition duration-200 hover:scale-110 hover:opacity-80 mr-4"
+          className="absolute left-0 top-1/2 -translate-y-1/2 flex items-center gap-2 p-2 cursor-pointer transition duration-200 hover:scale-110 hover:opacity-80"
           title="Go back to recipes"
         >
           <Image
@@ -103,7 +104,8 @@ export function RecipeCard({
           <span className="text-sm font-semibold text-primary-text">Back</span>
         </button>
 
-        <div className="flex flex-col sm:flex-row sm:items-center gap-3 flex-1">
+        {/* Centered title and metadata */}
+        <div className="flex flex-col items-center text-center gap-2">
           <h1 className="text-3xl md:text-4xl font-bold text-primary-text font-playfair break-words">
             {recipe.title}
           </h1>
@@ -202,15 +204,28 @@ export function RecipeCard({
         <span>{author?.username?.split("@")[0]}</span>
 
         <div className="flex flex-col sm:flex-row items-center gap-5">
-          {!isCreator && <LikeButton recipeId={recipe.id} />}
+          {/* Like button discoverability */}
+          {!isCreator && (
+            <div className="flex flex-col items-center">
+              <span className="text-xs text-text-muted mb-1">Like this recipe</span>
+              <LikeButton recipeId={recipe.id} />
+            </div>
+          )}
+
+          {/* Delete button discoverability */}
           {isCreator && (
-            <button
-              onClick={() => setIsModalOpen(true)}
-              className="w-8 h-8 flex items-center justify-center cursor-pointer transition-all duration-200 hover:scale-110 active:scale-95 hover:text-error-border"
-              aria-label="Delete Recipe"
-            >
-              <TrashIcon className="w-7 h-7" />
-            </button>
+            <div className="flex flex-col items-center">
+              <span className="text-xs text-text-muted mb-1">
+                Delete your recipe
+              </span>
+              <button
+                onClick={() => setIsModalOpen(true)}
+                className="w-8 h-8 flex items-center justify-center cursor-pointer transition-all duration-200 hover:scale-110 active:scale-95 hover:text-error-border"
+                aria-label="Delete Recipe"
+              >
+                <TrashIcon className="w-7 h-7" />
+              </button>
+            </div>
           )}
         </div>
       </footer>
