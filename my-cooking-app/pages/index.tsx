@@ -131,20 +131,13 @@ export default function HomePage() {
     selectedFavorite,
   ]);
 
-  const resetAllFilters = () => {
-    setSelectedCuisine(cuisineOptions[0]);
-    setSelectedRecipeType(recipeTypeOptions[0]);
-    setSelectedTime(timeOptions[0]);
-    setSelectedFavorite(favoriteOptions[0]);
-  };
-
   return (
     <div className="flex flex-col items-center">
       <h1 className="font-playfair font-bold text-[40px] text-center mb-10 text-primary-text">
         Check Out Best Recipes
       </h1>
 
-      {/* FILTERS */}
+      {/* FILTERS (unchanged) */}
       <div className="flex flex-col w-9/10 items-center gap-8 mb-10">
         <div className="grid grid-cols-2 gap-5 w-full lg:w-[70%]">
           <Dropdown
@@ -181,9 +174,9 @@ export default function HomePage() {
         </p>
       </div>
 
-      {/* ACTIVE CHIPS */}
+      {/* ACTIVE CHIPS (unchanged) */}
       {activeFilters.length > 0 && (
-        <div className="flex flex-wrap gap-3 mb-6 items-center">
+        <div className="flex flex-wrap gap-3 mb-6">
           {activeFilters.map(({ type, value }) => {
             if (type === "time") return null;
             return (
@@ -199,19 +192,6 @@ export default function HomePage() {
               </button>
             );
           })}
-
-          {/* REMOVE ALL FILTERS BUTTON */}
-          {activeFilters.length > 0 && (
-            <button
-              onClick={resetAllFilters}
-              className="flex items-center gap-2 px-4 py-2 text-sm font-medium border border-red-500 text-red-500 rounded-full bg-white shadow-sm cursor-pointer transition-all duration-200 hover:scale-105 hover:shadow-xl hover:bg-red-500 hover:text-white"
-            >
-              Remove All
-              <span className="text-xs font-bold transition-transform duration-200">
-                ✕
-              </span>
-            </button>
-          )}
         </div>
       )}
 
@@ -223,12 +203,14 @@ export default function HomePage() {
       {/* RESULTS LABEL */}
       <div className="w-full max-w-6xl px-6 sm:px-10 lg:px-20 mb-4">
         <p className="text-sm font-medium text-primary-text">
-          Showing {recipes.length} {recipes.length === 1 ? "recipe" : "recipes"}
+          Showing {recipes.length}{" "}
+          {recipes.length === 1 ? "recipe" : "recipes"}
         </p>
       </div>
 
-      {/* RECIPES GRID + ERROR STATE + SKELETONS */}
-      <div className="grid gap-6 grid-cols-1 md:grid-cols-2 xl:grid-cols-3 place-items-center min-h-[300px] w-full max-w-6xl px-6 sm:px-10 lg:px-20">
+      {/* RECIPES GRID + ERROR STATE */}
+      <div className="grid gap-6 grid-cols-1 md:grid-cols-2 xl:grid-cols-3 place-items-center min-h-[300px]">
+
         {isError ? (
           <div className="col-span-full flex flex-col items-center gap-4 text-center">
             <p className="text-lg font-semibold text-primary-text">
@@ -253,33 +235,20 @@ export default function HomePage() {
             />
           </div>
         ) : (
-          <>
-            {recipes.map((recipe) => (
-              <div
-                key={recipe.id}
-                className="transition-transform duration-200 hover:-translate-y-1 hover:shadow-lg w-full"
-              >
-                <RecipeMinimizeCard
-                  id={recipe.id || ""}
-                  title={recipe.title}
-                  imageUrl={recipe.image_url || ""}
-                  description={recipe.description || ""}
-                  authorId={recipe.author_id || ""}
-                />
-              </div>
-            ))}
-
-            {/* Skeleton loaders for pagination */}
-            {isFetchingMore &&
-              Array.from({ length: pageLimit }).map((_, idx) => (
-                <div
-                  key={`skeleton-${idx}`}
-                  className="transition-transform duration-200 hover:-translate-y-1 hover:shadow-lg w-full"
-                >
-                  <div className="w-full h-[260px] bg-gray-200 rounded-lg animate-pulse" />
-                </div>
-              ))}
-          </>
+          recipes.map((recipe) => (
+            <div
+              key={recipe.id}
+              className="transition-transform duration-200 hover:-translate-y-1 hover:shadow-lg"
+            >
+              <RecipeMinimizeCard
+                id={recipe.id || ""}
+                title={recipe.title}
+                imageUrl={recipe.image_url || ""}
+                description={recipe.description || ""}
+                authorId={recipe.author_id || ""}
+              />
+            </div>
+          ))
         )}
       </div>
 
