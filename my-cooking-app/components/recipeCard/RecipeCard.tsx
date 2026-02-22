@@ -85,7 +85,7 @@ export function RecipeCard({
   };
 
   return (
-    <article className="w-full max-w-[900px] lg:max-w-[1000px] bg-section-bg rounded-3xl p-10 lg:p-12 shadow-md text-body-text flex flex-col gap-6 relative mx-auto">
+    <article className="w-full max-w-[900px] min-w-[320px] lg:max-w-[1000px] bg-section-bg rounded-3xl p-10 lg:p-12 shadow-md text-body-text flex flex-col gap-6 relative mx-auto">
       {/* ---------------- Header Section ---------------- */}
       <header className="relative flex flex-col items-center gap-4 mb-8">
         {/* Back button (absolute left) */}
@@ -215,9 +215,7 @@ export function RecipeCard({
           {/* Delete button discoverability */}
           {isCreator && (
             <div className="flex flex-col items-center">
-              <span className="text-xs text-text-muted mb-1">
-                Delete your recipe
-              </span>
+              <span className="text-xs text-text-muted mb-1">Delete your recipe</span>
               <button
                 onClick={() => setIsModalOpen(true)}
                 className="w-8 h-8 flex items-center justify-center cursor-pointer transition-all duration-200 hover:scale-110 active:scale-95 hover:text-error-border"
