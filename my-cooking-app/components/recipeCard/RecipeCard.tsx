@@ -84,9 +84,9 @@ export function RecipeCard({
   };
 
   return (
-    <article className="w-full max-w-[360px] md:max-w-[720px] bg-section-bg rounded-3xl p-8 shadow-md text-body-text flex flex-col gap-6 relative">
-      {/* Header */}
-      <header className="flex items-center gap-3 flex-wrap">
+    <article className="w-full max-w-[360px] md:max-w-[720px] bg-section-bg rounded-3xl p-8 shadow-lg text-body-text flex flex-col gap-8 relative">
+      {/* ---------------- Header Section ---------------- */}
+      <header className="flex flex-col sm:flex-row sm:items-center gap-4 sm:gap-6 mb-8">
         <button
           onClick={() => router.back()}
           className="flex items-center gap-2 p-2 cursor-pointer transition duration-200 hover:scale-110 hover:opacity-80"
@@ -102,34 +102,44 @@ export function RecipeCard({
           <span className="text-sm font-semibold text-primary-text">Back</span>
         </button>
 
-        <h1 className="text-3xl font-bold text-primary-text font-playfair lg:mr-5 break-words">
-          {recipe.title}
-        </h1>
-
-        <h3 className="text-primary-text text-sm">
-          <span className="font-playfair font-semibold text-text-muted">
-            Cuisine:
-          </span>{" "}
-          <span className="font-normal">{recipe.cuisine}</span>
-          <br />
-          <span className="font-playfair font-semibold text-text-muted">
-            Type:
-          </span>{" "}
-          <span className="font-normal">
-            {recipe.recipe_type?.replace("_", " ")}
-          </span>
-        </h3>
+        <div className="flex flex-col sm:flex-row sm:items-center gap-3 flex-1">
+          <h1 className="text-3xl md:text-4xl font-bold text-primary-text font-playfair break-words">
+            {recipe.title}
+          </h1>
+          <h3 className="text-primary-text text-sm md:text-base">
+            <span className="font-playfair font-semibold text-text-muted">
+              Cuisine:
+            </span>{" "}
+            <span className="font-normal">{recipe.cuisine}</span>
+            <br />
+            <span className="font-playfair font-semibold text-text-muted">
+              Type:
+            </span>{" "}
+            <span className="font-normal">
+              {recipe.recipe_type?.replace("_", " ")}
+            </span>
+          </h3>
+        </div>
       </header>
 
-      {/* Description */}
-      <p className="text-sm leading-relaxed text-body-text">{recipe.description}</p>
+      {/* ---------------- Description Section ---------------- */}
+      <section className="mb-8 p-4 bg-white rounded-2xl shadow-sm" aria-labelledby="recipe-description">
+        <h2
+          id="recipe-description"
+          className="text-2xl font-semibold mb-2 text-primary-text font-playfair border-b border-gray-200 pb-1"
+        >
+          Description
+        </h2>
+        <p className="text-sm leading-relaxed text-body-text">{recipe.description}</p>
+      </section>
 
-      {/* Main Recipe Image */}
+      {/* ---------------- Main Image Section ---------------- */}
       {publicImageUrl && (
-        <div
-          className={`relative w-full h-[300px] rounded-2xl overflow-hidden transition-opacity duration-700 ${
+        <section
+          className={`relative w-full h-[400px] md:h-[500px] rounded-2xl overflow-hidden shadow-md transition-opacity duration-700 mb-8 ${
             showImage ? "opacity-100" : "opacity-0"
           }`}
+          aria-label="Recipe main image"
         >
           <Image
             src={publicImageUrl}
@@ -138,19 +148,23 @@ export function RecipeCard({
             sizes="100%"
             className="object-contain"
           />
-        </div>
+        </section>
       )}
 
-      {/* Ingredients */}
+      {/* ---------------- Ingredients Section ---------------- */}
       <section
-        className={`transition-opacity duration-700 ${
+        className={`transition-opacity duration-700 mb-8 p-4 bg-white rounded-2xl shadow-sm ${
           showIngredients ? "opacity-100" : "opacity-0"
         }`}
+        aria-labelledby="recipe-ingredients"
       >
-        <h2 className="text-xl font-semibold mb-2 text-primary-text font-playfair">
+        <h2
+          id="recipe-ingredients"
+          className="text-2xl font-semibold mb-2 text-primary-text font-playfair border-b border-gray-200 pb-1"
+        >
           Ingredients
         </h2>
-        <ul className="list-disc ml-5 text-sm flex flex-col gap-1">
+        <ul className="list-disc ml-5 text-sm flex flex-col gap-1 mt-2">
           {recipe.ingredients.map((item, i) => (
             <li key={i} className="text-body-text">
               {item}
@@ -168,16 +182,20 @@ export function RecipeCard({
         </div>
       </section>
 
-      {/* Instructions */}
+      {/* ---------------- Instructions Section ---------------- */}
       <section
-        className={`transition-opacity duration-700 ${
+        className={`transition-opacity duration-700 mb-8 p-4 bg-white rounded-2xl shadow-sm ${
           showInstructions ? "opacity-100" : "opacity-0"
         }`}
+        aria-labelledby="recipe-instructions"
       >
-        <h2 className="text-xl font-semibold mb-2 text-primary-text font-playfair">
+        <h2
+          id="recipe-instructions"
+          className="text-2xl font-semibold mb-2 text-primary-text font-playfair border-b border-gray-200 pb-1"
+        >
           Instructions
         </h2>
-        <ol className="list-decimal ml-5 text-sm flex flex-col gap-1">
+        <ol className="list-decimal ml-5 text-sm flex flex-col gap-1 mt-2">
           {recipe.instructions.map((step, i) => (
             <li key={i} className="text-body-text">
               {step}
@@ -195,12 +213,11 @@ export function RecipeCard({
         </div>
       </section>
 
-      {/* Footer */}
+      {/* ---------------- Footer Section ---------------- */}
       <footer className="flex justify-between items-center text-sm text-body-text">
-        <span>{author?.username?.split("@")[0]}</span>
+        <span className="font-medium">{author?.username?.split("@")[0]}</span>
 
         <div className="flex flex-col sm:flex-row items-center gap-5">
-          {/* Like button discoverability */}
           {!isCreator && (
             <div className="relative group">
               <LikeButton recipeId={recipe.id} />
@@ -210,7 +227,6 @@ export function RecipeCard({
             </div>
           )}
 
-          {/* Delete button discoverability */}
           {isCreator && (
             <div className="relative group">
               <button
@@ -228,7 +244,7 @@ export function RecipeCard({
         </div>
       </footer>
 
-      {/* Modal */}
+      {/* ---------------- Modal ---------------- */}
       {isModalOpen && (
         <Modal
           handleAction={handleDelete}
