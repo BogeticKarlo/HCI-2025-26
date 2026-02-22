@@ -51,21 +51,72 @@ export default function UploadRecipes() {
 
   if (!user) return null;
 
-  // Mapping improvement: compute recipe preview summary from inputs
-  const cuisinePreview =
-    selectedCuisine?.id !== "all" ? selectedCuisine.label : "—";
-  const typePreview =
-    selectedRecipeType?.id !== "all" ? selectedRecipeType.label : "—";
-  const ingredientsCount = ingredients.filter((i) => i.trim()).length;
-  const stepsCount = steps.filter((s) => s.trim()).length;
+  /* ---------------- CONSTRAINTS (Norman) ----------------
+   * 1) Disable Upload until all required fields are plausibly complete (prevents slips).
+   * 2) Show a clear “what’s missing” checklist (reduces trial & error).
+   * 3) Hard-stop if user tries anyway (e.g., Enter key or custom button behavior).
+   * 4) Treat list fields as valid only if they contain at least 1 non-empty item.
+   */
+
+  const trimmedIngredientsCount = useMemo(
+    () => ingredients.filter((v) => v.trim()).length,
+    [ingredients],
+  );
+
+  const trimmedStepsCount = useMemo(
+    () => steps.filter((v) => v.trim()).length,
+    [steps],
+  );
+
+  const missingItems = useMemo(() => {
+    const missing: string[] = [];
+    if (!title.trim()) missing.push("Title");
+    if (!description.trim()) missing.push("Description");
+    if (selectedCuisine.id === "all") missing.push("Cuisine");
+    if (selectedRecipeType.id === "all") missing.push("Recipe type");
+    if (trimmedIngredientsCount === 0) missing.push("At least 1 ingredient");
+    if (trimmedStepsCount === 0) missing.push("At least 1 step");
+    if (!image) missing.push("Photo");
+    return missing;
+  }, [
+    title,
+    description,
+    selectedCuisine.id,
+    selectedRecipeType.id,
+    trimmedIngredientsCount,
+    trimmedStepsCount,
+    image,
+  ]);
+
+  const canAttemptSubmit = useMemo(() => {
+    return (
+      title.trim().length > 0 &&
+      description.trim().length > 0 &&
+      selectedCuisine.id !== "all" &&
+      selectedRecipeType.id !== "all" &&
+      trimmedIngredientsCount > 0 &&
+      trimmedStepsCount > 0 &&
+      !!image &&
+      !isLoading
+    );
+  }, [
+    title,
+    description,
+    selectedCuisine.id,
+    selectedRecipeType.id,
+    trimmedIngredientsCount,
+    trimmedStepsCount,
+    image,
+    isLoading,
+  ]);
 
   // Progress includes image now (7 total)
   const completedCount = useMemo(() => {
     let count = 0;
     if (title.trim()) count += 1;
     if (description.trim()) count += 1;
-    if (ingredients.some((v) => v.trim())) count += 1;
-    if (steps.some((v) => v.trim())) count += 1;
+    if (trimmedIngredientsCount > 0) count += 1;
+    if (trimmedStepsCount > 0) count += 1;
     if (selectedCuisine.id !== "all") count += 1;
     if (selectedRecipeType.id !== "all") count += 1;
     if (image) count += 1;
@@ -73,8 +124,8 @@ export default function UploadRecipes() {
   }, [
     title,
     description,
-    ingredients,
-    steps,
+    trimmedIngredientsCount,
+    trimmedStepsCount,
     selectedCuisine.id,
     selectedRecipeType.id,
     image,
@@ -97,7 +148,50 @@ export default function UploadRecipes() {
     }
   }, [status]);
 
+  const applyConstraintErrors = () => {
+    // This keeps your existing per-field error UI working.
+    setErrors((prev) => ({
+      ...prev,
+      ...(title.trim() ? {} : { title: prev.title || "Title is required." }),
+      ...(description.trim()
+        ? {}
+        : { description: prev.description || "Description is required." }),
+      ...(selectedCuisine.id !== "all"
+        ? {}
+        : { selectedCuisine: prev.selectedCuisine || "Cuisine is required." }),
+      ...(selectedRecipeType.id !== "all"
+        ? {}
+        : {
+            selectedRecipeType:
+              prev.selectedRecipeType || "Recipe type is required.",
+          }),
+      ...(trimmedIngredientsCount > 0
+        ? {}
+        : {
+            ingredients:
+              prev.ingredients || "Add at least 1 ingredient (not empty).",
+          }),
+      ...(trimmedStepsCount > 0
+        ? {}
+        : { steps: prev.steps || "Add at least 1 step (not empty)." }),
+      ...(image ? {} : { image: prev.image || "Image is required." }),
+    }));
+  };
+
   const handleUploadRecipe = async () => {
+    // Constraint hard-stop: prevents invalid upload attempts
+    if (!canAttemptSubmit) {
+      setStatus("error");
+      applyConstraintErrors();
+
+      showBanner(
+        "Not ready to upload",
+        `Please complete: ${missingItems.join(", ")}.`,
+        "error",
+      );
+      return;
+    }
+
     setIsLoading(true);
     setStatus("validating");
 
@@ -162,7 +256,6 @@ export default function UploadRecipes() {
     }
 
     const imagePath = fullPath.split("/").pop();
-
     const recipe = recipeDataFormating(formData, user.id, imagePath);
 
     try {
@@ -240,56 +333,15 @@ export default function UploadRecipes() {
         </div>
       </div>
 
-      {/* Mapping improvement: Live preview summary (shows how inputs map to final recipe card) */}
-      <div className="max-w-[360px] md:max-w-[720px] mx-auto mb-6 px-2">
-        <div className="border border-gray-200 rounded-2xl bg-white/60 p-4">
-          <p className="text-sm font-semibold text-primary-text mb-2">
-            Preview summary
-          </p>
-
-          <div className="grid grid-cols-2 gap-3 text-xs text-primary-text">
-            <div className="flex flex-col">
-              <span className="opacity-80">Title</span>
-              <span className="font-semibold">
-                {title.trim() ? title : "—"}
-              </span>
-            </div>
-
-            <div className="flex flex-col">
-              <span className="opacity-80">Image</span>
-              <span className="font-semibold">
-                {image ? "Selected ✅" : "Not selected"}
-              </span>
-            </div>
-
-            <div className="flex flex-col">
-              <span className="opacity-80">Cuisine</span>
-              <span className="font-semibold">{cuisinePreview}</span>
-            </div>
-
-            <div className="flex flex-col">
-              <span className="opacity-80">Type</span>
-              <span className="font-semibold">{typePreview}</span>
-            </div>
-
-            <div className="flex flex-col">
-              <span className="opacity-80">Ingredients</span>
-              <span className="font-semibold">{ingredientsCount} items</span>
-            </div>
-
-            <div className="flex flex-col">
-              <span className="opacity-80">Steps</span>
-              <span className="font-semibold">{stepsCount} steps</span>
-            </div>
-          </div>
-
-          <p className="mt-3 text-xs text-primary-text opacity-80">
-            This is what will appear on your recipe page after upload.
-          </p>
-        </div>
-      </div>
-
       <div className="bg-section-bg shadow-md border border-input-border rounded-2xl flex flex-col items-center w-full max-w-[360px] md:max-w-[720px] mx-auto p-6 gap-8">
+        {/* Constraint: show exactly what’s missing (prevents trial-and-error) */}
+        {!canAttemptSubmit && missingItems.length > 0 && (
+          <div className="w-full border border-gray-300 bg-white/60 p-3 rounded-2xl text-sm text-center text-primary-text">
+            <span className="font-semibold">To upload, complete:</span>{" "}
+            {missingItems.join(", ")}.
+          </div>
+        )}
+
         {hasErrors && (
           <div className="w-full border border-error-border text-error-border bg-error p-3 rounded-2xl text-sm text-center">
             Some required fields are missing. Please fix the highlighted inputs
@@ -438,7 +490,12 @@ export default function UploadRecipes() {
             className="w-2/3 mx-auto mt-1"
             onClick={handleUploadRecipe}
             isLoading={isLoading}
-            disabled={isLoading}
+            disabled={!canAttemptSubmit}
+            title={
+              canAttemptSubmit
+                ? "Upload your recipe"
+                : `Complete: ${missingItems.join(", ")}`
+            }
           >
             {status === "uploadingImage"
               ? "Uploading Image..."
@@ -448,7 +505,8 @@ export default function UploadRecipes() {
           </Button>
 
           <p className="text-xs text-primary-text opacity-80 text-center">
-            Required fields are marked with <span className="font-semibold">*</span>
+            Required fields are marked with{" "}
+            <span className="font-semibold">*</span>
           </p>
         </div>
       </div>
