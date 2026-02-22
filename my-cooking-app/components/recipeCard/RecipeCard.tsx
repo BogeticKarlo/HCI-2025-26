@@ -3,7 +3,7 @@
 import Image from "next/image";
 import { useRouter } from "next/navigation";
 import { RecipeCardSkeleton } from "./RecipeSkeletonLoaderCard";
-import { useState, useEffect } from "react";
+import { useRef, useState, useEffect } from "react";
 import CakeImage from "../../public/assets/cake.png";
 import SoupImage from "../../public/assets/soup.png";
 import backArrow from "../../public/assets/backArrow.png";
@@ -41,6 +41,8 @@ export function RecipeCard({
   const [showImage, setShowImage] = useState(false);
   const [showIngredients, setShowIngredients] = useState(false);
   const [showInstructions, setShowInstructions] = useState(false);
+
+  const likeWrapperRef = useRef<HTMLDivElement | null>(null);
 
   const isCreator = user?.id === recipe?.author_id;
 
@@ -100,6 +102,13 @@ export function RecipeCard({
       setDeleting(false);
       setIsModalOpen(false);
     }
+  };
+
+  const triggerInnerLikeClick = () => {
+    const root = likeWrapperRef.current;
+    if (!root) return;
+    const innerButton = root.querySelector("button") as HTMLButtonElement | null;
+    innerButton?.click();
   };
 
   return (
@@ -284,9 +293,20 @@ export function RecipeCard({
         </span>
 
         <div className="flex flex-col sm:flex-row items-center gap-6">
-          {/* Like: visible border even before interaction */}
+          {/* LIKE: whole wrapper clickable */}
           {!isCreator && (
             <div
+              ref={likeWrapperRef}
+              role="button"
+              tabIndex={0}
+              aria-label="Like this recipe"
+              onClick={triggerInnerLikeClick}
+              onKeyDown={(e) => {
+                if (e.key === "Enter" || e.key === " ") {
+                  e.preventDefault();
+                  triggerInnerLikeClick();
+                }
+              }}
               className="
                 flex flex-col items-center
                 border border-accent/40
@@ -294,39 +314,47 @@ export function RecipeCard({
                 bg-white/60
                 transition-all duration-200
                 hover:border-accent hover:shadow-sm
-                focus-within:ring-2 focus-within:ring-accent focus-within:ring-offset-2
+                cursor-pointer
+                focus:outline-none
+                focus-visible:ring-2 focus-visible:ring-accent focus-visible:ring-offset-2
+                select-none
               "
+              title="Like this recipe"
             >
               <span className="text-xs text-text-muted mb-1">Like this recipe</span>
 
-              <div className="cursor-pointer flex items-center justify-center">
-                <LikeButton recipeId={recipe.id} />
-              </div>
+              {/* keep LikeButton as-is (no nested button issues) */}
+              <LikeButton recipeId={recipe.id} />
             </div>
           )}
 
-          {/* Delete */}
+          {/* DELETE: whole wrapper clickable */}
           {isCreator && (
-            <div className="flex flex-col items-center">
+            <button
+              type="button"
+              onClick={() => setIsModalOpen(true)}
+              disabled={deleting}
+              title="Delete recipe"
+              aria-label="Delete recipe"
+              className={`
+                group
+                flex flex-col items-center
+                rounded-xl px-3 py-2
+                transition-all duration-200
+                focus-visible:outline-none
+                focus-visible:ring-2 focus-visible:ring-red-400 focus-visible:ring-offset-2
+                ${deleting ? "opacity-60 cursor-not-allowed" : "cursor-pointer"}
+              `}
+            >
               <span className="text-xs text-red-500 font-medium mb-1">
                 Delete your recipe
               </span>
 
-              <button
-                onClick={() => setIsModalOpen(true)}
-                disabled={deleting}
-                title="Delete recipe"
-                aria-label="Delete Recipe"
+              <span
                 className={`
                   w-10 h-10 flex items-center justify-center rounded-full
                   transition-all duration-200
-                  focus-visible:outline-none
-                  focus-visible:ring-2 focus-visible:ring-red-400 focus-visible:ring-offset-2
-                  ${
-                    deleting
-                      ? "bg-red-100 opacity-60 cursor-not-allowed"
-                      : "cursor-pointer text-red-500 hover:bg-red-100 hover:scale-110 active:scale-95"
-                  }
+                  ${deleting ? "bg-red-100" : "text-red-500 group-hover:bg-red-100 group-hover:scale-110 active:scale-95"}
                 `}
               >
                 {deleting ? (
@@ -334,8 +362,8 @@ export function RecipeCard({
                 ) : (
                   <TrashIcon className="w-6 h-6" />
                 )}
-              </button>
-            </div>
+              </span>
+            </button>
           )}
         </div>
       </footer>
@@ -344,11 +372,7 @@ export function RecipeCard({
         <Modal
           handleAction={handleDelete}
           setIsModalOpen={setIsModalOpen}
-          title={
-            deleting
-              ? "Deleting recipe..."
-              : "Are you sure you want to delete this recipe?"
-          }
+          title={deleting ? "Deleting recipe..." : "Are you sure you want to delete this recipe?"}
         />
       )}
     </article>
