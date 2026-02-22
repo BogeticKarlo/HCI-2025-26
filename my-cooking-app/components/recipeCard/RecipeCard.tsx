@@ -30,7 +30,7 @@ export function RecipeCard({
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [deleting, setDeleting] = useState(false);
 
-  // Controls for progressive display
+  // Progressive display
   const [showImage, setShowImage] = useState(false);
   const [showIngredients, setShowIngredients] = useState(false);
   const [showInstructions, setShowInstructions] = useState(false);
@@ -50,7 +50,7 @@ export function RecipeCard({
     fetchData();
   }, [recipe?.author_id]);
 
-  // Progressive display effect
+  // Progressive reveal
   useEffect(() => {
     if (!recipe) return;
     setShowImage(false);
@@ -58,7 +58,6 @@ export function RecipeCard({
     setShowInstructions(false);
 
     const timers: NodeJS.Timeout[] = [];
-
     timers.push(setTimeout(() => setShowImage(true), 100));
     timers.push(setTimeout(() => setShowIngredients(true), 500));
     timers.push(setTimeout(() => setShowInstructions(true), 900));
@@ -125,10 +124,10 @@ export function RecipeCard({
       {/* Description */}
       <p className="text-sm leading-relaxed text-body-text">{recipe.description}</p>
 
-      {/* Main Recipe Image */}
+      {/* Main Recipe Image (object-contain so full picture visible) */}
       {publicImageUrl && (
         <div
-          className={`relative w-full h-48 rounded-2xl overflow-hidden transition-opacity duration-700 ${
+          className={`relative w-full h-[300px] rounded-2xl overflow-hidden transition-opacity duration-700 ${
             showImage ? "opacity-100" : "opacity-0"
           }`}
         >
@@ -137,7 +136,7 @@ export function RecipeCard({
             alt={recipe.title}
             fill
             sizes="100%"
-            className="object-cover"
+            className="object-contain"
           />
         </div>
       )}
