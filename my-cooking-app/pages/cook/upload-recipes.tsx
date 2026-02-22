@@ -21,7 +21,6 @@ import { Banner } from "@/components/banner/Banner";
 
 export default function UploadRecipes() {
   const { user } = useAuth();
-
   const { banner, closeBanner, showBanner } = useBannerNotification();
 
   const [isLoading, setIsLoading] = useState(false);
@@ -33,9 +32,8 @@ export default function UploadRecipes() {
   const [selectedCuisine, setSelectedCuisine] = useState<Option<"cuisine">>(
     cuisineOptions[0],
   );
-  const [selectedRecipeType, setSelectedRecipeType] = useState<
-    Option<"recipeType">
-  >(recipeTypeOptions[0]);
+  const [selectedRecipeType, setSelectedRecipeType] =
+    useState<Option<"recipeType">>(recipeTypeOptions[0]);
   const [image, setImage] = useState<File | null>(null);
 
   const [errors, setErrors] = useState<Record<string, string>>({});
@@ -46,6 +44,7 @@ export default function UploadRecipes() {
 
   const handleUploadRecipe = async () => {
     setIsLoading(true);
+
     const formData = {
       title,
       description,
@@ -82,7 +81,6 @@ export default function UploadRecipes() {
         setIsLoading(false);
         return;
       }
-      // Extract only the filename from the path
       imagePath = fullPath.split("/").pop();
     }
 
@@ -118,76 +116,111 @@ export default function UploadRecipes() {
 
   return (
     <div>
-      <h1 className="font-playfair font-bold text-[32px] leading-[120%] md:text-[40px] text-center mb-10 text-primary-text">
+      {/* PAGE TITLE + INSTRUCTION (Discoverability) */}
+      <h1 className="font-playfair font-bold text-[32px] leading-[120%] md:text-[40px] text-center mb-2 text-primary-text">
         Upload Your Recipe
       </h1>
 
-      <div className="bg-section-bg shadow-md border border-input-border rounded-2xl flex flex-col items-center w-full max-w-[360px] md:max-w-[720px] mx-auto p-4 gap-6">
-        <h1 className="text-3xl font-bold text-primary-text font-playfair">
-          Your Recipe...
-        </h1>
+      <p className="text-center text-sm text-secondary-text mb-8">
+        Fill out the form below to share your recipe with the community.
+      </p>
 
-        <div className="flex flex-col w-9/10 gap-6">
-          <Input
-            label="Recipe Title"
-            placeholder="Delicious Pancakes"
-            value={title}
-            onChange={(e) => {
-              setTitle(e.target.value);
-              setErrors((prev) => ({ ...prev, title: "" }));
-            }}
-            error={errors.title}
-          />
+      {/* FORM CARD */}
+      <div className="bg-section-bg shadow-md border border-input-border rounded-2xl flex flex-col items-center w-full max-w-[360px] md:max-w-[720px] mx-auto p-6 gap-8">
+        {/* SECTION: BASIC INFO */}
+        <div className="w-full">
+          <h2 className="text-xl font-semibold text-primary-text font-playfair mb-1">
+            Basic Information
+          </h2>
+          <p className="text-xs text-secondary-text mb-4">
+            Start with the core details of your recipe.
+          </p>
 
-          <TextArea
-            label="Recipe description"
-            value={description}
-            onChange={(value) => {
-              setDescription(value);
-              setErrors((prev) => ({ ...prev, description: "" }));
-            }}
-            maxLength={200}
-            placeholder="Describe your recipe in brief..."
-            error={errors.description}
-          />
+          <div className="flex flex-col w-full gap-6">
+            <Input
+              label="Recipe Title *"
+              placeholder="e.g. Delicious Pancakes"
+              value={title}
+              onChange={(e) => {
+                setTitle(e.target.value);
+                setErrors((prev) => ({ ...prev, title: "" }));
+              }}
+              error={errors.title}
+            />
 
-          <InputList
-            label="Ingredients"
-            values={ingredients}
-            onChange={(newValues) => {
-              setIngredients(newValues);
-              setErrors((prev) => ({ ...prev, ingredients: "" }));
-            }}
-            placeholder="e.g. 2 eggs"
-            maxItems={20}
-            error={errors.ingredients}
-          />
+            <TextArea
+              label="Recipe Description *"
+              value={description}
+              onChange={(value) => {
+                setDescription(value);
+                setErrors((prev) => ({ ...prev, description: "" }));
+              }}
+              maxLength={200}
+              placeholder="Describe your recipe in a short and clear way..."
+              error={errors.description}
+            />
 
-          <InputList
-            label="Instructions / Steps"
-            values={steps}
-            onChange={(newValues) => {
-              setSteps(newValues);
-              setErrors((prev) => ({ ...prev, steps: "" }));
-            }}
-            placeholder="e.g. boil water"
-            maxItems={20}
-            error={errors.steps}
-          />
+            <Dropdown
+              label="Choose Cuisine *"
+              options={cuisineOptions}
+              onSelect={setSelectedCuisine}
+              value={selectedCuisine}
+            />
 
-          <Dropdown
-            label="Choose Cuisine"
-            options={cuisineOptions}
-            onSelect={setSelectedCuisine}
-            value={selectedCuisine}
-          />
+            <Dropdown
+              label="Choose Recipe Type *"
+              options={recipeTypeOptions}
+              onSelect={setSelectedRecipeType}
+              value={selectedRecipeType}
+            />
+          </div>
+        </div>
 
-          <Dropdown
-            label="Choose Recipe Type"
-            options={recipeTypeOptions}
-            onSelect={setSelectedRecipeType}
-            value={selectedRecipeType}
-          />
+        {/* SECTION: INGREDIENTS & STEPS */}
+        <div className="w-full border-t pt-6">
+          <h2 className="text-xl font-semibold text-primary-text font-playfair mb-1">
+            Ingredients & Instructions
+          </h2>
+          <p className="text-xs text-secondary-text mb-4">
+            Add all ingredients and step-by-step instructions. You can add up to
+            20 items.
+          </p>
+
+          <div className="flex flex-col w-full gap-6">
+            <InputList
+              label="Ingredients *"
+              values={ingredients}
+              onChange={(newValues) => {
+                setIngredients(newValues);
+                setErrors((prev) => ({ ...prev, ingredients: "" }));
+              }}
+              placeholder="e.g. 2 eggs, 1 cup flour"
+              maxItems={20}
+              error={errors.ingredients}
+            />
+
+            <InputList
+              label="Instructions / Steps *"
+              values={steps}
+              onChange={(newValues) => {
+                setSteps(newValues);
+                setErrors((prev) => ({ ...prev, steps: "" }));
+              }}
+              placeholder="e.g. Mix ingredients, then bake for 20 minutes"
+              maxItems={20}
+              error={errors.steps}
+            />
+          </div>
+        </div>
+
+        {/* SECTION: IMAGE */}
+        <div className="w-full border-t pt-6">
+          <h2 className="text-xl font-semibold text-primary-text font-playfair mb-1">
+            Recipe Image (Optional)
+          </h2>
+          <p className="text-xs text-secondary-text mb-4">
+            Upload a photo to make your recipe more appealing.
+          </p>
 
           <ImageInput
             value={image}
@@ -199,20 +232,31 @@ export default function UploadRecipes() {
           />
         </div>
 
-        <Button
-          variant="primary"
-          className="w-1/2 mx-auto mt-4"
-          onClick={handleUploadRecipe}
-          isLoading={isLoading}
-        >
-          Upload Recipe
-        </Button>
+        {/* PRIMARY ACTION (More Discoverable CTA) */}
+        <div className="flex flex-col items-center gap-2 w-full">
+          <Button
+            variant="primary"
+            className="w-2/3 mx-auto mt-2"
+            onClick={handleUploadRecipe}
+            isLoading={isLoading}
+          >
+            Upload Recipe
+          </Button>
+
+          <p className="text-xs text-secondary-text text-center">
+            Make sure all required fields (*) are filled before uploading.
+          </p>
+        </div>
+
+        {/* GLOBAL ERROR FEEDBACK */}
         {hasErrors && (
-          <div className="w-9/10 border border-error-border text-error-border bg-error p-3 rounded-2xl flex items-center justify-center">
-            Please fill in the recipe sheet before uploading
+          <div className="w-full border border-error-border text-error-border bg-error p-3 rounded-2xl flex items-center justify-center text-sm text-center">
+            Please complete all required fields before uploading your recipe.
           </div>
         )}
       </div>
+
+      {/* BANNER NOTIFICATION */}
       {banner && (
         <div className="fixed bottom-4 right-4 z-50">
           <Banner
