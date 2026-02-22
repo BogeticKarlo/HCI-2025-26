@@ -51,6 +51,14 @@ export default function UploadRecipes() {
 
   if (!user) return null;
 
+  // Mapping improvement: compute recipe preview summary from inputs
+  const cuisinePreview =
+    selectedCuisine?.id !== "all" ? selectedCuisine.label : "—";
+  const typePreview =
+    selectedRecipeType?.id !== "all" ? selectedRecipeType.label : "—";
+  const ingredientsCount = ingredients.filter((i) => i.trim()).length;
+  const stepsCount = steps.filter((s) => s.trim()).length;
+
   // Progress includes image now (7 total)
   const completedCount = useMemo(() => {
     let count = 0;
@@ -125,7 +133,7 @@ export default function UploadRecipes() {
       return;
     }
 
-    // Image is REQUIRED now
+    // Image is REQUIRED
     if (!image) {
       setErrors((prev) => ({ ...prev, image: "Image is required." }));
       setStatus("error");
@@ -229,6 +237,55 @@ export default function UploadRecipes() {
               {statusText}
             </span>
           )}
+        </div>
+      </div>
+
+      {/* Mapping improvement: Live preview summary (shows how inputs map to final recipe card) */}
+      <div className="max-w-[360px] md:max-w-[720px] mx-auto mb-6 px-2">
+        <div className="border border-gray-200 rounded-2xl bg-white/60 p-4">
+          <p className="text-sm font-semibold text-primary-text mb-2">
+            Preview summary
+          </p>
+
+          <div className="grid grid-cols-2 gap-3 text-xs text-primary-text">
+            <div className="flex flex-col">
+              <span className="opacity-80">Title</span>
+              <span className="font-semibold">
+                {title.trim() ? title : "—"}
+              </span>
+            </div>
+
+            <div className="flex flex-col">
+              <span className="opacity-80">Image</span>
+              <span className="font-semibold">
+                {image ? "Selected ✅" : "Not selected"}
+              </span>
+            </div>
+
+            <div className="flex flex-col">
+              <span className="opacity-80">Cuisine</span>
+              <span className="font-semibold">{cuisinePreview}</span>
+            </div>
+
+            <div className="flex flex-col">
+              <span className="opacity-80">Type</span>
+              <span className="font-semibold">{typePreview}</span>
+            </div>
+
+            <div className="flex flex-col">
+              <span className="opacity-80">Ingredients</span>
+              <span className="font-semibold">{ingredientsCount} items</span>
+            </div>
+
+            <div className="flex flex-col">
+              <span className="opacity-80">Steps</span>
+              <span className="font-semibold">{stepsCount} steps</span>
+            </div>
+          </div>
+
+          <p className="mt-3 text-xs text-primary-text opacity-80">
+            This is what will appear on your recipe page after upload.
+          </p>
         </div>
       </div>
 
@@ -341,7 +398,7 @@ export default function UploadRecipes() {
           </div>
         </div>
 
-        {/* STEP 3 (Image REQUIRED now) */}
+        {/* STEP 3 (Image REQUIRED) */}
         <div className="w-full border-t pt-6">
           <div className="flex items-center justify-between mb-3">
             <h2 className="text-xl font-semibold text-primary-text font-playfair">
