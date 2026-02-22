@@ -142,66 +142,57 @@ export function RecipeCard({
         </div>
       )}
 
-      {/* Ingredients & Instructions */}
-      <section className="flex flex-col md:flex-row items-start gap-4">
-        {/* Ingredients */}
-        <div
-          className={`flex items-start justify-center lg:w-1/2 gap-4 transition-opacity duration-700 ${
-            showIngredients ? "opacity-100" : "opacity-0"
-          }`}
-        >
-          <div className="md:w-1/2 flex flex-col gap-4">
-            <h2 className="text-xl font-semibold mb-2 text-primary-text font-playfair">
-              Ingredients
-            </h2>
-            <ul className="list-disc ml-5 text-sm flex-1">
-              {recipe.ingredients.map((item, i) => (
-                <li key={i} className="mb-1 text-body-text">
-                  {item}
-                </li>
-              ))}
-            </ul>
-          </div>
-
-          <div className="w-24 h-20 rounded-xl flex items-center justify-center">
-            <Image
-              src={CakeImage}
-              alt="Cake"
-              width={90}
-              height={90}
-              className="object-contain -rotate-12"
-            />
-          </div>
+      {/* Ingredients */}
+      <section
+        className={`transition-opacity duration-700 ${
+          showIngredients ? "opacity-100" : "opacity-0"
+        }`}
+      >
+        <h2 className="text-xl font-semibold mb-2 text-primary-text font-playfair">
+          Ingredients
+        </h2>
+        <ul className="list-disc ml-5 text-sm flex flex-col gap-1">
+          {recipe.ingredients.map((item, i) => (
+            <li key={i} className="text-body-text">
+              {item}
+            </li>
+          ))}
+        </ul>
+        <div className="w-24 h-20 mt-4 flex items-center justify-center">
+          <Image
+            src={CakeImage}
+            alt="Cake"
+            width={90}
+            height={90}
+            className="object-contain -rotate-12"
+          />
         </div>
+      </section>
 
-        {/* Instructions */}
-        <div
-          className={`flex justify-center items-start lg:w-1/2 gap-4 transition-opacity duration-700 ${
-            showInstructions ? "opacity-100" : "opacity-0"
-          }`}
-        >
-          <div className="md:w-1/2 flex flex-col gap-4">
-            <h2 className="text-xl font-semibold mb-2 text-primary-text font-playfair">
-              Instructions
-            </h2>
-            <ol className="list-decimal ml-5 text-sm flex-1">
-              {recipe.instructions.map((step, i) => (
-                <li key={i} className="mb-1 text-body-text">
-                  {step}
-                </li>
-              ))}
-            </ol>
-          </div>
-
-          <div className="w-24 h-20 rounded-xl flex items-center justify-center">
-            <Image
-              src={SoupImage}
-              alt="Soup"
-              width={80}
-              height={80}
-              className="object-contain rotate-20"
-            />
-          </div>
+      {/* Instructions */}
+      <section
+        className={`transition-opacity duration-700 ${
+          showInstructions ? "opacity-100" : "opacity-0"
+        }`}
+      >
+        <h2 className="text-xl font-semibold mb-2 text-primary-text font-playfair">
+          Instructions
+        </h2>
+        <ol className="list-decimal ml-5 text-sm flex flex-col gap-1">
+          {recipe.instructions.map((step, i) => (
+            <li key={i} className="text-body-text">
+              {step}
+            </li>
+          ))}
+        </ol>
+        <div className="w-24 h-20 mt-4 flex items-center justify-center">
+          <Image
+            src={SoupImage}
+            alt="Soup"
+            width={80}
+            height={80}
+            className="object-contain rotate-20"
+          />
         </div>
       </section>
 
