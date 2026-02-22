@@ -28,21 +28,19 @@ export default function HomePage() {
   const [isLoading, setIsLoading] = useState(false);
   const [isFetchingMore, setIsFetchingMore] = useState(false);
   const [isError, setIsError] = useState(false);
+  const [loadingRecipeId, setLoadingRecipeId] = useState<string | null>(null);
 
   const [currentPage, setCurrentPage] = useState(1);
   const [hasMore, setHasMore] = useState(true);
 
   const [selectedCuisine, setSelectedCuisine] =
     useState<Option<"cuisine">>(savedFilters.cuisine || cuisineOptions[0]);
-
   const [selectedRecipeType, setSelectedRecipeType] =
     useState<Option<"recipeType">>(
       savedFilters.recipeType || recipeTypeOptions[0]
     );
-
   const [selectedTime, setSelectedTime] =
     useState<Option<"time">>(savedFilters.time || timeOptions[0]);
-
   const [selectedFavorite, setSelectedFavorite] =
     useState<Option<"favorite">>(
       savedFilters.favorite || favoriteOptions[0]
@@ -57,7 +55,6 @@ export default function HomePage() {
       time: selectedTime,
       favorite: selectedFavorite,
     };
-
     localStorage.setItem(localStorageKey, JSON.stringify(filters));
   }, [selectedCuisine, selectedRecipeType, selectedTime, selectedFavorite]);
 
@@ -131,13 +128,27 @@ export default function HomePage() {
     selectedFavorite,
   ]);
 
+  /* ---------------- HANDLE RECIPE CLICK ---------------- */
+
+  const handleRecipeClick = async (recipeId: string) => {
+    setLoadingRecipeId(recipeId);
+    try {
+      // simulate navigation delay or data fetch
+      await new Promise((res) => setTimeout(res, 600));
+      // Navigate to recipe detail page here (example)
+      // router.push(`/recipes/${recipeId}`);
+    } finally {
+      setLoadingRecipeId(null);
+    }
+  };
+
   return (
     <div className="flex flex-col items-center">
       <h1 className="font-playfair font-bold text-[40px] text-center mb-10 text-primary-text">
         Check Out Best Recipes
       </h1>
 
-      {/* FILTERS (unchanged) */}
+      {/* FILTERS */}
       <div className="flex flex-col w-9/10 items-center gap-8 mb-10">
         <div className="grid grid-cols-2 gap-5 w-full lg:w-[70%]">
           <Dropdown
@@ -174,7 +185,7 @@ export default function HomePage() {
         </p>
       </div>
 
-      {/* ACTIVE CHIPS (unchanged) */}
+      {/* ACTIVE CHIPS */}
       {activeFilters.length > 0 && (
         <div className="flex flex-wrap gap-3 mb-6">
           {activeFilters.map(({ type, value }) => {
@@ -210,7 +221,6 @@ export default function HomePage() {
 
       {/* RECIPES GRID + ERROR STATE */}
       <div className="grid gap-6 grid-cols-1 md:grid-cols-2 xl:grid-cols-3 place-items-center min-h-[300px]">
-
         {isError ? (
           <div className="col-span-full flex flex-col items-center gap-4 text-center">
             <p className="text-lg font-semibold text-primary-text">
@@ -238,7 +248,8 @@ export default function HomePage() {
           recipes.map((recipe) => (
             <div
               key={recipe.id}
-              className="transition-transform duration-200 hover:-translate-y-1 hover:shadow-lg"
+              className="transition-transform duration-200 hover:-translate-y-1 hover:shadow-lg w-full relative cursor-pointer"
+              onClick={() => handleRecipeClick(recipe.id || "")}
             >
               <RecipeMinimizeCard
                 id={recipe.id || ""}
@@ -247,6 +258,11 @@ export default function HomePage() {
                 description={recipe.description || ""}
                 authorId={recipe.author_id || ""}
               />
+              {loadingRecipeId === recipe.id && (
+                <div className="absolute inset-0 bg-white bg-opacity-70 flex justify-center items-center rounded-lg">
+                  <div className="w-8 h-8 border-4 border-gray-300 border-t-accent rounded-full animate-spin" />
+                </div>
+              )}
             </div>
           ))
         )}
