@@ -47,7 +47,6 @@ export default function HomePage() {
     );
 
   /* ---------------- SAVE FILTERS ---------------- */
-
   useEffect(() => {
     const filters = {
       cuisine: selectedCuisine,
@@ -59,18 +58,15 @@ export default function HomePage() {
   }, [selectedCuisine, selectedRecipeType, selectedTime, selectedFavorite]);
 
   /* ---------------- RESET PAGE ON FILTER CHANGE ---------------- */
-
   useEffect(() => {
     setCurrentPage(1);
   }, [selectedCuisine, selectedRecipeType, selectedTime, selectedFavorite]);
 
   /* ---------------- FETCH RECIPES ---------------- */
-
   const fetchHomeRecipes = async () => {
     try {
       if (currentPage === 1) setIsLoading(true);
       else setIsFetchingMore(true);
-
       setIsError(false);
 
       const newRecipes = await fetchRecipes({
@@ -85,7 +81,6 @@ export default function HomePage() {
       setRecipes((prev) =>
         currentPage === 1 ? newRecipes : [...prev, ...newRecipes]
       );
-
       setHasMore(newRecipes.length === pageLimit);
     } catch (err) {
       setIsError(true);
@@ -106,7 +101,6 @@ export default function HomePage() {
   ]);
 
   /* ---------------- FILTER RESET ---------------- */
-
   const resetFilter = (type: string) => {
     if (type === "cuisine") setSelectedCuisine(cuisineOptions[0]);
     if (type === "recipeType") setSelectedRecipeType(recipeTypeOptions[0]);
@@ -129,11 +123,10 @@ export default function HomePage() {
   ]);
 
   /* ---------------- HANDLE RECIPE CLICK ---------------- */
-
   const handleRecipeClick = async (recipeId: string) => {
     setLoadingRecipeId(recipeId);
     try {
-      // simulate navigation/loading delay
+      // simulate network delay
       await new Promise((res) => setTimeout(res, 600));
       // navigate to recipe detail page here
       // router.push(`/recipes/${recipeId}`);
@@ -257,13 +250,11 @@ export default function HomePage() {
                 description={recipe.description || ""}
                 authorId={recipe.author_id || ""}
               />
+
+              {/* Spinner overlay */}
               {loadingRecipeId === recipe.id && (
-                <div className="absolute inset-0 flex justify-center items-center">
-                  <div className="flex space-x-2">
-                    <div className="w-3 h-3 bg-accent rounded-full animate-bounce" />
-                    <div className="w-3 h-3 bg-accent rounded-full animate-bounce200" />
-                    <div className="w-3 h-3 bg-accent rounded-full animate-bounce400" />
-                  </div>
+                <div className="absolute inset-0 flex justify-center items-center bg-white/70 rounded-lg">
+                  <div className="w-10 h-10 border-4 border-accent border-t-transparent rounded-full animate-spin"></div>
                 </div>
               )}
             </div>
@@ -286,20 +277,6 @@ export default function HomePage() {
           {isFetchingMore ? "Loading more..." : "Load More"}
         </Button>
       )}
-
-      {/* Tailwind keyframes for staggered bounce */}
-      <style jsx>{`
-        .animate-bounce200 {
-          animation: bounce 0.6s infinite 0.1s;
-        }
-        .animate-bounce400 {
-          animation: bounce 0.6s infinite 0.2s;
-        }
-        @keyframes bounce {
-          0%, 80%, 100% { transform: scale(0); }
-          40% { transform: scale(1); }
-        }
-      `}</style>
     </div>
   );
 }
