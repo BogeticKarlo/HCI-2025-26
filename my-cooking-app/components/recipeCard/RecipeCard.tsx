@@ -3,7 +3,13 @@
 import Image from "next/image";
 import { useRouter } from "next/navigation";
 import { RecipeCardSkeleton } from "./RecipeSkeletonLoaderCard";
-import { useRef, useState, useEffect } from "react";
+import {
+  useRef,
+  useState,
+  useEffect,
+  type MouseEvent,
+  type KeyboardEvent,
+} from "react";
 import CakeImage from "../../public/assets/cake.png";
 import SoupImage from "../../public/assets/soup.png";
 import backArrow from "../../public/assets/backArrow.png";
@@ -17,8 +23,11 @@ import { LikeButton } from "../LikeButton";
 type Recipe = Database["public"]["Tables"]["recipes"]["Row"];
 type Profile = Database["public"]["Tables"]["profiles"]["Row"];
 
-// NOTE: This component assumes LikeButton renders a <button> internally.
-// We make the entire wrapper clickable by forwarding clicks to that button.
+// Constraints improvements included:
+// 1) Like cooldown to prevent accidental double-like spam.
+// 2) Disable delete wrapper while modal is open OR while deleting.
+// 3) Modal title includes recipe title to prevent deleting wrong item.
+// 4) If delete fails, DO NOT close modal (keep user in control). Close only on success.
 
 export function RecipeCard({
   recipe,
@@ -29,6 +38,7 @@ export function RecipeCard({
 }) {
   const router = useRouter();
   const { user } = useAuth();
+
   const [author, setAuthor] = useState<Profile>();
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [deleting, setDeleting] = useState(false);
@@ -47,6 +57,10 @@ export function RecipeCard({
 
   // Like wrapper -> click anywhere to trigger internal LikeButton click
   const likeWrapperRef = useRef<HTMLDivElement | null>(null);
+
+  // Constraint: prevent rapid double-like toggles
+  const [likeCooldown, setLikeCooldown] = useState(false);
+  const likeCooldownTimerRef = useRef<ReturnType<typeof setTimeout> | null>(null);
 
   const isCreator = user?.id === recipe?.author_id;
 
@@ -73,7 +87,7 @@ export function RecipeCard({
     setShowInstructions(false);
     setImageLoaded(false);
 
-    const timers: NodeJS.Timeout[] = [];
+    const timers: ReturnType<typeof setTimeout>[] = [];
     timers.push(setTimeout(() => setShowImage(true), 100));
     timers.push(setTimeout(() => setShowIngredients(true), 500));
     timers.push(setTimeout(() => setShowInstructions(true), 900));
@@ -81,9 +95,57 @@ export function RecipeCard({
     return () => timers.forEach(clearTimeout);
   }, [recipe]);
 
+  useEffect(() => {
+    return () => {
+      if (likeCooldownTimerRef.current) clearTimeout(likeCooldownTimerRef.current);
+    };
+  }, []);
+
   if (isLoading || !recipe) return <RecipeCardSkeleton />;
 
   const publicImageUrl = `https://xhebsnwjpfcdttydwuhg.supabase.co/storage/v1/object/public/recipe-images/${recipe.author_id}/${recipe.image_url}`;
+
+  const startLikeCooldown = () => {
+    setLikeCooldown(true);
+    if (likeCooldownTimerRef.current) clearTimeout(likeCooldownTimerRef.current);
+    likeCooldownTimerRef.current = setTimeout(() => setLikeCooldown(false), 450);
+  };
+
+  const triggerInnerLikeClick = () => {
+    const root = likeWrapperRef.current;
+    if (!root) return;
+
+    const innerButton = root.querySelector("button") as HTMLButtonElement | null;
+    innerButton?.click();
+  };
+
+  const handleLikeWrapperClick = (e: MouseEvent<HTMLDivElement>) => {
+    if (likeCooldown) return;
+
+    const root = likeWrapperRef.current;
+    if (!root) return;
+
+    const innerButton = root.querySelector("button") as HTMLButtonElement | null;
+
+    // If user clicked the actual LikeButton, let it handle it (avoid double toggle)
+    if (innerButton && e.target instanceof Node && innerButton.contains(e.target)) {
+      startLikeCooldown();
+      return;
+    }
+
+    triggerInnerLikeClick();
+    startLikeCooldown();
+  };
+
+  const handleLikeWrapperKeyDown = (e: KeyboardEvent<HTMLDivElement>) => {
+    if (likeCooldown) return;
+
+    if (e.key === "Enter" || e.key === " ") {
+      e.preventDefault();
+      triggerInnerLikeClick();
+      startLikeCooldown();
+    }
+  };
 
   const handleDelete = async () => {
     if (!user || !recipe) return;
@@ -94,7 +156,9 @@ export function RecipeCard({
 
     try {
       await deleteRecipe(recipe.id, user.id);
+
       setSuccessMessage("Recipe deleted successfully.");
+      setIsModalOpen(false); // ✅ close modal ONLY on success
 
       setTimeout(() => {
         router.back();
@@ -102,32 +166,13 @@ export function RecipeCard({
     } catch (error) {
       console.error("Error deleting recipe:", error);
       setErrorMessage("Failed to delete recipe. Please try again.");
+      // ✅ keep modal open on error (do NOT close)
     } finally {
       setDeleting(false);
-      setIsModalOpen(false);
     }
   };
 
-  const triggerInnerLikeClick = () => {
-    const root = likeWrapperRef.current;
-    if (!root) return;
-    const innerButton = root.querySelector("button") as HTMLButtonElement | null;
-    innerButton?.click();
-  };
-
-  const handleLikeWrapperClick = (e: React.MouseEvent<HTMLDivElement>) => {
-    const root = likeWrapperRef.current;
-    if (!root) return;
-
-    const innerButton = root.querySelector("button") as HTMLButtonElement | null;
-
-    // If user clicked the actual LikeButton, let it handle the click (avoid double toggle)
-    if (innerButton && e.target instanceof Node && innerButton.contains(e.target)) {
-      return;
-    }
-
-    triggerInnerLikeClick();
-  };
+  const deleteWrapperDisabled = deleting || isModalOpen;
 
   return (
     <article
@@ -245,7 +290,13 @@ export function RecipeCard({
         </ul>
 
         <div className="w-24 h-20 mt-6 flex items-center justify-center">
-          <Image src={CakeImage} alt="Decoration" width={90} height={90} className="object-contain -rotate-12" />
+          <Image
+            src={CakeImage}
+            alt="Decoration"
+            width={90}
+            height={90}
+            className="object-contain -rotate-12"
+          />
         </div>
       </section>
 
@@ -271,7 +322,13 @@ export function RecipeCard({
         </ol>
 
         <div className="w-24 h-20 mt-6 flex items-center justify-center">
-          <Image src={SoupImage} alt="Decoration" width={80} height={80} className="object-contain rotate-12" />
+          <Image
+            src={SoupImage}
+            alt="Decoration"
+            width={80}
+            height={80}
+            className="object-contain rotate-12"
+          />
         </div>
       </section>
 
@@ -298,7 +355,7 @@ export function RecipeCard({
         </span>
 
         <div className="flex flex-col sm:flex-row items-center gap-6">
-          {/* LIKE: whole wrapper clickable + responsive hover/active animation */}
+          {/* LIKE: whole wrapper clickable + cooldown constraint */}
           {!isCreator && (
             <div
               ref={likeWrapperRef}
@@ -306,13 +363,8 @@ export function RecipeCard({
               tabIndex={0}
               aria-label="Like this recipe"
               onClick={handleLikeWrapperClick}
-              onKeyDown={(e) => {
-                if (e.key === "Enter" || e.key === " ") {
-                  e.preventDefault();
-                  triggerInnerLikeClick();
-                }
-              }}
-              className="
+              onKeyDown={handleLikeWrapperKeyDown}
+              className={`
                 flex flex-col items-center
                 border border-accent/40
                 rounded-xl px-4 py-3
@@ -324,7 +376,8 @@ export function RecipeCard({
                 focus:outline-none
                 focus-visible:ring-2 focus-visible:ring-accent focus-visible:ring-offset-2
                 select-none
-              "
+                ${likeCooldown ? "opacity-90" : ""}
+              `}
               title="Like this recipe"
             >
               <span className="text-xs text-text-muted mb-1">Like this recipe</span>
@@ -332,13 +385,15 @@ export function RecipeCard({
             </div>
           )}
 
-          {/* DELETE: add border like Like button + responsive hover/active animation */}
+          {/* DELETE: whole wrapper clickable + disabled while modal open */}
           {isCreator && (
             <button
               type="button"
-              onClick={() => setIsModalOpen(true)}
-              disabled={deleting}
-              title="Delete recipe"
+              onClick={() => {
+                if (!deleteWrapperDisabled) setIsModalOpen(true);
+              }}
+              disabled={deleteWrapperDisabled}
+              title={deleteWrapperDisabled ? "Delete is currently unavailable" : "Delete recipe"}
               aria-label="Delete recipe"
               className={`
                 group
@@ -350,7 +405,7 @@ export function RecipeCard({
                 focus-visible:outline-none
                 focus-visible:ring-2 focus-visible:ring-red-400 focus-visible:ring-offset-2
                 ${
-                  deleting
+                  deleteWrapperDisabled
                     ? "opacity-60 cursor-not-allowed"
                     : "cursor-pointer hover:border-red-400 hover:shadow-md hover:-translate-y-[1px] hover:scale-[1.02] active:scale-[0.98]"
                 }
@@ -365,7 +420,7 @@ export function RecipeCard({
                   w-10 h-10 flex items-center justify-center rounded-full
                   transition-all duration-200
                   ${
-                    deleting
+                    deleteWrapperDisabled
                       ? "bg-red-100"
                       : "text-red-500 group-hover:bg-red-100 group-hover:scale-110 active:scale-95"
                   }
@@ -386,7 +441,11 @@ export function RecipeCard({
         <Modal
           handleAction={handleDelete}
           setIsModalOpen={setIsModalOpen}
-          title={deleting ? "Deleting recipe..." : "Are you sure you want to delete this recipe?"}
+          title={
+            deleting
+              ? `Deleting "${recipe.title}"...`
+              : `Delete "${recipe.title}"?`
+          }
         />
       )}
     </article>
