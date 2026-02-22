@@ -99,9 +99,7 @@ export function RecipeCard({
             height={32}
             className="w-8 aspect-square"
           />
-          <span className="text-sm font-semibold text-primary-text">
-            Back
-          </span>
+          <span className="text-sm font-semibold text-primary-text">Back</span>
         </button>
 
         <h1 className="text-3xl font-bold text-primary-text font-playfair lg:mr-5 break-words">
@@ -212,15 +210,20 @@ export function RecipeCard({
             </div>
           )}
 
-          {/* Delete button */}
+          {/* Delete button discoverability */}
           {isCreator && (
-            <button
-              onClick={() => setIsModalOpen(true)}
-              className="w-8 h-8 flex items-center justify-center cursor-pointer transition-all duration-200 hover:scale-110 active:scale-95 hover:text-error-border"
-              aria-label="Delete Recipe"
-            >
-              <TrashIcon className="w-7 h-7" />
-            </button>
+            <div className="relative group">
+              <button
+                onClick={() => setIsModalOpen(true)}
+                className="w-8 h-8 flex items-center justify-center cursor-pointer transition-all duration-200 hover:scale-110 active:scale-95 hover:text-error-border"
+                aria-label="Delete Recipe"
+              >
+                <TrashIcon className="w-7 h-7 text-red-600" />
+              </button>
+              <span className="absolute bottom-full mb-1 left-1/2 -translate-x-1/2 text-xs text-white bg-red-600/80 px-2 py-1 rounded opacity-0 group-hover:opacity-100 transition-opacity">
+                Delete this recipe
+              </span>
+            </div>
           )}
         </div>
       </footer>
