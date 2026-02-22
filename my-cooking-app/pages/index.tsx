@@ -36,15 +36,20 @@ export default function HomePage() {
     useState<Option<"cuisine">>(savedFilters.cuisine || cuisineOptions[0]);
 
   const [selectedRecipeType, setSelectedRecipeType] =
-    useState<Option<"recipeType">>(savedFilters.recipeType || recipeTypeOptions[0]);
+    useState<Option<"recipeType">>(
+      savedFilters.recipeType || recipeTypeOptions[0]
+    );
 
   const [selectedTime, setSelectedTime] =
     useState<Option<"time">>(savedFilters.time || timeOptions[0]);
 
   const [selectedFavorite, setSelectedFavorite] =
-    useState<Option<"favorite">>(savedFilters.favorite || favoriteOptions[0]);
+    useState<Option<"favorite">>(
+      savedFilters.favorite || favoriteOptions[0]
+    );
 
   /* ---------------- SAVE FILTERS ---------------- */
+
   useEffect(() => {
     const filters = {
       cuisine: selectedCuisine,
@@ -52,15 +57,18 @@ export default function HomePage() {
       time: selectedTime,
       favorite: selectedFavorite,
     };
+
     localStorage.setItem(localStorageKey, JSON.stringify(filters));
   }, [selectedCuisine, selectedRecipeType, selectedTime, selectedFavorite]);
 
   /* ---------------- RESET PAGE ON FILTER CHANGE ---------------- */
+
   useEffect(() => {
     setCurrentPage(1);
   }, [selectedCuisine, selectedRecipeType, selectedTime, selectedFavorite]);
 
   /* ---------------- FETCH RECIPES ---------------- */
+
   const fetchHomeRecipes = async () => {
     try {
       if (currentPage === 1) setIsLoading(true);
@@ -101,6 +109,7 @@ export default function HomePage() {
   ]);
 
   /* ---------------- FILTER RESET ---------------- */
+
   const resetFilter = (type: string) => {
     if (type === "cuisine") setSelectedCuisine(cuisineOptions[0]);
     if (type === "recipeType") setSelectedRecipeType(recipeTypeOptions[0]);
@@ -115,7 +124,19 @@ export default function HomePage() {
       { type: "time", value: selectedTime },
       { type: "favorite", value: selectedFavorite },
     ].filter((item) => item.value.id !== "all");
-  }, [selectedCuisine, selectedRecipeType, selectedTime, selectedFavorite]);
+  }, [
+    selectedCuisine,
+    selectedRecipeType,
+    selectedTime,
+    selectedFavorite,
+  ]);
+
+  const resetAllFilters = () => {
+    setSelectedCuisine(cuisineOptions[0]);
+    setSelectedRecipeType(recipeTypeOptions[0]);
+    setSelectedTime(timeOptions[0]);
+    setSelectedFavorite(favoriteOptions[0]);
+  };
 
   return (
     <div className="flex flex-col items-center">
@@ -160,9 +181,9 @@ export default function HomePage() {
         </p>
       </div>
 
-      {/* ACTIVE FILTER CHIPS */}
+      {/* ACTIVE CHIPS */}
       {activeFilters.length > 0 && (
-        <div className="flex flex-wrap gap-3 mb-6">
+        <div className="flex flex-wrap gap-3 mb-6 items-center">
           {activeFilters.map(({ type, value }) => {
             if (type === "time") return null;
             return (
@@ -178,6 +199,19 @@ export default function HomePage() {
               </button>
             );
           })}
+
+          {/* REMOVE ALL FILTERS BUTTON */}
+          {activeFilters.length > 0 && (
+            <button
+              onClick={resetAllFilters}
+              className="flex items-center gap-2 px-4 py-2 text-sm font-medium border border-red-500 text-red-500 rounded-full bg-white shadow-sm cursor-pointer transition-all duration-200 hover:scale-105 hover:shadow-xl hover:bg-red-500 hover:text-white"
+            >
+              Remove All
+              <span className="text-xs font-bold transition-transform duration-200">
+                ✕
+              </span>
+            </button>
+          )}
         </div>
       )}
 
@@ -193,8 +227,8 @@ export default function HomePage() {
         </p>
       </div>
 
-      {/* RECIPES GRID + ERROR STATE */}
-      <div className="grid gap-6 grid-cols-1 md:grid-cols-2 xl:grid-cols-3 place-items-center min-h-[300px]">
+      {/* RECIPES GRID + ERROR STATE + SKELETONS */}
+      <div className="grid gap-6 grid-cols-1 md:grid-cols-2 xl:grid-cols-3 place-items-center min-h-[300px] w-full max-w-6xl px-6 sm:px-10 lg:px-20">
         {isError ? (
           <div className="col-span-full flex flex-col items-center gap-4 text-center">
             <p className="text-lg font-semibold text-primary-text">
@@ -223,7 +257,7 @@ export default function HomePage() {
             {recipes.map((recipe) => (
               <div
                 key={recipe.id}
-                className={`transition-transform duration-200 hover:-translate-y-1 hover:shadow-lg`}
+                className="transition-transform duration-200 hover:-translate-y-1 hover:shadow-lg w-full"
               >
                 <RecipeMinimizeCard
                   id={recipe.id || ""}
@@ -235,13 +269,15 @@ export default function HomePage() {
               </div>
             ))}
 
-            {/* Skeleton placeholders matching card size */}
+            {/* Skeleton loaders for pagination */}
             {isFetchingMore &&
               Array.from({ length: pageLimit }).map((_, idx) => (
                 <div
                   key={`skeleton-${idx}`}
-                  className="w-full max-w-sm h-[260px] bg-gray-200 rounded-lg animate-pulse"
-                />
+                  className="transition-transform duration-200 hover:-translate-y-1 hover:shadow-lg w-full"
+                >
+                  <div className="w-full h-[260px] bg-gray-200 rounded-lg animate-pulse" />
+                </div>
               ))}
           </>
         )}
@@ -251,7 +287,9 @@ export default function HomePage() {
       {hasMore && !isError && (
         <Button
           onClick={() => {
-            if (!isFetchingMore && !isLoading) setCurrentPage((prev) => prev + 1);
+            if (!isFetchingMore && !isLoading) {
+              setCurrentPage((prev) => prev + 1);
+            }
           }}
           className="mt-6"
           isLoading={isFetchingMore}
