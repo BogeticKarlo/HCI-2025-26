@@ -110,7 +110,6 @@ export default function UploadRecipes() {
     setSelectedRecipeType(recipeTypeOptions[0]);
     setImage(null);
     setErrors({});
-
     setIsLoading(false);
   };
 
@@ -120,25 +119,23 @@ export default function UploadRecipes() {
         Upload Your Recipe
       </h1>
 
-      <p className="text-center text-sm text-secondary-text mb-4">
+      {/* Discoverability text (now high contrast) */}
+      <p className="text-center text-sm text-primary-text opacity-80 mb-4">
         Follow the steps below to publish your recipe.
       </p>
 
-      {/* Signifier: Required fields legend */}
+      {/* Required fields legend (signifier visibility fixed) */}
       <div className="max-w-[360px] md:max-w-[720px] mx-auto mb-6 px-2">
-        <div className="flex items-center justify-between text-xs text-secondary-text">
+        <div className="flex items-center justify-between text-xs text-primary-text">
           <span>
-            <span className="text-error-border font-semibold">*</span> Required
-            fields
+            <span className="font-semibold">*</span> Required fields
           </span>
-          <span className="text-secondary-text">
-            Step 1 → Step 2 → Step 3
-          </span>
+          <span className="opacity-80">Step 1 → Step 2 → Step 3</span>
         </div>
       </div>
 
       <div className="bg-section-bg shadow-md border border-input-border rounded-2xl flex flex-col items-center w-full max-w-[360px] md:max-w-[720px] mx-auto p-6 gap-8">
-        {/* Signifier: top error callout if any errors */}
+        {/* Top error signifier */}
         {hasErrors && (
           <div className="w-full border border-error-border text-error-border bg-error p-3 rounded-2xl text-sm text-center">
             Some required fields are missing. Please fix the highlighted inputs.
@@ -151,12 +148,12 @@ export default function UploadRecipes() {
             <h2 className="text-xl font-semibold text-primary-text font-playfair">
               Step 1: Basic Information
             </h2>
-            <span className="text-xs text-secondary-text">
+            <span className="text-xs text-primary-text opacity-80">
               Start here
             </span>
           </div>
 
-          <div className="flex flex-col w-full gap-6 border-l-2 border-gray-200 pl-4">
+          <div className="flex flex-col w-full gap-6 border-l-2 border-gray-300 pl-4">
             <Input
               label="Recipe Title *"
               placeholder="e.g. Delicious Pancakes"
@@ -202,12 +199,12 @@ export default function UploadRecipes() {
             <h2 className="text-xl font-semibold text-primary-text font-playfair">
               Step 2: Ingredients & Steps
             </h2>
-            <span className="text-xs text-secondary-text">
+            <span className="text-xs text-primary-text opacity-80">
               Up to 20 items
             </span>
           </div>
 
-          <div className="flex flex-col w-full gap-6 border-l-2 border-gray-200 pl-4">
+          <div className="flex flex-col w-full gap-6 border-l-2 border-gray-300 pl-4">
             <InputList
               label="Ingredients *"
               values={ingredients}
@@ -240,13 +237,13 @@ export default function UploadRecipes() {
             <h2 className="text-xl font-semibold text-primary-text font-playfair">
               Step 3: Add a Photo (Optional)
             </h2>
-            <span className="text-xs text-secondary-text">
+            <span className="text-xs text-primary-text opacity-80">
               Recommended
             </span>
           </div>
 
-          <div className="flex flex-col w-full gap-4 border-l-2 border-gray-200 pl-4">
-            <p className="text-xs text-secondary-text">
+          <div className="flex flex-col w-full gap-4 border-l-2 border-gray-300 pl-4">
+            <p className="text-xs text-primary-text opacity-80">
               A photo makes your recipe easier to notice and more likely to be
               clicked.
             </p>
@@ -264,7 +261,7 @@ export default function UploadRecipes() {
 
         {/* CTA */}
         <div className="flex flex-col items-center gap-2 w-full pt-2">
-          <p className="text-xs text-secondary-text text-center">
+          <p className="text-xs text-primary-text opacity-80 text-center">
             Ready to publish? Click the button below.
           </p>
 
@@ -273,14 +270,14 @@ export default function UploadRecipes() {
             className="w-2/3 mx-auto mt-1"
             onClick={handleUploadRecipe}
             isLoading={isLoading}
-            disabled={isLoading} // Signifier + constraint: prevents double submission
+            disabled={isLoading}
           >
             Upload Recipe
           </Button>
 
-          <p className="text-xs text-secondary-text text-center">
+          <p className="text-xs text-primary-text opacity-80 text-center">
             Required fields are marked with{" "}
-            <span className="text-error-border font-semibold">*</span>
+            <span className="font-semibold">*</span>
           </p>
         </div>
       </div>
