@@ -16,11 +16,14 @@ export default function LessonCardHero({
   const [imageUrl, setImageUrl] = useState<string | null>(null);
   const [loading, setLoading] = useState(true);
 
+  // Feedback: show spinner overlay like recipe cards
+  const [isOpening, setIsOpening] = useState(false);
+
   const lessonHref = useMemo(() => {
     const slug = title
       .toLowerCase()
       .trim()
-      .replace(/[^\p{L}\p{N}\s-]/gu, "") // keep letters/numbers (incl. diacritics), spaces, hyphens
+      .replace(/[^\p{L}\p{N}\s-]/gu, "")
       .replace(/\s+/g, "-");
     return `/lesson/${id}-${slug}`;
   }, [id, title]);
@@ -32,7 +35,11 @@ export default function LessonCardHero({
   }, [heroImage]);
 
   const openLesson = () => {
+    if (isOpening) return; // constraint: prevent double-click racing
+    setIsOpening(true);
     router.push(lessonHref);
+    // If route is fast, clearing isn't necessary; but keeps UX consistent if it doesn't unmount instantly
+    window.setTimeout(() => setIsOpening(false), 900);
   };
 
   const onKeyDown = (e: KeyboardEvent<HTMLElement>) => {
@@ -51,8 +58,10 @@ export default function LessonCardHero({
       aria-label={`Open lesson: ${title}`}
       onClick={openLesson}
       onKeyDown={onKeyDown}
+      title="Click to open lesson"
       className="
         group
+        relative
         flex flex-col
         w-[250px]
         bg-section-bg
@@ -60,9 +69,9 @@ export default function LessonCardHero({
         shadow-md
         overflow-hidden
         h-80
-        cursor-pointer
 
         border border-gray-200/70
+        cursor-pointer
         transition-all duration-200
         hover:shadow-lg
         hover:-translate-y-1
@@ -71,7 +80,6 @@ export default function LessonCardHero({
         focus-visible:outline-none
         focus-visible:ring-2 focus-visible:ring-accent focus-visible:ring-offset-2
       "
-      title="Click to open lesson"
     >
       {/* IMAGE AREA */}
       <div className="relative w-full aspect-square">
@@ -136,11 +144,15 @@ export default function LessonCardHero({
           {title}
         </h2>
 
-        {/* FEEDBACK + MAPPING: subtle hint that it's clickable */}
-        <p className="text-xs text-primary-text/70">
-          Click to open lesson
-        </p>
+        <p className="text-xs text-primary-text/70">Click to open lesson</p>
       </div>
+
+      {/* Spinner overlay (same style as recipe cards on homepage) */}
+      {isOpening && (
+        <div className="absolute inset-0 flex justify-center items-center bg-white/70 rounded-2xl">
+          <div className="w-10 h-10 border-4 border-accent border-t-transparent rounded-full animate-spin" />
+        </div>
+      )}
     </article>
   );
 }
