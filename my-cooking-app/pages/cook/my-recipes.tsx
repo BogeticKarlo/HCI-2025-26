@@ -124,23 +124,6 @@ export default function MyRecipes() {
     if (type === "favorite") setSelectedFavorite(favoriteOptions[0]);
   };
 
-  const resetAllFilters = () => {
-    setSelectedCuisine(cuisineOptions[0]);
-    setSelectedRecipeType(recipeTypeOptions[0]);
-    setSelectedTime(timeOptions[0]);
-    setSelectedFavorite(favoriteOptions[0]);
-
-    localStorage.setItem(
-      localStorageKey,
-      JSON.stringify({
-        cuisine: cuisineOptions[0],
-        recipeType: recipeTypeOptions[0],
-        time: timeOptions[0],
-        favorite: favoriteOptions[0],
-      }),
-    );
-  };
-
   const activeFilters = useMemo(() => {
     return [
       { type: "cuisine", value: selectedCuisine },
@@ -150,24 +133,22 @@ export default function MyRecipes() {
     ].filter((item) => item.value.id !== "all");
   }, [selectedCuisine, selectedRecipeType, selectedTime, selectedFavorite]);
 
-  // Match your homepage behavior:
-  // - Hide time chip entirely (latest/oldest)
-  // - Keep favorite chip removable (most/least likes)
+  // Match homepage behavior:
+  // - hide Date chip entirely (latest/oldest)
+  // - allow removing Popularity chip (most/least likes)
   const activeChips = useMemo(() => {
     return activeFilters.filter((f) => f.type !== "time");
   }, [activeFilters]);
 
-  /* ---------------- HANDLE RECIPE CLICK (same UX as homepage) ---------------- */
+  /* ---------------- HANDLE RECIPE CLICK ---------------- */
   const handleRecipeClick = async (recipeId: string) => {
     if (!recipeId) return;
 
     setLoadingRecipeId(recipeId);
 
     try {
-      // Navigate immediately, spinner overlay provides feedback while route loads
       router.push(`/recipes/${recipeId}`);
     } finally {
-      // If navigation is fast, clear quickly; if not, it will unmount anyway
       setTimeout(() => setLoadingRecipeId(null), 800);
     }
   };
@@ -178,7 +159,7 @@ export default function MyRecipes() {
         My Recipes
       </h1>
 
-      {/* FILTERS (same layout as homepage) */}
+      {/* FILTERS */}
       <div className="flex flex-col w-9/10 items-center gap-8 mb-10">
         <div className="grid grid-cols-2 gap-5 w-full lg:w-[70%]">
           <Dropdown
@@ -215,10 +196,10 @@ export default function MyRecipes() {
         </p>
       </div>
 
-      {/* ACTIVE CHIPS + REMOVE ALL (same pattern as homepage) */}
-      {activeFilters.length > 0 && (
+      {/* ACTIVE CHIPS (centered, no "Remove all") */}
+      {activeChips.length > 0 && (
         <div className="w-full max-w-6xl mx-auto px-6 sm:px-10 lg:px-20">
-          <div className="flex flex-wrap gap-3 mb-6 items-center">
+          <div className="flex flex-wrap gap-3 mb-6 items-center justify-center">
             {activeChips.map(({ type, value }) => (
               <button
                 key={`${type}-${value.id}`}
@@ -252,51 +233,23 @@ export default function MyRecipes() {
                 </span>
               </button>
             ))}
-
-            {/* Remove all filters (only when any filter is active) */}
-            <button
-              onClick={resetAllFilters}
-              className="
-                group
-                flex items-center gap-2
-                px-4 py-2
-                text-sm font-medium
-                border border-gray-300
-                text-primary-text
-                rounded-full
-                bg-white
-                shadow-sm
-                cursor-pointer
-                transition-all duration-200
-                hover:shadow-md
-                hover:-translate-y-[1px]
-                active:scale-95
-                focus:outline-none
-                focus:ring-2 focus:ring-gray-300
-                focus:ring-offset-2
-              "
-              title="Remove all filters"
-            >
-              <span>Remove all</span>
-              <span className="text-xs font-bold">✕</span>
-            </button>
           </div>
         </div>
       )}
 
-      {/* DIVIDER (conceptual model clarity) */}
+      {/* DIVIDER */}
       <div className="w-full max-w-6xl px-6 sm:px-10 lg:px-20">
         <div className="border-t border-gray-200 my-6" />
       </div>
 
-      {/* RESULTS LABEL (keep black text like homepage) */}
+      {/* RESULTS LABEL */}
       <div className="w-full max-w-6xl px-6 sm:px-10 lg:px-20 mb-4">
         <p className="text-sm font-medium text-primary-text">
           Showing {recipes.length} {recipes.length === 1 ? "recipe" : "recipes"}
         </p>
       </div>
 
-      {/* GRID + ERROR STATE (same as homepage) */}
+      {/* GRID + ERROR STATE */}
       <div className="max-w-6xl mx-auto px-6 sm:px-10 lg:px-20 w-full">
         <div className="grid gap-6 grid-cols-1 md:grid-cols-2 xl:grid-cols-3 place-items-center min-h-[300px]">
           {isError ? (
@@ -344,7 +297,7 @@ export default function MyRecipes() {
                         authorId={recipe.author_id || ""}
                       />
 
-                      {/* Spinner overlay (same as homepage) */}
+                      {/* Spinner overlay */}
                       {loadingRecipeId === recipe.id && (
                         <div className="absolute inset-0 flex justify-center items-center bg-white/70 rounded-lg">
                           <div className="w-10 h-10 border-4 border-accent border-t-transparent rounded-full animate-spin" />
@@ -366,7 +319,7 @@ export default function MyRecipes() {
         </div>
       </div>
 
-      {/* LOAD MORE (error prevention: disable while loading) */}
+      {/* LOAD MORE */}
       {hasMore && !isError && (
         <Button
           onClick={() => {
