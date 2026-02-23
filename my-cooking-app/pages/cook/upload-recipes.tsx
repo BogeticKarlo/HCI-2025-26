@@ -25,7 +25,6 @@ export default function UploadRecipes() {
 
   const [isLoading, setIsLoading] = useState(false);
 
-  // Feedback state
   const [status, setStatus] = useState<
     | "idle"
     | "validating"
@@ -50,13 +49,6 @@ export default function UploadRecipes() {
   const hasErrors = Object.values(errors).some((error) => error);
 
   if (!user) return null;
-
-  /* ---------------- CONSTRAINTS (Norman) ----------------
-   * 1) Disable Upload until all required fields are plausibly complete (prevents slips).
-   * 2) Show a clear “what’s missing” checklist (reduces trial & error).
-   * 3) Hard-stop if user tries anyway (e.g., Enter key or custom button behavior).
-   * 4) Treat list fields as valid only if they contain at least 1 non-empty item.
-   */
 
   const trimmedIngredientsCount = useMemo(
     () => ingredients.filter((v) => v.trim()).length,
@@ -110,7 +102,6 @@ export default function UploadRecipes() {
     isLoading,
   ]);
 
-  // Progress includes image now (7 total)
   const completedCount = useMemo(() => {
     let count = 0;
     if (title.trim()) count += 1;
@@ -120,7 +111,7 @@ export default function UploadRecipes() {
     if (selectedCuisine.id !== "all") count += 1;
     if (selectedRecipeType.id !== "all") count += 1;
     if (image) count += 1;
-    return count; // out of 7
+    return count;
   }, [
     title,
     description,
@@ -291,7 +282,6 @@ export default function UploadRecipes() {
 
   return (
     <div>
-      {/* VISUAL WEIGHT 1: Stronger page header hierarchy */}
       <div className="max-w-[360px] md:max-w-[720px] mx-auto px-2">
         <h1 className="font-playfair font-bold text-[32px] leading-[120%] md:text-[44px] text-center mb-2 text-primary-text">
           Upload Your Recipe
@@ -301,7 +291,6 @@ export default function UploadRecipes() {
           Follow the steps below to publish your recipe.
         </p>
 
-        {/* VISUAL WEIGHT 2: Meta row in a subtle container so it reads as “status” */}
         <div className="mb-4 rounded-xl border border-gray-200 bg-white/60 px-3 py-2">
           <div className="flex items-center justify-between text-xs text-primary-text">
             <span>
@@ -312,8 +301,8 @@ export default function UploadRecipes() {
 
           <div className="mt-2 flex items-center justify-between text-xs text-primary-text">
             <span className="opacity-80">
-              Progress:{" "}
-              <span className="font-semibold">{completedCount}</span>/7 filled
+              Progress: <span className="font-semibold">{completedCount}</span>
+              /7 filled
             </span>
 
             {statusText && (
@@ -334,9 +323,7 @@ export default function UploadRecipes() {
         </div>
       </div>
 
-      {/* VISUAL WEIGHT 3: Main “sheet” gets more presence + consistent spacing */}
       <div className="bg-section-bg shadow-lg border border-input-border rounded-2xl flex flex-col items-center w-full max-w-[360px] md:max-w-[720px] mx-auto p-6 md:p-8 gap-8">
-        {/* VISUAL WEIGHT 4: Alerts get priority with a slightly stronger background */}
         {!canAttemptSubmit && missingItems.length > 0 && (
           <div className="w-full border border-gray-300 bg-white p-3 rounded-2xl text-sm text-center text-primary-text shadow-sm">
             <span className="font-semibold">To upload, complete:</span>{" "}
@@ -353,7 +340,6 @@ export default function UploadRecipes() {
 
         {/* STEP 1 */}
         <div className="w-full">
-          {/* VISUAL WEIGHT: Step header stands out + step indicator */}
           <div className="flex items-center justify-between mb-3">
             <div className="flex items-center gap-3">
               <span className="inline-flex items-center justify-center w-7 h-7 rounded-full bg-accent text-black text-xs font-bold">
@@ -368,7 +354,6 @@ export default function UploadRecipes() {
             </span>
           </div>
 
-          {/* VISUAL WEIGHT: Step section card */}
           <div className="rounded-2xl border border-gray-200 bg-white/50 p-4 md:p-5">
             <div className="flex flex-col w-full gap-6 border-l-2 border-gray-300 pl-4">
               <Input
@@ -489,15 +474,22 @@ export default function UploadRecipes() {
                 publish.
               </p>
 
-              <ImageInput
-                value={image}
-                onChange={(file) => {
-                  setImage(file);
-                  setErrors((prev) => ({ ...prev, image: "" }));
-                  setStatus("idle");
-                }}
-                error={errors.image}
-              />
+              {/* ✅ Add required signifier here */}
+              <div className="flex flex-col gap-2">
+                <p className="text-sm font-semibold text-primary-text">
+                  Upload Dish Image <span className="font-bold">*</span>
+                </p>
+
+                <ImageInput
+                  value={image}
+                  onChange={(file) => {
+                    setImage(file);
+                    setErrors((prev) => ({ ...prev, image: "" }));
+                    setStatus("idle");
+                  }}
+                  error={errors.image}
+                />
+              </div>
             </div>
           </div>
         </div>
@@ -510,7 +502,6 @@ export default function UploadRecipes() {
             Ready to publish? Click the button below.
           </p>
 
-          {/* Strongest visual weight: primary CTA */}
           <Button
             variant="primary"
             className="w-2/3 mx-auto mt-1 shadow-md hover:shadow-lg transition-shadow duration-200"
