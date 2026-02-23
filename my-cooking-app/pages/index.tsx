@@ -173,7 +173,7 @@ export default function HomePage() {
           />
         </div>
 
-        <p className="text-xs text-secondary-text text-center">
+        <p className="text-xs text-black text-center">
           Filters update recipes automatically
         </p>
       </div>
