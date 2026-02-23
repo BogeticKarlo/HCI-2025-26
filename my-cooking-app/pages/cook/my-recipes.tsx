@@ -16,14 +16,13 @@ import {
 } from "@/components/dropdown/DropdownOptions";
 import { Dropdown } from "@/components/dropdown/Dropdown";
 import { Button } from "@/components/button/Button";
-import { useRouter } from "next/navigation";
+import Link from "next/link";
 
 const localStorageKey = "myRecipeFilters";
 const pageLimit = 12;
 
 export default function MyRecipes() {
   const { user } = useAuth();
-  const router = useRouter();
 
   const savedFilters =
     typeof window !== "undefined"
@@ -140,18 +139,14 @@ export default function MyRecipes() {
     return activeFilters.filter((f) => f.type !== "time");
   }, [activeFilters]);
 
-  /* ---------------- HANDLE RECIPE CLICK ---------------- */
-  const handleRecipeClick = async (recipeId: string) => {
-    if (!recipeId) return;
-
-    setLoadingRecipeId(recipeId);
-
-    try {
-      router.push(`/recipes/${recipeId}`);
-    } finally {
-      setTimeout(() => setLoadingRecipeId(null), 800);
-    }
-  };
+  /* ---------------- SLUG HELPER (to match your /recipes/<id>-<slug> format) ---------------- */
+  const slugify = (text: string) =>
+    text
+      .toLowerCase()
+      .trim()
+      .replace(/\s+/g, "-")
+      .replace(/[^\p{L}\p{N}-]+/gu, "") // keep letters (including čćđšž), numbers, hyphen
+      .replace(/-+/g, "-");
 
   return (
     <div className="flex flex-col items-center">
@@ -196,7 +191,7 @@ export default function MyRecipes() {
         </p>
       </div>
 
-      {/* ACTIVE CHIPS (centered, no "Remove all") */}
+      {/* ACTIVE CHIPS (centered) */}
       {activeChips.length > 0 && (
         <div className="w-full max-w-6xl mx-auto px-6 sm:px-10 lg:px-20">
           <div className="flex flex-wrap gap-3 mb-6 items-center justify-center">
@@ -205,25 +200,14 @@ export default function MyRecipes() {
                 key={`${type}-${value.id}`}
                 onClick={() => resetFilter(type)}
                 className="
-                  group
-                  flex items-center gap-2
-                  px-4 py-2
-                  text-sm font-medium
-                  border border-accent
-                  text-accent
-                  rounded-full
-                  bg-white
-                  shadow-sm
-                  cursor-pointer
-                  transition-all duration-200
-                  hover:scale-105
-                  hover:shadow-xl
-                  hover:bg-accent
-                  hover:text-black
+                  group flex items-center gap-2
+                  px-4 py-2 text-sm font-medium
+                  border border-accent text-accent
+                  rounded-full bg-white shadow-sm
+                  cursor-pointer transition-all duration-200
+                  hover:scale-105 hover:shadow-xl hover:bg-accent hover:text-black
                   active:scale-95
-                  focus:outline-none
-                  focus:ring-2 focus:ring-accent
-                  focus:ring-offset-2
+                  focus:outline-none focus:ring-2 focus:ring-accent focus:ring-offset-2
                 "
                 title={`Remove ${value.label} filter`}
               >
@@ -282,29 +266,37 @@ export default function MyRecipes() {
                 ? Array.from({ length: pageLimit }).map((_, i) => (
                     <RecipeMinimizeCardSkeletonLoader key={`first-${i}`} />
                   ))
-                : recipes.map((recipe) => (
-                    <div
-                      key={recipe.id}
-                      className="transition-transform duration-200 hover:-translate-y-1 hover:shadow-lg w-full relative cursor-pointer"
-                      onClick={() => handleRecipeClick(recipe.id || "")}
-                      title="Open recipe"
-                    >
-                      <RecipeMinimizeCard
-                        id={recipe.id || ""}
-                        title={recipe.title}
-                        imageUrl={recipe.image_url || ""}
-                        description={recipe.description || ""}
-                        authorId={recipe.author_id || ""}
-                      />
+                : recipes.map((recipe) => {
+                    const recipeId = recipe.id || "";
+                    const titleSlug = slugify(recipe.title || "recipe");
+                    const href = `/recipes/${recipeId}-${titleSlug}`;
 
-                      {/* Spinner overlay */}
-                      {loadingRecipeId === recipe.id && (
-                        <div className="absolute inset-0 flex justify-center items-center bg-white/70 rounded-lg">
-                          <div className="w-10 h-10 border-4 border-accent border-t-transparent rounded-full animate-spin" />
-                        </div>
-                      )}
-                    </div>
-                  ))}
+                    return (
+                      <Link
+                        key={recipeId}
+                        href={href}
+                        className="w-full relative cursor-pointer transition-transform duration-200 hover:-translate-y-1 hover:shadow-lg"
+                        title="Open recipe"
+                        onClick={() => setLoadingRecipeId(recipeId)}
+                        prefetch
+                      >
+                        <RecipeMinimizeCard
+                          id={recipeId}
+                          title={recipe.title}
+                          imageUrl={recipe.image_url || ""}
+                          description={recipe.description || ""}
+                          authorId={recipe.author_id || ""}
+                        />
+
+                        {/* Spinner overlay */}
+                        {loadingRecipeId === recipeId && (
+                          <div className="absolute inset-0 flex justify-center items-center bg-white/70 rounded-lg">
+                            <div className="w-10 h-10 border-4 border-accent border-t-transparent rounded-full animate-spin" />
+                          </div>
+                        )}
+                      </Link>
+                    );
+                  })}
 
               {/* Pagination continuity: skeletons below grid on page 2+ */}
               {isFetchingMore && currentPage > 1 && (
