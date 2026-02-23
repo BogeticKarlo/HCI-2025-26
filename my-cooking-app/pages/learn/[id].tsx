@@ -105,9 +105,6 @@ export default function Cooking101({ page, error }: Props) {
                   Pick a lesson to begin
                 </p>
               </div>
-              <p className="text-xs text-primary-text opacity-70">
-                Cards open a lesson page
-              </p>
             </div>
 
             <div className="p-4 sm:p-6">
