@@ -149,7 +149,6 @@ export default function UploadRecipes() {
   }, [status]);
 
   const applyConstraintErrors = () => {
-    // This keeps your existing per-field error UI working.
     setErrors((prev) => ({
       ...prev,
       ...(title.trim() ? {} : { title: prev.title || "Title is required." }),
@@ -179,7 +178,6 @@ export default function UploadRecipes() {
   };
 
   const handleUploadRecipe = async () => {
-    // Constraint hard-stop: prevents invalid upload attempts
     if (!canAttemptSubmit) {
       setStatus("error");
       applyConstraintErrors();
@@ -227,7 +225,6 @@ export default function UploadRecipes() {
       return;
     }
 
-    // Image is REQUIRED
     if (!image) {
       setErrors((prev) => ({ ...prev, image: "Image is required." }));
       setStatus("error");
@@ -294,56 +291,61 @@ export default function UploadRecipes() {
 
   return (
     <div>
-      <h1 className="font-playfair font-bold text-[32px] leading-[120%] md:text-[40px] text-center mb-2 text-primary-text">
-        Upload Your Recipe
-      </h1>
+      {/* VISUAL WEIGHT 1: Stronger page header hierarchy */}
+      <div className="max-w-[360px] md:max-w-[720px] mx-auto px-2">
+        <h1 className="font-playfair font-bold text-[32px] leading-[120%] md:text-[44px] text-center mb-2 text-primary-text">
+          Upload Your Recipe
+        </h1>
 
-      <p className="text-center text-sm text-primary-text opacity-80 mb-4">
-        Follow the steps below to publish your recipe.
-      </p>
+        <p className="text-center text-sm text-primary-text opacity-80 mb-4">
+          Follow the steps below to publish your recipe.
+        </p>
 
-      <div className="max-w-[360px] md:max-w-[720px] mx-auto mb-4 px-2">
-        <div className="flex items-center justify-between text-xs text-primary-text">
-          <span>
-            <span className="font-semibold">*</span> Required fields
-          </span>
-          <span className="opacity-80">Step 1 → Step 2 → Step 3</span>
-        </div>
-
-        <div className="mt-2 flex items-center justify-between text-xs text-primary-text">
-          <span className="opacity-80">
-            Progress: <span className="font-semibold">{completedCount}</span>/7
-            filled
-          </span>
-
-          {statusText && (
-            <span
-              className={`font-semibold ${
-                status === "error"
-                  ? "text-error-border"
-                  : status === "success"
-                    ? "text-green-700"
-                    : "text-primary-text"
-              }`}
-              aria-live="polite"
-            >
-              {statusText}
+        {/* VISUAL WEIGHT 2: Meta row in a subtle container so it reads as “status” */}
+        <div className="mb-4 rounded-xl border border-gray-200 bg-white/60 px-3 py-2">
+          <div className="flex items-center justify-between text-xs text-primary-text">
+            <span>
+              <span className="font-semibold">*</span> Required fields
             </span>
-          )}
+            <span className="opacity-80">Step 1 → Step 2 → Step 3</span>
+          </div>
+
+          <div className="mt-2 flex items-center justify-between text-xs text-primary-text">
+            <span className="opacity-80">
+              Progress:{" "}
+              <span className="font-semibold">{completedCount}</span>/7 filled
+            </span>
+
+            {statusText && (
+              <span
+                className={`font-semibold ${
+                  status === "error"
+                    ? "text-error-border"
+                    : status === "success"
+                      ? "text-green-700"
+                      : "text-primary-text"
+                }`}
+                aria-live="polite"
+              >
+                {statusText}
+              </span>
+            )}
+          </div>
         </div>
       </div>
 
-      <div className="bg-section-bg shadow-md border border-input-border rounded-2xl flex flex-col items-center w-full max-w-[360px] md:max-w-[720px] mx-auto p-6 gap-8">
-        {/* Constraint: show exactly what’s missing (prevents trial-and-error) */}
+      {/* VISUAL WEIGHT 3: Main “sheet” gets more presence + consistent spacing */}
+      <div className="bg-section-bg shadow-lg border border-input-border rounded-2xl flex flex-col items-center w-full max-w-[360px] md:max-w-[720px] mx-auto p-6 md:p-8 gap-8">
+        {/* VISUAL WEIGHT 4: Alerts get priority with a slightly stronger background */}
         {!canAttemptSubmit && missingItems.length > 0 && (
-          <div className="w-full border border-gray-300 bg-white/60 p-3 rounded-2xl text-sm text-center text-primary-text">
+          <div className="w-full border border-gray-300 bg-white p-3 rounded-2xl text-sm text-center text-primary-text shadow-sm">
             <span className="font-semibold">To upload, complete:</span>{" "}
             {missingItems.join(", ")}.
           </div>
         )}
 
         {hasErrors && (
-          <div className="w-full border border-error-border text-error-border bg-error p-3 rounded-2xl text-sm text-center">
+          <div className="w-full border border-error-border text-error-border bg-error p-3 rounded-2xl text-sm text-center shadow-sm">
             Some required fields are missing. Please fix the highlighted inputs
             below, then try uploading again.
           </div>
@@ -351,143 +353,167 @@ export default function UploadRecipes() {
 
         {/* STEP 1 */}
         <div className="w-full">
+          {/* VISUAL WEIGHT: Step header stands out + step indicator */}
           <div className="flex items-center justify-between mb-3">
-            <h2 className="text-xl font-semibold text-primary-text font-playfair">
-              Step 1: Basic Information
-            </h2>
+            <div className="flex items-center gap-3">
+              <span className="inline-flex items-center justify-center w-7 h-7 rounded-full bg-accent text-black text-xs font-bold">
+                1
+              </span>
+              <h2 className="text-xl font-semibold text-primary-text font-playfair">
+                Basic Information
+              </h2>
+            </div>
             <span className="text-xs text-primary-text opacity-80">
               Start here
             </span>
           </div>
 
-          <div className="flex flex-col w-full gap-6 border-l-2 border-gray-300 pl-4">
-            <Input
-              label="Recipe Title *"
-              placeholder="e.g. Delicious Pancakes"
-              value={title}
-              onChange={(e) => {
-                setTitle(e.target.value);
-                setErrors((prev) => ({ ...prev, title: "" }));
-                setStatus("idle");
-              }}
-              error={errors.title}
-            />
+          {/* VISUAL WEIGHT: Step section card */}
+          <div className="rounded-2xl border border-gray-200 bg-white/50 p-4 md:p-5">
+            <div className="flex flex-col w-full gap-6 border-l-2 border-gray-300 pl-4">
+              <Input
+                label="Recipe Title *"
+                placeholder="e.g. Delicious Pancakes"
+                value={title}
+                onChange={(e) => {
+                  setTitle(e.target.value);
+                  setErrors((prev) => ({ ...prev, title: "" }));
+                  setStatus("idle");
+                }}
+                error={errors.title}
+              />
 
-            <TextArea
-              label="Recipe Description *"
-              value={description}
-              onChange={(value) => {
-                setDescription(value);
-                setErrors((prev) => ({ ...prev, description: "" }));
-                setStatus("idle");
-              }}
-              maxLength={200}
-              placeholder="Describe your recipe in a short and clear way..."
-              error={errors.description}
-            />
+              <TextArea
+                label="Recipe Description *"
+                value={description}
+                onChange={(value) => {
+                  setDescription(value);
+                  setErrors((prev) => ({ ...prev, description: "" }));
+                  setStatus("idle");
+                }}
+                maxLength={200}
+                placeholder="Describe your recipe in a short and clear way..."
+                error={errors.description}
+              />
 
-            <Dropdown
-              label="Choose Cuisine *"
-              options={cuisineOptions}
-              onSelect={(opt) => {
-                setSelectedCuisine(opt);
-                setErrors((prev) => ({ ...prev, selectedCuisine: "" }));
-                setStatus("idle");
-              }}
-              value={selectedCuisine}
-            />
+              <Dropdown
+                label="Choose Cuisine *"
+                options={cuisineOptions}
+                onSelect={(opt) => {
+                  setSelectedCuisine(opt);
+                  setErrors((prev) => ({ ...prev, selectedCuisine: "" }));
+                  setStatus("idle");
+                }}
+                value={selectedCuisine}
+              />
 
-            <Dropdown
-              label="Choose Recipe Type *"
-              options={recipeTypeOptions}
-              onSelect={(opt) => {
-                setSelectedRecipeType(opt);
-                setErrors((prev) => ({ ...prev, selectedRecipeType: "" }));
-                setStatus("idle");
-              }}
-              value={selectedRecipeType}
-            />
+              <Dropdown
+                label="Choose Recipe Type *"
+                options={recipeTypeOptions}
+                onSelect={(opt) => {
+                  setSelectedRecipeType(opt);
+                  setErrors((prev) => ({ ...prev, selectedRecipeType: "" }));
+                  setStatus("idle");
+                }}
+                value={selectedRecipeType}
+              />
+            </div>
           </div>
         </div>
 
         {/* STEP 2 */}
-        <div className="w-full border-t pt-6">
+        <div className="w-full">
           <div className="flex items-center justify-between mb-3">
-            <h2 className="text-xl font-semibold text-primary-text font-playfair">
-              Step 2: Ingredients & Steps
-            </h2>
+            <div className="flex items-center gap-3">
+              <span className="inline-flex items-center justify-center w-7 h-7 rounded-full bg-accent text-black text-xs font-bold">
+                2
+              </span>
+              <h2 className="text-xl font-semibold text-primary-text font-playfair">
+                Ingredients & Steps
+              </h2>
+            </div>
             <span className="text-xs text-primary-text opacity-80">
               Up to 20 items
             </span>
           </div>
 
-          <div className="flex flex-col w-full gap-6 border-l-2 border-gray-300 pl-4">
-            <InputList
-              label="Ingredients *"
-              values={ingredients}
-              onChange={(newValues) => {
-                setIngredients(newValues);
-                setErrors((prev) => ({ ...prev, ingredients: "" }));
-                setStatus("idle");
-              }}
-              placeholder="e.g. 2 eggs, 1 cup flour"
-              maxItems={20}
-              error={errors.ingredients}
-            />
+          <div className="rounded-2xl border border-gray-200 bg-white/50 p-4 md:p-5">
+            <div className="flex flex-col w-full gap-6 border-l-2 border-gray-300 pl-4">
+              <InputList
+                label="Ingredients *"
+                values={ingredients}
+                onChange={(newValues) => {
+                  setIngredients(newValues);
+                  setErrors((prev) => ({ ...prev, ingredients: "" }));
+                  setStatus("idle");
+                }}
+                placeholder="e.g. 2 eggs, 1 cup flour"
+                maxItems={20}
+                error={errors.ingredients}
+              />
 
-            <InputList
-              label="Instructions / Steps *"
-              values={steps}
-              onChange={(newValues) => {
-                setSteps(newValues);
-                setErrors((prev) => ({ ...prev, steps: "" }));
-                setStatus("idle");
-              }}
-              placeholder="e.g. Mix ingredients, then bake for 20 minutes"
-              maxItems={20}
-              error={errors.steps}
-            />
+              <InputList
+                label="Instructions / Steps *"
+                values={steps}
+                onChange={(newValues) => {
+                  setSteps(newValues);
+                  setErrors((prev) => ({ ...prev, steps: "" }));
+                  setStatus("idle");
+                }}
+                placeholder="e.g. Mix ingredients, then bake for 20 minutes"
+                maxItems={20}
+                error={errors.steps}
+              />
+            </div>
           </div>
         </div>
 
-        {/* STEP 3 (Image REQUIRED) */}
-        <div className="w-full border-t pt-6">
+        {/* STEP 3 */}
+        <div className="w-full">
           <div className="flex items-center justify-between mb-3">
-            <h2 className="text-xl font-semibold text-primary-text font-playfair">
-              Step 3: Add a Photo *
-            </h2>
-            <span className="text-xs text-primary-text opacity-80">
-              Required
-            </span>
+            <div className="flex items-center gap-3">
+              <span className="inline-flex items-center justify-center w-7 h-7 rounded-full bg-accent text-black text-xs font-bold">
+                3
+              </span>
+              <h2 className="text-xl font-semibold text-primary-text font-playfair">
+                Photo
+              </h2>
+            </div>
+            <span className="text-xs text-primary-text opacity-80">Required</span>
           </div>
 
-          <div className="flex flex-col w-full gap-4 border-l-2 border-gray-300 pl-4">
-            <p className="text-xs text-primary-text opacity-80">
-              Please upload a clear photo of your recipe. This is required to
-              publish.
-            </p>
+          <div className="rounded-2xl border border-gray-200 bg-white/50 p-4 md:p-5">
+            <div className="flex flex-col w-full gap-4 border-l-2 border-gray-300 pl-4">
+              <p className="text-xs text-primary-text opacity-80">
+                Please upload a clear photo of your recipe. This is required to
+                publish.
+              </p>
 
-            <ImageInput
-              value={image}
-              onChange={(file) => {
-                setImage(file);
-                setErrors((prev) => ({ ...prev, image: "" }));
-                setStatus("idle");
-              }}
-              error={errors.image}
-            />
+              <ImageInput
+                value={image}
+                onChange={(file) => {
+                  setImage(file);
+                  setErrors((prev) => ({ ...prev, image: "" }));
+                  setStatus("idle");
+                }}
+                error={errors.image}
+              />
+            </div>
           </div>
         </div>
 
         {/* CTA */}
-        <div className="flex flex-col items-center gap-2 w-full pt-2">
+        <div className="flex flex-col items-center gap-3 w-full pt-2">
+          <div className="w-full border-t border-gray-200/70 pt-5" />
+
           <p className="text-xs text-primary-text opacity-80 text-center">
             Ready to publish? Click the button below.
           </p>
 
+          {/* Strongest visual weight: primary CTA */}
           <Button
             variant="primary"
-            className="w-2/3 mx-auto mt-1"
+            className="w-2/3 mx-auto mt-1 shadow-md hover:shadow-lg transition-shadow duration-200"
             onClick={handleUploadRecipe}
             isLoading={isLoading}
             disabled={!canAttemptSubmit}
