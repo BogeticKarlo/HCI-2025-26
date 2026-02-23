@@ -1,5 +1,5 @@
 import { GetServerSideProps } from "next";
-import { useEffect, useState } from "react";
+import { useEffect, useState, useMemo } from "react";
 import { useRouter } from "next/router";
 import { getLessonsById } from "@/fetch/cms";
 import { LessonType } from "@/types/cms";
@@ -11,8 +11,6 @@ interface Props {
   error: string | null;
 }
 
-const COOKING_101_BACK_URL = "/learn/cooking-101";
-
 export default function LessonPage({ lesson, error }: Props) {
   const router = useRouter();
   const [isHydrating, setIsHydrating] = useState(true);
@@ -23,8 +21,46 @@ export default function LessonPage({ lesson, error }: Props) {
     return () => clearTimeout(t);
   }, []);
 
-  const handleBackToCourse = () => {
-    router.push(COOKING_101_BACK_URL);
+  /**
+   * ---------------- MAPPING (Norman)
+   * Back button maps to the course the lesson belongs to.
+   * Priority:
+   * 1) Browser history (natural mental model of "Back")
+   * 2) Course slug (cooking-101 / culinary-techniques / cuisine-explorer)
+   * 3) Fallback to /learn
+   */
+  const courseBackUrl = useMemo(() => {
+    if (!lesson) return "/learn";
+
+    // Adjust these field names if your CMS uses a different property
+    const courseSlug =
+      // common CMS patterns
+      (lesson as any)?.courseSlug ||
+      (lesson as any)?.course?.slug ||
+      (lesson as any)?.course_id ||
+      null;
+
+    if (!courseSlug) return "/learn";
+
+    if (courseSlug === "cooking-101") return "/learn/cooking-101";
+    if (courseSlug === "culinary-techniques")
+      return "/learn/culinary-techniques";
+    if (courseSlug === "cuisine-explorer")
+      return "/learn/cuisine-explorer";
+
+    // Generic fallback if new courses are added later
+    return `/learn/${courseSlug}`;
+  }, [lesson]);
+
+  const handleBack = () => {
+    // If user navigated from a course page, respect real back behavior
+    if (typeof window !== "undefined" && window.history.length > 1) {
+      router.back();
+      return;
+    }
+
+    // Direct entry fallback → go to correct course page
+    router.push(courseBackUrl);
   };
 
   const handleRetry = () => {
@@ -35,11 +71,11 @@ export default function LessonPage({ lesson, error }: Props) {
 
   const PageShell = ({ children }: { children: React.ReactNode }) => (
     <div className="w-full max-w-5xl mx-auto px-6 sm:px-10 lg:px-20 py-8">
-      {/* Minimal header with strong signifier (Back button only) */}
+      {/* Context-aware Back Button */}
       <header className="flex items-center justify-between mb-6">
         <button
           type="button"
-          onClick={handleBackToCourse}
+          onClick={handleBack}
           disabled={isRetrying}
           className={`
             flex items-center gap-2
@@ -57,10 +93,10 @@ export default function LessonPage({ lesson, error }: Props) {
                 : "cursor-pointer hover:scale-105 hover:shadow-md hover:bg-gray-50 active:scale-95"
             }
           `}
-          aria-label="Go back to Cooking 101 course"
-          title="Back to Cooking 101"
+          aria-label="Go back to course"
+          title="Go back to course"
         >
-          ← Back to Cooking 101
+          ← Back to course
         </button>
       </header>
 
@@ -78,7 +114,9 @@ export default function LessonPage({ lesson, error }: Props) {
         >
           <div className="flex items-center gap-3">
             <div className="w-6 h-6 border-2 border-accent border-t-transparent rounded-full animate-spin" />
-            <p className="text-sm font-medium text-black">Loading lesson…</p>
+            <p className="text-sm font-medium text-black">
+              Loading lesson…
+            </p>
           </div>
 
           <div className="mt-6 space-y-3">
@@ -133,10 +171,10 @@ export default function LessonPage({ lesson, error }: Props) {
 
             <Button
               variant="secondary"
-              onClick={handleBackToCourse}
+              onClick={handleBack}
               className="cursor-pointer transition-all duration-200 hover:scale-105 active:scale-95"
             >
-              Back to Cooking 101
+              Back to course
             </Button>
           </div>
         </div>
@@ -147,11 +185,7 @@ export default function LessonPage({ lesson, error }: Props) {
   if (!lesson) {
     return (
       <PageShell>
-        <div
-          className="flex flex-col items-center text-center gap-5 border border-gray-300 bg-white rounded-2xl p-8 shadow-sm"
-          role="status"
-          aria-live="polite"
-        >
+        <div className="flex flex-col items-center text-center gap-5 border border-gray-300 bg-white rounded-2xl p-8 shadow-sm">
           <div className="w-14 h-14 rounded-2xl bg-gray-100 flex items-center justify-center text-black text-2xl font-bold">
             ?
           </div>
@@ -166,10 +200,10 @@ export default function LessonPage({ lesson, error }: Props) {
           </div>
 
           <Button
-            onClick={handleBackToCourse}
+            onClick={handleBack}
             className="cursor-pointer transition-all duration-200 hover:scale-105 active:scale-95"
           >
-            Back to Cooking 101
+            Back to course
           </Button>
         </div>
       </PageShell>
@@ -178,7 +212,7 @@ export default function LessonPage({ lesson, error }: Props) {
 
   return (
     <PageShell>
-      {/* Strong visual hierarchy: single focused content card */}
+      {/* Strong visual hierarchy: focused lesson card */}
       <section
         className="w-full bg-white border border-gray-200 rounded-3xl shadow-md p-6 sm:p-8"
         aria-label="Lesson content"
