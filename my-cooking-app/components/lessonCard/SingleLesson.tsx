@@ -46,7 +46,7 @@ export default function SingleLesson({ lesson }: { lesson: LessonType }) {
             cursor-pointer
             transition-colors duration-200
             hover:bg-white/60
-            hover:opacity-90
+            hover:scale-110 hover:opacity-80
             active:opacity-80
             focus-visible:outline-none
             focus-visible:ring-2 focus-visible:ring-accent focus-visible:ring-offset-2
