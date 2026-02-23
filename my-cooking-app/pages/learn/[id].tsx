@@ -41,7 +41,7 @@ export default function Cooking101({ page, error }: Props) {
 
   return (
     <div className="flex flex-col items-center w-full">
-      {/* Title */}
+      {/* TITLE (highest visual weight) */}
       <h1
         className="
           font-playfair font-bold
@@ -53,27 +53,47 @@ export default function Cooking101({ page, error }: Props) {
         {page.title}
       </h1>
 
-      {/* Discoverability hint */}
-      <p className="text-center text-sm text-primary-text opacity-80 mb-6 px-6">
-        Choose a lesson below to start learning. Each card opens a full lesson with a video.
-      </p>
+      {/* MAPPING: action -> outcome model */}
+      <div className="w-full max-w-6xl px-6 sm:px-10 lg:px-20 mb-6">
+        <p className="text-center text-sm text-primary-text opacity-80">
+          Choose a lesson card below to open the full lesson page.
+        </p>
 
-      {/* Divider (conceptual model clarity) */}
+        <div className="mt-2 flex items-center justify-center gap-2 text-xs text-primary-text opacity-80">
+          <span className="font-semibold">Step 1:</span> Pick a lesson
+          <span className="opacity-60">→</span>
+          <span className="font-semibold">Step 2:</span> Opens lesson page
+          <span className="opacity-60">→</span>
+          <span className="font-semibold">Step 3:</span> Watch the video
+        </div>
+      </div>
+
+      {/* DIVIDER (conceptual separation) */}
       <div className="w-full max-w-6xl px-6 sm:px-10 lg:px-20">
-        <div className="border-t border-gray-200 my-4" />
+        <div className="border-t border-gray-200 my-2" />
       </div>
 
-      {/* Results label */}
-      <div className="w-full max-w-6xl px-6 sm:px-10 lg:px-20 mb-4">
-        <p className="text-sm font-medium text-primary-text">
-          Showing {lessonsCount} {lessonsCount === 1 ? "lesson" : "lessons"}
-        </p>
-        <p className="text-xs text-primary-text opacity-70 mt-1">
-          Tip: click a card to open the lesson.
-        </p>
+      {/* RESULTS + SECTION HEADER (visual hierarchy + mapping) */}
+      <div className="w-full max-w-6xl px-6 sm:px-10 lg:px-20 mt-4 mb-4">
+        <div className="flex items-end justify-between gap-4 flex-wrap">
+          <div className="flex flex-col gap-1">
+            <h2 className="text-lg font-semibold text-primary-text">Lessons</h2>
+            <p className="text-sm font-medium text-primary-text">
+              Showing {lessonsCount} {lessonsCount === 1 ? "lesson" : "lessons"}
+            </p>
+          </div>
+
+          {/* SIGNIFIER (small, but helps mapping) */}
+          {lessonsCount > 0 && (
+            <div className="flex items-center gap-2 text-xs text-primary-text opacity-80">
+              <span className="inline-block w-2 h-2 rounded-full bg-accent" />
+              <span>Click a card to open</span>
+            </div>
+          )}
+        </div>
       </div>
 
-      {/* Lessons grid */}
+      {/* GRID CONTAINER (visual weight + grouping) */}
       <div className="w-full max-w-6xl mx-auto px-6 sm:px-10 lg:px-20 pb-10">
         {lessonsCount === 0 ? (
           <div className="flex flex-col items-center text-center gap-3 py-16">
@@ -81,14 +101,32 @@ export default function Cooking101({ page, error }: Props) {
               No lessons available yet.
             </h2>
             <p className="text-sm text-primary-text opacity-80">
-              Please check back later or explore another learning category.
+              Please check back later, or open another learning category.
             </p>
           </div>
         ) : (
-          <div className="grid justify-center items-stretch gap-10 grid-cols-1 md:grid-cols-2 lg:grid-cols-3">
-            {page.lessons?.map((lesson, i) => (
-              <LessonCardHero key={i} {...lesson} />
-            ))}
+          <div className="rounded-2xl border border-gray-200 bg-white/50 shadow-sm overflow-hidden">
+            {/* Header strip adds weight to the “interactive area” */}
+            <div className="flex items-center justify-between px-4 sm:px-6 py-3 border-b border-gray-200 bg-white/60">
+              <div className="flex items-center gap-3">
+                <span className="inline-block w-2.5 h-2.5 rounded-full bg-accent" />
+                <p className="text-sm font-semibold text-primary-text">
+                  Pick a lesson to begin
+                </p>
+              </div>
+              <p className="text-xs text-primary-text opacity-70">
+                Cards open a lesson page
+              </p>
+            </div>
+
+            {/* The grid */}
+            <div className="p-4 sm:p-6">
+              <div className="grid justify-center items-stretch gap-10 grid-cols-1 md:grid-cols-2 lg:grid-cols-3">
+                {page.lessons?.map((lesson, i) => (
+                  <LessonCardHero key={i} {...lesson} />
+                ))}
+              </div>
+            </div>
           </div>
         )}
       </div>
