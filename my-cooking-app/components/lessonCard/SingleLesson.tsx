@@ -21,17 +21,19 @@ export default function SingleLesson({ lesson }: { lesson: LessonType }) {
   if (loading) return <SingleLessonSkeleton />;
 
   return (
-    <article className="relative w-full max-w-[360px] md:max-w-[720px] bg-section-bg rounded-3xl p-8 pt-16 shadow-md text-body-text flex flex-col gap-6">
-      {/* BACK BUTTON — NOW TRULY INSIDE THE CARD */}
+    <article className="relative w-full max-w-[800px] bg-section-bg rounded-3xl p-8 pt-16 shadow-md text-body-text mx-auto">
+      
+      {/* BACK BUTTON */}
       <button
         onClick={() => router.back()}
         className="
           absolute left-6 top-6
-          flex items-center gap-2 p-2
+          flex items-center gap-2 px-3 py-2
           cursor-pointer
-          transition-all duration-200
-          hover:scale-110 hover:opacity-80
-          active:scale-95
+          transition-colors duration-200
+          hover:bg-white/60
+          hover:opacity-90
+          active:opacity-80
           focus-visible:outline-none
           focus-visible:ring-2 focus-visible:ring-accent focus-visible:ring-offset-2
           rounded-lg
@@ -49,30 +51,34 @@ export default function SingleLesson({ lesson }: { lesson: LessonType }) {
         <span className="text-sm font-semibold text-primary-text">Back</span>
       </button>
 
-      {/* HEADER */}
-      <header className="flex items-center justify-center">
-        <h1 className="text-3xl font-bold text-primary-text font-playfair text-center">
+      {/* CENTERED CONTENT WRAPPER */}
+      <div className="flex flex-col items-center gap-8 text-center">
+
+        {/* TITLE */}
+        <h1 className="text-3xl md:text-4xl font-bold text-primary-text font-playfair max-w-[650px]">
           {lesson.title}
         </h1>
-      </header>
 
-      {/* DESCRIPTION */}
-      <p className="text-sm leading-relaxed text-body-text">
-        {lesson.description}
-      </p>
-
-      {/* VIDEO */}
-      {videoUrl ? (
-        <video
-          src={videoUrl}
-          controls
-          className="w-full rounded-lg mt-4 shadow-sm"
-        />
-      ) : (
-        <p className="text-center text-gray-500 mt-4">
-          Video not available.
+        {/* DESCRIPTION (controlled line length for better readability) */}
+        <p className="text-sm md:text-base leading-relaxed text-body-text max-w-[600px]">
+          {lesson.description}
         </p>
-      )}
+
+        {/* VIDEO */}
+        {videoUrl ? (
+          <div className="w-full max-w-[700px]">
+            <video
+              src={videoUrl}
+              controls
+              className="w-full rounded-xl shadow-sm"
+            />
+          </div>
+        ) : (
+          <p className="text-center text-gray-500">
+            Video not available.
+          </p>
+        )}
+      </div>
     </article>
   );
 }
