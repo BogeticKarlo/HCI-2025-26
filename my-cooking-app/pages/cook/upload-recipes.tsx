@@ -58,15 +58,17 @@ export default function UploadRecipes() {
    * 4) Treat list fields as valid only if they contain at least 1 non-empty item.
    */
 
-  const trimmedIngredientsCount = useMemo(
-    () => ingredients.filter((v) => v.trim()).length,
+  const trimmedIngredients = useMemo(
+    () => ingredients.map((v) => v.trim()).filter(Boolean),
     [ingredients],
   );
-
-  const trimmedStepsCount = useMemo(
-    () => steps.filter((v) => v.trim()).length,
+  const trimmedSteps = useMemo(
+    () => steps.map((v) => v.trim()).filter(Boolean),
     [steps],
   );
+
+  const trimmedIngredientsCount = trimmedIngredients.length;
+  const trimmedStepsCount = trimmedSteps.length;
 
   const missingItems = useMemo(() => {
     const missing: string[] = [];
@@ -148,8 +150,17 @@ export default function UploadRecipes() {
     }
   }, [status]);
 
+  // ---------------- KNOWLEDGE IN THE WORLD (Norman) ----------------
+  // 1) Make system expectations visible: examples + format hints live on the page.
+  // 2) Make current state visible: “Preview summary” + counts + “selected image” indicator.
+  // 3) Make errors recoverable: “What’s missing” checklist + per-field clearing on change.
+
+  const cuisinePreview =
+    selectedCuisine?.id !== "all" ? selectedCuisine.label : "—";
+  const typePreview =
+    selectedRecipeType?.id !== "all" ? selectedRecipeType.label : "—";
+
   const applyConstraintErrors = () => {
-    // This keeps your existing per-field error UI working.
     setErrors((prev) => ({
       ...prev,
       ...(title.trim() ? {} : { title: prev.title || "Title is required." }),
@@ -179,7 +190,6 @@ export default function UploadRecipes() {
   };
 
   const handleUploadRecipe = async () => {
-    // Constraint hard-stop: prevents invalid upload attempts
     if (!canAttemptSubmit) {
       setStatus("error");
       applyConstraintErrors();
@@ -227,7 +237,6 @@ export default function UploadRecipes() {
       return;
     }
 
-    // Image is REQUIRED
     if (!image) {
       setErrors((prev) => ({ ...prev, image: "Image is required." }));
       setStatus("error");
@@ -333,8 +342,53 @@ export default function UploadRecipes() {
         </div>
       </div>
 
+      {/* KNOWLEDGE IN THE WORLD: Live preview summary */}
+      <div className="max-w-[360px] md:max-w-[720px] mx-auto mb-6 px-2">
+        <div className="border border-gray-200 rounded-2xl bg-white/60 p-4">
+          <p className="text-sm font-semibold text-primary-text mb-2">
+            Preview summary
+          </p>
+
+          <div className="grid grid-cols-2 gap-3 text-xs text-primary-text">
+            <div className="flex flex-col">
+              <span className="opacity-80">Title</span>
+              <span className="font-semibold">{title.trim() ? title : "—"}</span>
+            </div>
+
+            <div className="flex flex-col">
+              <span className="opacity-80">Photo</span>
+              <span className="font-semibold">{image ? "Selected ✅" : "Not selected"}</span>
+            </div>
+
+            <div className="flex flex-col">
+              <span className="opacity-80">Cuisine</span>
+              <span className="font-semibold">{cuisinePreview}</span>
+            </div>
+
+            <div className="flex flex-col">
+              <span className="opacity-80">Type</span>
+              <span className="font-semibold">{typePreview}</span>
+            </div>
+
+            <div className="flex flex-col">
+              <span className="opacity-80">Ingredients</span>
+              <span className="font-semibold">{trimmedIngredientsCount} items</span>
+            </div>
+
+            <div className="flex flex-col">
+              <span className="opacity-80">Steps</span>
+              <span className="font-semibold">{trimmedStepsCount} steps</span>
+            </div>
+          </div>
+
+          <p className="mt-3 text-xs text-primary-text opacity-80">
+            This is what your recipe page will show after upload.
+          </p>
+        </div>
+      </div>
+
       <div className="bg-section-bg shadow-md border border-input-border rounded-2xl flex flex-col items-center w-full max-w-[360px] md:max-w-[720px] mx-auto p-6 gap-8">
-        {/* Constraint: show exactly what’s missing (prevents trial-and-error) */}
+        {/* KNOWLEDGE IN THE WORLD: "what's missing" checklist (concrete guidance) */}
         {!canAttemptSubmit && missingItems.length > 0 && (
           <div className="w-full border border-gray-300 bg-white/60 p-3 rounded-2xl text-sm text-center text-primary-text">
             <span className="font-semibold">To upload, complete:</span>{" "}
@@ -361,6 +415,11 @@ export default function UploadRecipes() {
           </div>
 
           <div className="flex flex-col w-full gap-6 border-l-2 border-gray-300 pl-4">
+            {/* KNOWLEDGE IN THE WORLD: Example + expectation */}
+            <p className="text-xs text-primary-text opacity-80">
+              Tip: Use a clear title people would search for (e.g. “Fluffy Pancakes”).
+            </p>
+
             <Input
               label="Recipe Title *"
               placeholder="e.g. Delicious Pancakes"
@@ -382,7 +441,7 @@ export default function UploadRecipes() {
                 setStatus("idle");
               }}
               maxLength={200}
-              placeholder="Describe your recipe in a short and clear way..."
+              placeholder="What makes it good? Mention time, taste, and key ingredients..."
               error={errors.description}
             />
 
@@ -422,6 +481,11 @@ export default function UploadRecipes() {
           </div>
 
           <div className="flex flex-col w-full gap-6 border-l-2 border-gray-300 pl-4">
+            {/* KNOWLEDGE IN THE WORLD: Format hint */}
+            <p className="text-xs text-primary-text opacity-80">
+              Tip: Ingredients work best with quantity + unit (e.g. “200g flour”, “2 eggs”).
+            </p>
+
             <InputList
               label="Ingredients *"
               values={ingredients}
@@ -430,10 +494,15 @@ export default function UploadRecipes() {
                 setErrors((prev) => ({ ...prev, ingredients: "" }));
                 setStatus("idle");
               }}
-              placeholder="e.g. 2 eggs, 1 cup flour"
+              placeholder="e.g. 2 eggs, 200g flour"
               maxItems={20}
               error={errors.ingredients}
             />
+
+            {/* KNOWLEDGE IN THE WORLD: Steps hint */}
+            <p className="text-xs text-primary-text opacity-80">
+              Tip: Write steps as short actions (e.g. “Mix”, “Bake”, “Serve”).
+            </p>
 
             <InputList
               label="Instructions / Steps *"
@@ -462,9 +531,9 @@ export default function UploadRecipes() {
           </div>
 
           <div className="flex flex-col w-full gap-4 border-l-2 border-gray-300 pl-4">
+            {/* KNOWLEDGE IN THE WORLD: Quality guidance */}
             <p className="text-xs text-primary-text opacity-80">
-              Please upload a clear photo of your recipe. This is required to
-              publish.
+              Tip: Use a bright photo where the dish is centered and clearly visible.
             </p>
 
             <ImageInput
