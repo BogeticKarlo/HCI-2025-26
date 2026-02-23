@@ -44,7 +44,7 @@ export const ImageInput: React.FC<ImageInputProps> = ({
         htmlFor="image-input"
         className="font-sans text-[18px] leading-normal text-primary-text"
       >
-        Upload Dish Image
+        Upload Dish Image*
       </label>
       <div
         onDrop={handleDrop}
