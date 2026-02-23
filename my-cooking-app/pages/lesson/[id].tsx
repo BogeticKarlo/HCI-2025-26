@@ -21,11 +21,9 @@ export default function LessonPage({ lesson, error }: Props) {
     return () => clearTimeout(t);
   }, []);
 
-  // Determine the correct course page for this lesson
+  // Detect course slug for correct back navigation
   const courseSlug = useMemo(() => {
     if (!lesson) return null;
-
-    // Adjust these if your CMS uses different fields
     return (
       (lesson as any)?.courseSlug ||
       (lesson as any)?.course?.slug ||
@@ -39,22 +37,14 @@ export default function LessonPage({ lesson, error }: Props) {
     return `/learn/${courseSlug}`;
   }, [courseSlug]);
 
-  const backLabel = useMemo(() => {
-    if (!courseSlug) return "Back to Learn";
-    if (courseSlug === "cooking-101") return "Back to Cooking 101";
-    if (courseSlug === "culinary-techniques") return "Back to Culinary Techniques";
-    if (courseSlug === "cuisine-explorer") return "Back to Cuisine Explorer";
-    return "Back to Course";
-  }, [courseSlug]);
-
   const handleBack = () => {
-    // Natural mapping: if they came from a course page, normal back makes sense
+    // Natural mapping: go back in history if possible
     if (typeof window !== "undefined" && window.history.length > 1) {
       router.back();
-      return;
+    } else {
+      // Fallback: go to the correct course page
+      router.push(backHref);
     }
-    // If they landed here directly, go to the correct course page
-    router.push(backHref);
   };
 
   const handleRetry = () => {
@@ -74,37 +64,31 @@ export default function LessonPage({ lesson, error }: Props) {
       className="w-full bg-white border border-gray-200 rounded-3xl shadow-md p-6 sm:p-8"
       aria-label="Lesson content"
     >
-      {/* ✅ Single back button INSIDE the card */}
-      <div className="flex items-center justify-between gap-3 mb-6">
+      {/* SINGLE BACK BUTTON (Arrow + Text “Back”) */}
+      <div className="mb-6">
         <button
           type="button"
           onClick={handleBack}
-          disabled={isRetrying}
-          className={`
+          className="
             flex items-center gap-2
-            px-4 py-2
+            px-3 py-2
             border border-gray-300
             rounded-xl
             bg-white
             text-black font-medium
             shadow-sm
+            cursor-pointer
             transition-all duration-200
+            hover:scale-105 hover:shadow-md hover:bg-gray-50
+            active:scale-95
             focus:outline-none focus:ring-2 focus:ring-accent focus:ring-offset-2
-            ${
-              isRetrying
-                ? "opacity-60 cursor-not-allowed"
-                : "cursor-pointer hover:scale-105 hover:shadow-md hover:bg-gray-50 active:scale-95"
-            }
-          `}
-          aria-label={backLabel}
-          title={backLabel}
+          "
+          aria-label="Go back"
+          title="Go back"
         >
-          <span aria-hidden="true">←</span>
-          <span>{backLabel}</span>
+          <span aria-hidden="true" className="text-lg">←</span>
+          <span>Back</span>
         </button>
-
-        {/* (Optional) keep space for future actions without adding extra UI now */}
-        <div />
       </div>
 
       {children}
@@ -155,32 +139,13 @@ export default function LessonPage({ lesson, error }: Props) {
               </p>
             </div>
 
-            <div className="flex flex-col sm:flex-row gap-3 mt-2">
-              <Button
-                onClick={handleRetry}
-                disabled={isRetrying}
-                className={`transition-all duration-200 ${
-                  isRetrying
-                    ? "opacity-70 cursor-not-allowed"
-                    : "cursor-pointer hover:scale-105 active:scale-95"
-                }`}
-              >
-                <span className="flex items-center gap-2">
-                  {isRetrying && (
-                    <span className="w-4 h-4 border-2 border-accent border-t-transparent rounded-full animate-spin" />
-                  )}
-                  {isRetrying ? "Retrying…" : "Retry"}
-                </span>
-              </Button>
-
-              <Button
-                variant="secondary"
-                onClick={() => router.push(backHref)}
-                className="cursor-pointer transition-all duration-200 hover:scale-105 active:scale-95"
-              >
-                {backLabel}
-              </Button>
-            </div>
+            <Button
+              onClick={handleRetry}
+              disabled={isRetrying}
+              className="cursor-pointer transition-all duration-200 hover:scale-105 active:scale-95"
+            >
+              {isRetrying ? "Retrying…" : "Retry"}
+            </Button>
           </div>
         </ContentCard>
       </PageShell>
@@ -191,30 +156,13 @@ export default function LessonPage({ lesson, error }: Props) {
     return (
       <PageShell>
         <ContentCard>
-          <div
-            className="flex flex-col items-center text-center gap-5 border border-gray-300 bg-white rounded-2xl p-8"
-            role="status"
-            aria-live="polite"
-          >
-            <div className="w-14 h-14 rounded-2xl bg-gray-100 flex items-center justify-center text-black text-2xl font-bold">
-              ?
-            </div>
-
-            <div className="flex flex-col gap-2">
-              <h2 className="text-xl font-semibold text-black">
-                Lesson not found
-              </h2>
-              <p className="text-sm text-black/70 max-w-md">
-                This lesson may have been removed or the link might be incorrect.
-              </p>
-            </div>
-
-            <Button
-              onClick={() => router.push(backHref)}
-              className="cursor-pointer transition-all duration-200 hover:scale-105 active:scale-95"
-            >
-              {backLabel}
-            </Button>
+          <div className="flex flex-col items-center text-center gap-5 border border-gray-300 bg-white rounded-2xl p-8">
+            <h2 className="text-xl font-semibold text-black">
+              Lesson not found
+            </h2>
+            <p className="text-sm text-black/70 max-w-md">
+              This lesson may have been removed or the link might be incorrect.
+            </p>
           </div>
         </ContentCard>
       </PageShell>
