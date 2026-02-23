@@ -1,553 +1,506 @@
 "use client";
 
-import { Input } from "@/components/input/Input";
-import { TextArea } from "@/components/textArea/TextArea";
-import { InputList } from "@/components/inputList/InputList";
-import { useMemo, useState } from "react";
-import { Dropdown } from "@/components/dropdown/Dropdown";
-import { Option } from "@/components/dropdown/Dropdown.types";
+import Image from "next/image";
+import { useRouter } from "next/navigation";
+import { RecipeCardSkeleton } from "./RecipeSkeletonLoaderCard";
 import {
-  cuisineOptions,
-  recipeTypeOptions,
-} from "@/components/dropdown/DropdownOptions";
-import { ImageInput } from "@/components/imageInput/ImageInput";
-import { Button } from "@/components/button/Button";
-import { uploadRecipeSchema } from "../../zodSchema/uploadRecipeSchema";
-import { uploadRecipe, uploadRecipeImage } from "@/fetch/fetch";
-import { recipeDataFormating } from "@/utils/UploadRecipe.utils";
+  useRef,
+  useState,
+  useEffect,
+  type MouseEvent,
+  type KeyboardEvent,
+} from "react";
+import CakeImage from "../../public/assets/cake.png";
+import SoupImage from "../../public/assets/soup.png";
+import backArrow from "../../public/assets/backArrow.png";
+import { TrashIcon } from "@/assets/TrashIcon";
+import { Database } from "@/types/supabase";
+import { fetchUserById, deleteRecipe } from "@/fetch/fetch";
 import { useAuth } from "@/context/AuthContext";
-import { useBannerNotification } from "@/hooks/UseBannerNotification";
-import { Banner } from "@/components/banner/Banner";
+import Modal from "../modal/Modal";
+import { LikeButton } from "../LikeButton";
 
-export default function UploadRecipes() {
+type Recipe = Database["public"]["Tables"]["recipes"]["Row"];
+type Profile = Database["public"]["Tables"]["profiles"]["Row"];
+
+/**
+ * Visual weight improvements included (all 4):
+ * 1) Stronger hierarchy: title block gets subtle divider + more spacing, Cuisine/Type is more muted & smaller.
+ * 2) Decorative images reduced dominance: slightly smaller on mobile + opacity.
+ * 3) Better scanability: Ingredients + Instructions list items have subtle “row” background + padding.
+ * 4) Footer balance: author name slightly stronger; Like/Delete wrappers are lighter by default, strengthen on hover.
+ */
+
+export function RecipeCard({
+  recipe,
+  isLoading,
+}: {
+  recipe?: Recipe;
+  isLoading?: boolean;
+}) {
+  const router = useRouter();
   const { user } = useAuth();
-  const { banner, closeBanner, showBanner } = useBannerNotification();
 
-  const [isLoading, setIsLoading] = useState(false);
+  const [author, setAuthor] = useState<Profile>();
+  const [isModalOpen, setIsModalOpen] = useState(false);
+  const [deleting, setDeleting] = useState(false);
 
-  // Feedback state
-  const [status, setStatus] = useState<
-    | "idle"
-    | "validating"
-    | "uploadingImage"
-    | "uploadingRecipe"
-    | "success"
-    | "error"
-  >("idle");
+  // Feedback
+  const [errorMessage, setErrorMessage] = useState<string | null>(null);
+  const [successMessage, setSuccessMessage] = useState<string | null>(null);
 
-  const [title, setTitle] = useState("");
-  const [description, setDescription] = useState("");
-  const [ingredients, setIngredients] = useState<string[]>([""]);
-  const [steps, setSteps] = useState<string[]>([""]);
-  const [selectedCuisine, setSelectedCuisine] = useState<Option<"cuisine">>(
-    cuisineOptions[0],
-  );
-  const [selectedRecipeType, setSelectedRecipeType] =
-    useState<Option<"recipeType">>(recipeTypeOptions[0]);
-  const [image, setImage] = useState<File | null>(null);
+  // Image loading
+  const [imageLoaded, setImageLoaded] = useState(false);
 
-  const [errors, setErrors] = useState<Record<string, string>>({});
-  const hasErrors = Object.values(errors).some((error) => error);
+  // Progressive reveal
+  const [showImage, setShowImage] = useState(false);
+  const [showIngredients, setShowIngredients] = useState(false);
+  const [showInstructions, setShowInstructions] = useState(false);
 
-  if (!user) return null;
+  // Like wrapper -> click anywhere to trigger internal LikeButton click
+  const likeWrapperRef = useRef<HTMLDivElement | null>(null);
 
-  /* ---------------- CONSTRAINTS (Norman) ----------------
-   * 1) Disable Upload until all required fields are plausibly complete (prevents slips).
-   * 2) Show a clear “what’s missing” checklist (reduces trial & error).
-   * 3) Hard-stop if user tries anyway (e.g., Enter key or custom button behavior).
-   * 4) Treat list fields as valid only if they contain at least 1 non-empty item.
-   */
-
-  const trimmedIngredientsCount = useMemo(
-    () => ingredients.filter((v) => v.trim()).length,
-    [ingredients],
+  // Constraint: prevent rapid double-like toggles
+  const [likeCooldown, setLikeCooldown] = useState(false);
+  const likeCooldownTimerRef = useRef<ReturnType<typeof setTimeout> | null>(
+    null,
   );
 
-  const trimmedStepsCount = useMemo(
-    () => steps.filter((v) => v.trim()).length,
-    [steps],
-  );
+  const isCreator = user?.id === recipe?.author_id;
 
-  const missingItems = useMemo(() => {
-    const missing: string[] = [];
-    if (!title.trim()) missing.push("Title");
-    if (!description.trim()) missing.push("Description");
-    if (selectedCuisine.id === "all") missing.push("Cuisine");
-    if (selectedRecipeType.id === "all") missing.push("Recipe type");
-    if (trimmedIngredientsCount === 0) missing.push("At least 1 ingredient");
-    if (trimmedStepsCount === 0) missing.push("At least 1 step");
-    if (!image) missing.push("Photo");
-    return missing;
-  }, [
-    title,
-    description,
-    selectedCuisine.id,
-    selectedRecipeType.id,
-    trimmedIngredientsCount,
-    trimmedStepsCount,
-    image,
-  ]);
+  useEffect(() => {
+    if (!recipe?.author_id) return;
 
-  const canAttemptSubmit = useMemo(() => {
-    return (
-      title.trim().length > 0 &&
-      description.trim().length > 0 &&
-      selectedCuisine.id !== "all" &&
-      selectedRecipeType.id !== "all" &&
-      trimmedIngredientsCount > 0 &&
-      trimmedStepsCount > 0 &&
-      !!image &&
-      !isLoading
-    );
-  }, [
-    title,
-    description,
-    selectedCuisine.id,
-    selectedRecipeType.id,
-    trimmedIngredientsCount,
-    trimmedStepsCount,
-    image,
-    isLoading,
-  ]);
-
-  // Progress includes image now (7 total)
-  const completedCount = useMemo(() => {
-    let count = 0;
-    if (title.trim()) count += 1;
-    if (description.trim()) count += 1;
-    if (trimmedIngredientsCount > 0) count += 1;
-    if (trimmedStepsCount > 0) count += 1;
-    if (selectedCuisine.id !== "all") count += 1;
-    if (selectedRecipeType.id !== "all") count += 1;
-    if (image) count += 1;
-    return count; // out of 7
-  }, [
-    title,
-    description,
-    trimmedIngredientsCount,
-    trimmedStepsCount,
-    selectedCuisine.id,
-    selectedRecipeType.id,
-    image,
-  ]);
-
-  const statusText = useMemo(() => {
-    switch (status) {
-      case "validating":
-        return "Checking your recipe…";
-      case "uploadingImage":
-        return "Uploading image…";
-      case "uploadingRecipe":
-        return "Uploading recipe…";
-      case "success":
-        return "Upload complete ✅";
-      case "error":
-        return "Upload failed. Please try again.";
-      default:
-        return null;
-    }
-  }, [status]);
-
-  const applyConstraintErrors = () => {
-    setErrors((prev) => ({
-      ...prev,
-      ...(title.trim() ? {} : { title: prev.title || "Title is required." }),
-      ...(description.trim()
-        ? {}
-        : { description: prev.description || "Description is required." }),
-      ...(selectedCuisine.id !== "all"
-        ? {}
-        : { selectedCuisine: prev.selectedCuisine || "Cuisine is required." }),
-      ...(selectedRecipeType.id !== "all"
-        ? {}
-        : {
-            selectedRecipeType:
-              prev.selectedRecipeType || "Recipe type is required.",
-          }),
-      ...(trimmedIngredientsCount > 0
-        ? {}
-        : {
-            ingredients:
-              prev.ingredients || "Add at least 1 ingredient (not empty).",
-          }),
-      ...(trimmedStepsCount > 0
-        ? {}
-        : { steps: prev.steps || "Add at least 1 step (not empty)." }),
-      ...(image ? {} : { image: prev.image || "Image is required." }),
-    }));
-  };
-
-  const handleUploadRecipe = async () => {
-    if (!canAttemptSubmit) {
-      setStatus("error");
-      applyConstraintErrors();
-
-      showBanner(
-        "Not ready to upload",
-        `Please complete: ${missingItems.join(", ")}.`,
-        "error",
-      );
-      return;
-    }
-
-    setIsLoading(true);
-    setStatus("validating");
-
-    const formData = {
-      title,
-      description,
-      ingredients,
-      steps,
-      selectedCuisine: selectedCuisine.id,
-      selectedRecipeType: selectedRecipeType.id,
-      image,
+    const fetchData = async () => {
+      try {
+        const author = await fetchUserById(recipe.author_id);
+        setAuthor(author);
+      } catch (err) {
+        console.error("Failed to fetch author", err);
+      }
     };
 
-    const result = uploadRecipeSchema.safeParse(formData);
+    fetchData();
+  }, [recipe?.author_id]);
 
-    if (!result.success) {
-      const fieldErrors: Record<string, string> = {};
-      result.error.issues.forEach((err) => {
-        if (err.path.length > 0) {
-          fieldErrors[err.path[0] as string] = err.message;
-        }
-      });
-      setErrors(fieldErrors);
+  useEffect(() => {
+    if (!recipe) return;
 
-      setStatus("error");
-      setIsLoading(false);
+    setShowImage(false);
+    setShowIngredients(false);
+    setShowInstructions(false);
+    setImageLoaded(false);
 
-      showBanner(
-        "Missing information",
-        "Please fix the highlighted fields and try again.",
-        "error",
-      );
-      return;
-    }
+    const timers: ReturnType<typeof setTimeout>[] = [];
+    timers.push(setTimeout(() => setShowImage(true), 100));
+    timers.push(setTimeout(() => setShowIngredients(true), 500));
+    timers.push(setTimeout(() => setShowInstructions(true), 900));
 
-    if (!image) {
-      setErrors((prev) => ({ ...prev, image: "Image is required." }));
-      setStatus("error");
-      setIsLoading(false);
+    return () => timers.forEach(clearTimeout);
+  }, [recipe]);
 
-      showBanner(
-        "Missing image",
-        "Please upload a recipe image to continue.",
-        "error",
-      );
-      return;
-    }
+  useEffect(() => {
+    return () => {
+      if (likeCooldownTimerRef.current)
+        clearTimeout(likeCooldownTimerRef.current);
+    };
+  }, []);
 
-    setStatus("uploadingImage");
+  if (isLoading || !recipe) return <RecipeCardSkeleton />;
 
-    const fullPath = await uploadRecipeImage(image, user.id);
-    if (!fullPath) {
-      showBanner(
-        "Something went wrong",
-        "Error uploading image. Please try again.",
-        "error",
-      );
-      setStatus("error");
-      setIsLoading(false);
-      return;
-    }
+  const publicImageUrl = `https://xhebsnwjpfcdttydwuhg.supabase.co/storage/v1/object/public/recipe-images/${recipe.author_id}/${recipe.image_url}`;
 
-    const imagePath = fullPath.split("/").pop();
-    const recipe = recipeDataFormating(formData, user.id, imagePath);
-
-    try {
-      setStatus("uploadingRecipe");
-      await uploadRecipe(recipe);
-
-      setStatus("success");
-      showBanner(
-        "Recipe Uploaded",
-        "Your recipe has been uploaded successfully!",
-        "success",
-      );
-    } catch (error) {
-      showBanner(
-        "Something went wrong",
-        "Error uploading recipe. Please try again.",
-        "error",
-      );
-      setStatus("error");
-      setIsLoading(false);
-      return;
-    }
-
-    setTitle("");
-    setDescription("");
-    setIngredients([""]);
-    setSteps([""]);
-    setSelectedCuisine(cuisineOptions[0]);
-    setSelectedRecipeType(recipeTypeOptions[0]);
-    setImage(null);
-    setErrors({});
-    setIsLoading(false);
-
-    setTimeout(() => setStatus("idle"), 1200);
+  const startLikeCooldown = () => {
+    setLikeCooldown(true);
+    if (likeCooldownTimerRef.current)
+      clearTimeout(likeCooldownTimerRef.current);
+    likeCooldownTimerRef.current = setTimeout(() => setLikeCooldown(false), 450);
   };
 
+  const triggerInnerLikeClick = () => {
+    const root = likeWrapperRef.current;
+    if (!root) return;
+    const innerButton = root.querySelector("button") as HTMLButtonElement | null;
+    innerButton?.click();
+  };
+
+  const handleLikeWrapperClick = (e: MouseEvent<HTMLDivElement>) => {
+    if (likeCooldown) return;
+
+    const root = likeWrapperRef.current;
+    if (!root) return;
+
+    const innerButton = root.querySelector("button") as HTMLButtonElement | null;
+
+    // If user clicked the actual LikeButton, let it handle it (avoid double toggle)
+    if (
+      innerButton &&
+      e.target instanceof Node &&
+      innerButton.contains(e.target)
+    ) {
+      startLikeCooldown();
+      return;
+    }
+
+    triggerInnerLikeClick();
+    startLikeCooldown();
+  };
+
+  const handleLikeWrapperKeyDown = (e: KeyboardEvent<HTMLDivElement>) => {
+    if (likeCooldown) return;
+
+    if (e.key === "Enter" || e.key === " ") {
+      e.preventDefault();
+      triggerInnerLikeClick();
+      startLikeCooldown();
+    }
+  };
+
+  const handleDelete = async () => {
+    if (!user || !recipe) return;
+
+    setDeleting(true);
+    setErrorMessage(null);
+    setSuccessMessage(null);
+
+    try {
+      await deleteRecipe(recipe.id, user.id);
+
+      setSuccessMessage("Recipe deleted successfully.");
+      setIsModalOpen(false);
+
+      setTimeout(() => {
+        router.back();
+      }, 900);
+    } catch (error) {
+      console.error("Error deleting recipe:", error);
+      setErrorMessage("Failed to delete recipe. Please try again.");
+      // keep modal open on error
+    } finally {
+      setDeleting(false);
+    }
+  };
+
+  const deleteWrapperDisabled = deleting || isModalOpen;
+
   return (
-    <div>
-      {/* VISUAL WEIGHT 1: Stronger page header hierarchy */}
-      <div className="max-w-[360px] md:max-w-[720px] mx-auto px-2">
-        <h1 className="font-playfair font-bold text-[32px] leading-[120%] md:text-[44px] text-center mb-2 text-primary-text">
-          Upload Your Recipe
-        </h1>
+    <article
+      className="
+        w-[95%]
+        sm:w-[90%]
+        md:w-[85%]
+        lg:w-[75%]
+        xl:w-[65%]
+        max-w-[1100px]
+        mx-auto
+        bg-section-bg
+        rounded-3xl
+        p-8
+        lg:p-12
+        shadow-md
+        text-body-text
+        flex
+        flex-col
+        gap-8
+        relative
+      "
+    >
+      {/* HEADER */}
+      <header className="relative flex flex-col items-center gap-4 mb-2">
+        <button
+          onClick={() => router.back()}
+          className="
+            absolute left-0 top-1/2 -translate-y-1/2
+            flex items-center gap-2 p-2
+            cursor-pointer
+            transition-all duration-200
+            hover:scale-110 hover:opacity-80
+            active:scale-95
+            focus-visible:outline-none
+            focus-visible:ring-2 focus-visible:ring-accent focus-visible:ring-offset-2
+            rounded-lg
+          "
+          title="Go back"
+          aria-label="Go back to previous page"
+        >
+          <Image
+            src={backArrow}
+            alt="Back"
+            width={36}
+            height={36}
+            className="w-9 aspect-square"
+          />
+          <span className="text-sm font-semibold text-primary-text">Back</span>
+        </button>
 
-        <p className="text-center text-sm text-primary-text opacity-80 mb-4">
-          Follow the steps below to publish your recipe.
-        </p>
+        {/* Title area gets more weight + divider */}
+        <div className="flex flex-col items-center text-center gap-3 w-full">
+          <h1 className="text-3xl md:text-4xl font-bold text-primary-text font-playfair tracking-tight">
+            {recipe.title}
+          </h1>
 
-        {/* VISUAL WEIGHT 2: Meta row in a subtle container so it reads as “status” */}
-        <div className="mb-4 rounded-xl border border-gray-200 bg-white/60 px-3 py-2">
-          <div className="flex items-center justify-between text-xs text-primary-text">
-            <span>
-              <span className="font-semibold">*</span> Required fields
+          {/* Muted metadata so it doesn't compete with title */}
+          <h3 className="text-xs md:text-sm text-text-muted leading-relaxed">
+            <span className="font-playfair font-semibold">Cuisine:</span>{" "}
+            <span className="text-primary-text/90">{recipe.cuisine}</span>
+            <span className="mx-2 text-text-muted/60">•</span>
+            <span className="font-playfair font-semibold">Type:</span>{" "}
+            <span className="text-primary-text/90">
+              {recipe.recipe_type?.replace("_", " ")}
             </span>
-            <span className="opacity-80">Step 1 → Step 2 → Step 3</span>
-          </div>
+          </h3>
 
-          <div className="mt-2 flex items-center justify-between text-xs text-primary-text">
-            <span className="opacity-80">
-              Progress:{" "}
-              <span className="font-semibold">{completedCount}</span>/7 filled
-            </span>
-
-            {statusText && (
-              <span
-                className={`font-semibold ${
-                  status === "error"
-                    ? "text-error-border"
-                    : status === "success"
-                      ? "text-green-700"
-                      : "text-primary-text"
-                }`}
-                aria-live="polite"
-              >
-                {statusText}
-              </span>
-            )}
-          </div>
+          <div className="w-full border-t border-gray-200/70" />
         </div>
-      </div>
+      </header>
 
-      {/* VISUAL WEIGHT 3: Main “sheet” gets more presence + consistent spacing */}
-      <div className="bg-section-bg shadow-lg border border-input-border rounded-2xl flex flex-col items-center w-full max-w-[360px] md:max-w-[720px] mx-auto p-6 md:p-8 gap-8">
-        {/* VISUAL WEIGHT 4: Alerts get priority with a slightly stronger background */}
-        {!canAttemptSubmit && missingItems.length > 0 && (
-          <div className="w-full border border-gray-300 bg-white p-3 rounded-2xl text-sm text-center text-primary-text shadow-sm">
-            <span className="font-semibold">To upload, complete:</span>{" "}
-            {missingItems.join(", ")}.
-          </div>
-        )}
+      {/* DESCRIPTION */}
+      <p className="text-sm leading-relaxed text-body-text">
+        {recipe.description}
+      </p>
 
-        {hasErrors && (
-          <div className="w-full border border-error-border text-error-border bg-error p-3 rounded-2xl text-sm text-center shadow-sm">
-            Some required fields are missing. Please fix the highlighted inputs
-            below, then try uploading again.
-          </div>
-        )}
+      {/* IMAGE */}
+      {publicImageUrl && (
+        <div
+          className={`relative w-full h-[420px] md:h-[520px] rounded-2xl overflow-hidden transition-all duration-700 ${
+            showImage ? "opacity-100 translate-y-0" : "opacity-0 translate-y-4"
+          }`}
+        >
+          {!imageLoaded && (
+            <div className="absolute inset-0 bg-gray-200 animate-pulse" />
+          )}
 
-        {/* STEP 1 */}
-        <div className="w-full">
-          {/* VISUAL WEIGHT: Step header stands out + step indicator */}
-          <div className="flex items-center justify-between mb-3">
-            <div className="flex items-center gap-3">
-              <span className="inline-flex items-center justify-center w-7 h-7 rounded-full bg-accent text-black text-xs font-bold">
-                1
-              </span>
-              <h2 className="text-xl font-semibold text-primary-text font-playfair">
-                Basic Information
-              </h2>
-            </div>
-            <span className="text-xs text-primary-text opacity-80">
-              Start here
-            </span>
-          </div>
-
-          {/* VISUAL WEIGHT: Step section card */}
-          <div className="rounded-2xl border border-gray-200 bg-white/50 p-4 md:p-5">
-            <div className="flex flex-col w-full gap-6 border-l-2 border-gray-300 pl-4">
-              <Input
-                label="Recipe Title *"
-                placeholder="e.g. Delicious Pancakes"
-                value={title}
-                onChange={(e) => {
-                  setTitle(e.target.value);
-                  setErrors((prev) => ({ ...prev, title: "" }));
-                  setStatus("idle");
-                }}
-                error={errors.title}
-              />
-
-              <TextArea
-                label="Recipe Description *"
-                value={description}
-                onChange={(value) => {
-                  setDescription(value);
-                  setErrors((prev) => ({ ...prev, description: "" }));
-                  setStatus("idle");
-                }}
-                maxLength={200}
-                placeholder="Describe your recipe in a short and clear way..."
-                error={errors.description}
-              />
-
-              <Dropdown
-                label="Choose Cuisine *"
-                options={cuisineOptions}
-                onSelect={(opt) => {
-                  setSelectedCuisine(opt);
-                  setErrors((prev) => ({ ...prev, selectedCuisine: "" }));
-                  setStatus("idle");
-                }}
-                value={selectedCuisine}
-              />
-
-              <Dropdown
-                label="Choose Recipe Type *"
-                options={recipeTypeOptions}
-                onSelect={(opt) => {
-                  setSelectedRecipeType(opt);
-                  setErrors((prev) => ({ ...prev, selectedRecipeType: "" }));
-                  setStatus("idle");
-                }}
-                value={selectedRecipeType}
-              />
-            </div>
-          </div>
-        </div>
-
-        {/* STEP 2 */}
-        <div className="w-full">
-          <div className="flex items-center justify-between mb-3">
-            <div className="flex items-center gap-3">
-              <span className="inline-flex items-center justify-center w-7 h-7 rounded-full bg-accent text-black text-xs font-bold">
-                2
-              </span>
-              <h2 className="text-xl font-semibold text-primary-text font-playfair">
-                Ingredients & Steps
-              </h2>
-            </div>
-            <span className="text-xs text-primary-text opacity-80">
-              Up to 20 items
-            </span>
-          </div>
-
-          <div className="rounded-2xl border border-gray-200 bg-white/50 p-4 md:p-5">
-            <div className="flex flex-col w-full gap-6 border-l-2 border-gray-300 pl-4">
-              <InputList
-                label="Ingredients *"
-                values={ingredients}
-                onChange={(newValues) => {
-                  setIngredients(newValues);
-                  setErrors((prev) => ({ ...prev, ingredients: "" }));
-                  setStatus("idle");
-                }}
-                placeholder="e.g. 2 eggs, 1 cup flour"
-                maxItems={20}
-                error={errors.ingredients}
-              />
-
-              <InputList
-                label="Instructions / Steps *"
-                values={steps}
-                onChange={(newValues) => {
-                  setSteps(newValues);
-                  setErrors((prev) => ({ ...prev, steps: "" }));
-                  setStatus("idle");
-                }}
-                placeholder="e.g. Mix ingredients, then bake for 20 minutes"
-                maxItems={20}
-                error={errors.steps}
-              />
-            </div>
-          </div>
-        </div>
-
-        {/* STEP 3 */}
-        <div className="w-full">
-          <div className="flex items-center justify-between mb-3">
-            <div className="flex items-center gap-3">
-              <span className="inline-flex items-center justify-center w-7 h-7 rounded-full bg-accent text-black text-xs font-bold">
-                3
-              </span>
-              <h2 className="text-xl font-semibold text-primary-text font-playfair">
-                Photo
-              </h2>
-            </div>
-            <span className="text-xs text-primary-text opacity-80">Required</span>
-          </div>
-
-          <div className="rounded-2xl border border-gray-200 bg-white/50 p-4 md:p-5">
-            <div className="flex flex-col w-full gap-4 border-l-2 border-gray-300 pl-4">
-              <p className="text-xs text-primary-text opacity-80">
-                Please upload a clear photo of your recipe. This is required to
-                publish.
-              </p>
-
-              <ImageInput
-                value={image}
-                onChange={(file) => {
-                  setImage(file);
-                  setErrors((prev) => ({ ...prev, image: "" }));
-                  setStatus("idle");
-                }}
-                error={errors.image}
-              />
-            </div>
-          </div>
-        </div>
-
-        {/* CTA */}
-        <div className="flex flex-col items-center gap-3 w-full pt-2">
-          <div className="w-full border-t border-gray-200/70 pt-5" />
-
-          <p className="text-xs text-primary-text opacity-80 text-center">
-            Ready to publish? Click the button below.
-          </p>
-
-          {/* Strongest visual weight: primary CTA */}
-          <Button
-            variant="primary"
-            className="w-2/3 mx-auto mt-1 shadow-md hover:shadow-lg transition-shadow duration-200"
-            onClick={handleUploadRecipe}
-            isLoading={isLoading}
-            disabled={!canAttemptSubmit}
-            title={
-              canAttemptSubmit
-                ? "Upload your recipe"
-                : `Complete: ${missingItems.join(", ")}`
-            }
-          >
-            {status === "uploadingImage"
-              ? "Uploading Image..."
-              : status === "uploadingRecipe"
-                ? "Uploading Recipe..."
-                : "Upload Recipe"}
-          </Button>
-
-          <p className="text-xs text-primary-text opacity-80 text-center">
-            Required fields are marked with{" "}
-            <span className="font-semibold">*</span>
-          </p>
-        </div>
-      </div>
-
-      {banner && (
-        <div className="fixed bottom-4 right-4 z-50">
-          <Banner
-            bannerType={banner.bannerType}
-            description={banner.description}
-            title={banner.title}
-            variant="simple"
-            onCloseBanner={closeBanner}
+          <Image
+            src={publicImageUrl}
+            alt={recipe.title}
+            fill
+            sizes="100%"
+            onLoadingComplete={() => setImageLoaded(true)}
+            className={`object-contain transition-opacity duration-500 ${
+              imageLoaded ? "opacity-100" : "opacity-0"
+            }`}
           />
         </div>
       )}
-    </div>
+
+      {/* INGREDIENTS */}
+      <section
+        className={`transition-all duration-700 ${
+          showIngredients
+            ? "opacity-100 translate-y-0"
+            : "opacity-0 translate-y-4"
+        }`}
+      >
+        <div className="flex items-center gap-3 mb-3 border-b pb-1">
+          <span className="inline-flex items-center justify-center w-6 h-6 rounded-full bg-accent text-black text-xs font-bold">
+            1
+          </span>
+          <h2 className="text-xl font-semibold text-primary-text font-playfair">
+            Ingredients
+          </h2>
+        </div>
+
+        {/* Scanability: subtle row background */}
+        <ul className="ml-1 text-sm flex flex-col gap-2">
+          {recipe.ingredients.map((item, index) => (
+            <li
+              key={index}
+              className="flex items-start gap-3 rounded-lg px-3 py-2 bg-white/40"
+            >
+              <span className="mt-[6px] w-1.5 h-1.5 rounded-full bg-accent shrink-0" />
+              <span className="text-body-text">{item}</span>
+            </li>
+          ))}
+        </ul>
+
+        {/* Decorative image de-weighted */}
+        <div className="w-24 h-20 mt-6 flex items-center justify-center">
+          <Image
+            src={CakeImage}
+            alt="Decoration"
+            width={84}
+            height={84}
+            className="object-contain -rotate-12 opacity-80"
+          />
+        </div>
+      </section>
+
+      {/* INSTRUCTIONS */}
+      <section
+        className={`transition-all duration-700 ${
+          showInstructions
+            ? "opacity-100 translate-y-0"
+            : "opacity-0 translate-y-4"
+        }`}
+      >
+        <div className="flex items-center gap-3 mb-3 border-b pb-1">
+          <span className="inline-flex items-center justify-center w-6 h-6 rounded-full bg-accent text-black text-xs font-bold">
+            2
+          </span>
+          <h2 className="text-xl font-semibold text-primary-text font-playfair">
+            Instructions
+          </h2>
+        </div>
+
+        {/* Scanability: subtle row background */}
+        <ol className="ml-1 text-sm flex flex-col gap-2">
+          {recipe.instructions.map((step, index) => (
+            <li key={index} className="flex items-start gap-3">
+              <span className="inline-flex items-center justify-center w-6 h-6 rounded-full bg-white/60 border border-gray-200/70 text-xs font-semibold text-primary-text shrink-0">
+                {index + 1}
+              </span>
+              <span className="rounded-lg px-3 py-2 bg-white/40 flex-1">
+                {step}
+              </span>
+            </li>
+          ))}
+        </ol>
+
+        {/* Decorative image de-weighted */}
+        <div className="w-24 h-20 mt-6 flex items-center justify-center">
+          <Image
+            src={SoupImage}
+            alt="Decoration"
+            width={76}
+            height={76}
+            className="object-contain rotate-12 opacity-80"
+          />
+        </div>
+      </section>
+
+      {/* FEEDBACK */}
+      {(errorMessage || successMessage) && (
+        <div className="transition-all duration-500">
+          {errorMessage && (
+            <div className="bg-red-100 border border-red-300 text-red-700 text-sm px-4 py-2 rounded-lg shadow-sm">
+              {errorMessage}
+            </div>
+          )}
+          {successMessage && (
+            <div className="bg-green-100 border border-green-300 text-green-700 text-sm px-4 py-2 rounded-lg shadow-sm">
+              {successMessage}
+            </div>
+          )}
+        </div>
+      )}
+
+      {/* FOOTER */}
+      <footer className="flex justify-between items-center pt-4 border-t text-sm">
+        {/* Footer balance: give author a bit more weight */}
+        <span
+          className={`${
+            author
+              ? "font-semibold text-primary-text"
+              : "animate-pulse text-text-muted"
+          }`}
+        >
+          {author ? author.username?.split("@")[0] : "Loading author..."}
+        </span>
+
+        <div className="flex flex-col sm:flex-row items-center gap-6">
+          {/* LIKE (lighter default; stronger on hover already) */}
+          {!isCreator && (
+            <div
+              ref={likeWrapperRef}
+              role="button"
+              tabIndex={0}
+              aria-label="Like this recipe"
+              onClick={handleLikeWrapperClick}
+              onKeyDown={handleLikeWrapperKeyDown}
+              className={`
+                flex flex-col items-center
+                border border-accent/25
+                rounded-xl px-4 py-3
+                bg-white/50
+                transition-all duration-200
+                hover:border-accent hover:bg-white/70 hover:shadow-md hover:-translate-y-[1px] hover:scale-[1.02]
+                active:scale-[0.98] active:translate-y-0
+                cursor-pointer
+                focus:outline-none
+                focus-visible:ring-2 focus-visible:ring-accent focus-visible:ring-offset-2
+                select-none
+                ${likeCooldown ? "opacity-90" : ""}
+              `}
+              title="Tap to like / tap again to unlike"
+            >
+              <span className="text-xs text-text-muted">Like this recipe</span>
+              <span className="text-[11px] text-text-muted/80 mb-1">
+                Tap to like · tap again to unlike
+              </span>
+
+              <LikeButton recipeId={recipe.id} />
+            </div>
+          )}
+
+          {/* DELETE (lighter default border; stronger on hover) */}
+          {isCreator && (
+            <button
+              type="button"
+              onClick={() => {
+                if (!deleteWrapperDisabled) setIsModalOpen(true);
+              }}
+              disabled={deleteWrapperDisabled}
+              title={
+                deleteWrapperDisabled
+                  ? "Delete is currently unavailable"
+                  : "Delete recipe"
+              }
+              aria-label="Delete recipe"
+              className={`
+                group
+                flex flex-col items-center
+                border border-red-300/40
+                rounded-xl px-4 py-3
+                bg-white/50
+                transition-all duration-200
+                focus-visible:outline-none
+                focus-visible:ring-2 focus-visible:ring-red-400 focus-visible:ring-offset-2
+                ${
+                  deleteWrapperDisabled
+                    ? "opacity-60 cursor-not-allowed"
+                    : "cursor-pointer hover:border-red-400 hover:bg-white/70 hover:shadow-md hover:-translate-y-[1px] hover:scale-[1.02] active:scale-[0.98]"
+                }
+              `}
+            >
+              <span className="text-xs text-red-500 font-medium">
+                Delete your recipe
+              </span>
+
+              <span className="text-[11px] text-text-muted/80 mb-1">
+                You are the author · Removes permanently
+              </span>
+
+              <span
+                className={`
+                  w-10 h-10 flex items-center justify-center rounded-full
+                  transition-all duration-200
+                  ${
+                    deleteWrapperDisabled
+                      ? "bg-red-100"
+                      : "text-red-500 group-hover:bg-red-100 group-hover:scale-110 active:scale-95"
+                  }
+                `}
+              >
+                {deleting ? (
+                  <span className="text-xs animate-pulse">...</span>
+                ) : (
+                  <TrashIcon className="w-6 h-6" />
+                )}
+              </span>
+            </button>
+          )}
+        </div>
+      </footer>
+
+      {isModalOpen && (
+        <Modal
+          handleAction={handleDelete}
+          setIsModalOpen={setIsModalOpen}
+          title={
+            deleting ? `Deleting "${recipe.title}"...` : `Delete "${recipe.title}"?`
+          }
+        />
+      )}
+    </article>
   );
 }
