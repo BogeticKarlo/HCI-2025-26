@@ -21,17 +21,33 @@ export default function SingleLesson({ lesson }: { lesson: LessonType }) {
   if (loading) return <SingleLessonSkeleton />;
 
   return (
-    <article className="w-full max-w-[360px] md:max-w-[720px] bg-section-bg rounded-3xl p-8 shadow-md text-body-text flex flex-col gap-6">
-      {/* HEADER (Back button INSIDE card, title centered) */}
+    <article
+      className="
+        w-full
+        max-w-[360px]
+        md:max-w-[720px]
+        bg-section-bg
+        rounded-3xl
+        p-8
+        shadow-md
+        text-body-text
+        flex
+        flex-col
+        gap-6
+      "
+    >
+      {/* HEADER (Back button inside card, stable on hover) */}
       <header className="grid grid-cols-[auto,1fr,auto] items-center gap-3">
+        {/* Back Button – no scale to prevent left shift */}
         <button
           onClick={() => router.back()}
           className="
-            flex items-center gap-2 p-2
+            flex items-center gap-2 px-3 py-2
             cursor-pointer
-            transition-all duration-200
-            hover:scale-110 hover:opacity-80
-            active:scale-95
+            transition-colors duration-200
+            hover:bg-white/60
+            hover:opacity-90
+            active:opacity-80
             focus-visible:outline-none
             focus-visible:ring-2 focus-visible:ring-accent focus-visible:ring-offset-2
             rounded-lg
@@ -46,25 +62,36 @@ export default function SingleLesson({ lesson }: { lesson: LessonType }) {
             height={36}
             className="w-9 aspect-square"
           />
-          <span className="text-sm font-semibold text-primary-text">Back</span>
+          <span className="text-sm font-semibold text-primary-text">
+            Back
+          </span>
         </button>
 
+        {/* Centered Title */}
         <h1 className="text-3xl font-bold text-primary-text font-playfair text-center">
           {lesson.title}
         </h1>
 
-        {/* Spacer keeps title truly centered */}
+        {/* Spacer to keep title perfectly centered */}
         <div className="w-[88px]" />
       </header>
 
+      {/* Description */}
       <p className="text-sm leading-relaxed text-body-text">
         {lesson.description}
       </p>
 
+      {/* Video Section */}
       {videoUrl ? (
-        <video src={videoUrl} controls className="w-full rounded-lg mt-4" />
+        <video
+          src={videoUrl}
+          controls
+          className="w-full rounded-lg mt-4"
+        />
       ) : (
-        <p className="text-center text-gray-500 mt-4">Video not available.</p>
+        <p className="text-center text-gray-500 mt-4">
+          Video not available.
+        </p>
       )}
     </article>
   );
