@@ -32,32 +32,7 @@ export default function LessonPage({ lesson, error }: Props) {
 
   return (
     <div className="relative flex flex-col items-center gap-10 w-full">
-      {/* SINGLE BACK BUTTON (replacing all previous ones) */}
-      <button
-        onClick={() => router.back()}
-        className="
-          absolute left-6 top-6
-          flex items-center gap-2 p-2
-          cursor-pointer
-          transition-all duration-200
-          hover:scale-110 hover:opacity-80
-          active:scale-95
-          focus-visible:outline-none
-          focus-visible:ring-2 focus-visible:ring-accent focus-visible:ring-offset-2
-          rounded-lg
-        "
-        title="Go back"
-        aria-label="Go back to previous page"
-      >
-        <Image
-          src={backArrow}
-          alt="Back"
-          width={36}
-          height={36}
-          className="w-9 aspect-square"
-        />
-        <span className="text-sm font-semibold text-primary-text">Back</span>
-      </button>
+
 
       {/* LOADING FEEDBACK */}
       {isHydrating && (
