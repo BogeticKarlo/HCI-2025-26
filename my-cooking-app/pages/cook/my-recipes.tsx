@@ -132,20 +132,18 @@ export default function MyRecipes() {
     ].filter((item) => item.value.id !== "all");
   }, [selectedCuisine, selectedRecipeType, selectedTime, selectedFavorite]);
 
-  // Match homepage behavior:
-  // - hide Date chip entirely (latest/oldest)
-  // - allow removing Popularity chip (most/least likes)
+  // Match homepage behavior: hide time chip, keep favorite removable
   const activeChips = useMemo(() => {
     return activeFilters.filter((f) => f.type !== "time");
   }, [activeFilters]);
 
-  /* ---------------- SLUG HELPER (to match your /recipes/<id>-<slug> format) ---------------- */
+  /* ---------------- SLUG HELPER ---------------- */
   const slugify = (text: string) =>
     text
       .toLowerCase()
       .trim()
       .replace(/\s+/g, "-")
-      .replace(/[^\p{L}\p{N}-]+/gu, "") // keep letters (including čćđšž), numbers, hyphen
+      .replace(/[^\p{L}\p{N}-]+/gu, "")
       .replace(/-+/g, "-");
 
   return (
@@ -275,10 +273,18 @@ export default function MyRecipes() {
                       <Link
                         key={recipeId}
                         href={href}
-                        className="w-full relative cursor-pointer transition-transform duration-200 hover:-translate-y-1 hover:shadow-lg"
-                        title="Open recipe"
-                        onClick={() => setLoadingRecipeId(recipeId)}
                         prefetch
+                        onClick={() => setLoadingRecipeId(recipeId)}
+                        title="Open recipe"
+                        className="
+                          relative
+                          inline-block
+                          w-fit
+                          justify-self-center
+                          cursor-pointer
+                          transition-transform duration-200
+                          hover:-translate-y-1 hover:shadow-lg
+                        "
                       >
                         <RecipeMinimizeCard
                           id={recipeId}
@@ -288,7 +294,7 @@ export default function MyRecipes() {
                           authorId={recipe.author_id || ""}
                         />
 
-                        {/* Spinner overlay */}
+                        {/* Spinner overlay (only covers the card now) */}
                         {loadingRecipeId === recipeId && (
                           <div className="absolute inset-0 flex justify-center items-center bg-white/70 rounded-lg">
                             <div className="w-10 h-10 border-4 border-accent border-t-transparent rounded-full animate-spin" />
