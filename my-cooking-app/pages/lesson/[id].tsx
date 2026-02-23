@@ -6,7 +6,7 @@ import { getLessonsById } from "@/fetch/cms";
 import { LessonType } from "@/types/cms";
 import { Button } from "@/components/button/Button";
 import SingleLesson from "@/components/lessonCard/SingleLesson";
-import backArrow from "@/assets/backArrow.png"; // adjust path if needed
+import backArrow from "../../public/assets/backArrow.png";
 
 interface Props {
   lesson: LessonType | null;
