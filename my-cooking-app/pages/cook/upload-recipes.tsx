@@ -476,10 +476,6 @@ export default function UploadRecipes() {
 
               {/* ✅ Add required signifier here */}
               <div className="flex flex-col gap-2">
-                <p className="text-sm font-semibold text-primary-text">
-                  Upload Dish Image <span className="font-bold">*</span>
-                </p>
-
                 <ImageInput
                   value={image}
                   onChange={(file) => {
