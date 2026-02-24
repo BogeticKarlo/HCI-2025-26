@@ -91,8 +91,8 @@ export default function NavBar() {
   };
 
   // Active rules:
-  // - subnav active only on exact match
-  // - top-level active on section match (Cook for /cook/* etc.)
+  // - Subnav active ONLY when exact match
+  // - Top-level active when section matches (Cook for /cook/*)
   // - Learn stays active on /learn/* AND /lesson/*
   const isActiveHref = (href: string) => {
     const isTopLevel = topLevelHrefs.has(href);
@@ -110,7 +110,7 @@ export default function NavBar() {
     return pathname.startsWith(root);
   };
 
-  // Add button-like styles + spinner overlay (CENTERED)
+  // Apply button-like styles + force ACTIVE/INACTIVE backgrounds
   useEffect(() => {
     const applyButtonStyles = () => {
       const navRoot = document.querySelector("[data-nav-root]") || document;
@@ -123,7 +123,7 @@ export default function NavBar() {
 
         const active = isActiveHref(href);
 
-        // Base styles
+        // Base styles (button look)
         a.classList.add(
           "relative",
           "inline-flex",
@@ -147,7 +147,7 @@ export default function NavBar() {
           "overflow-hidden",
         );
 
-        // Ensure label wrapper exists
+        // Ensure label wrapper exists (so we can dim it under overlay)
         let labelWrap = a.querySelector("[data-nav-label]") as HTMLSpanElement | null;
         if (!labelWrap) {
           labelWrap = document.createElement("span");
@@ -173,7 +173,7 @@ export default function NavBar() {
           if (existingSpinner) a.appendChild(existingSpinner);
         }
 
-        // Ensure spinner overlay exists
+        // Ensure spinner overlay exists (CENTERED)
         let overlay = a.querySelector("[data-nav-spinner-overlay]") as HTMLSpanElement | null;
         if (!overlay) {
           overlay = document.createElement("span");
@@ -190,29 +190,37 @@ export default function NavBar() {
           a.appendChild(overlay);
         }
 
-        // ---- ACTIVE vs INACTIVE (FIX: inactive should be WHITE, not tinted) ----
-        // Clear conflicting classes first
+        // --- FORCE ACTIVE/INACTIVE (IMPORTANT FIX) ---
+        // Remove anything that could conflict (including important variants)
         a.classList.remove(
           "bg-accent",
+          "!bg-accent",
           "bg-white",
+          "!bg-white",
           "bg-white/60",
+          "!bg-white/60",
           "text-black",
+          "!text-black",
           "text-primary-text",
+          "!text-primary-text",
           "border-accent",
+          "!border-accent",
           "border-gray-200",
+          "!border-gray-200",
           "font-semibold",
+          "!font-semibold",
         );
 
         if (active) {
-          a.classList.add("bg-accent", "border-accent", "text-black", "font-semibold");
+          // Active = orange background for BOTH top-level + currently-selected subnav
+          a.classList.add("!bg-accent", "!border-accent", "!text-black", "!font-semibold");
         } else {
-          // Make inactive solid white so non-active subnav (e.g. Cooking 101) stays white
-          a.classList.add("bg-white", "border-gray-200", "text-primary-text");
+          // Inactive = always white background (this fixes Cooking 101 being tinted)
+          a.classList.add("!bg-white", "!border-gray-200", "!text-primary-text");
         }
 
-        // Loading overlay (centered)
+        // Loading overlay
         const isLoading = loadingHref === href;
-
         if (isLoading) {
           overlay.classList.remove("hidden");
           a.setAttribute("aria-busy", "true");
@@ -228,7 +236,7 @@ export default function NavBar() {
     applyButtonStyles();
   }, [allHrefs, loadingHref, pathname, topLevelHrefs]);
 
-  // Click capture: show spinner overlay + navigate
+  // Capture clicks and route with overlay spinner feedback
   const handleNavClickCapture = (e: React.MouseEvent<HTMLDivElement>) => {
     const target = e.target as HTMLElement | null;
     if (!target) return;
