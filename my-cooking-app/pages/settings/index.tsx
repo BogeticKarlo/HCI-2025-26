@@ -57,24 +57,7 @@ export default function Settings() {
 
         <div className="border-t border-body-text my-1" />
 
-        {/* Dark mode row */}
-        <div className="flex items-center justify-between gap-4 py-3">
-          <div className="w-80%">
-            <h3 className="text-[26px] font-semibold font-playfair text-primary-text">
-              Dark mode
-            </h3>
-            <p className="text-[18px] text-body-text">
-              Enable dark theme for low-light environments
-            </p>
-          </div>
-
-          <div className="w-20%">
-            <ToggleButton
-              checked={isDarkMode}
-              onChange={(value) => setTheme(value ? "dark" : "light")}
-            />
-          </div>
-        </div>
+        
       </div>
     </div>
   );
