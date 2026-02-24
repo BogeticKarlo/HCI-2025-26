@@ -146,62 +146,74 @@ export default function MyRecipes() {
       .replace(/[^\p{L}\p{N}-]+/gu, "")
       .replace(/-+/g, "-");
 
-  const recipesCount = recipes.length;
-
   return (
     <div className="flex flex-col items-center">
-      <h1 className="font-playfair font-bold text-[40px] text-center mb-8 text-primary-text">
+      <h1 className="font-playfair font-bold text-[40px] text-center mb-10 text-primary-text">
         My Recipes
       </h1>
 
-      {/* Filters + section purpose (Fix #3: management/ownership cue) */}
+      {/* FILTERS (Fix #1: more contrast + clearer “interactive area”) */}
       <div className="w-full max-w-6xl mx-auto px-6 sm:px-10 lg:px-20">
-        <p className="text-sm text-primary-text opacity-80 text-center mb-6">
-          Browse and manage the recipes you’ve uploaded.
-        </p>
-      </div>
+        <div className="rounded-2xl border border-gray-200 bg-white/70 shadow-sm p-5 sm:p-6">
+          <div className="flex items-center justify-between gap-3 flex-wrap mb-4">
+            <p className="text-sm font-semibold text-primary-text">
+              Filters
+              <span className="ml-2 text-xs font-normal text-black/70">
+                (updates automatically)
+              </span>
+            </p>
 
-      {/* FILTERS */}
-      <div className="flex flex-col w-9/10 items-center gap-8 mb-6">
-        <div className="grid grid-cols-2 gap-5 w-full lg:w-[70%]">
-          <Dropdown
-            label="Choose Cuisine"
-            options={cuisineOptions}
-            onSelect={setSelectedCuisine}
-            value={selectedCuisine}
-          />
-          <Dropdown
-            label="Choose Type"
-            options={recipeTypeOptions}
-            onSelect={setSelectedRecipeType}
-            value={selectedRecipeType}
-          />
+            {/* Fix #2: small, inline feedback when filters trigger loading */}
+            {(isLoading || isFetchingMore) && (
+              <span className="text-xs text-black/70" aria-live="polite">
+                Updating recipes…
+              </span>
+            )}
+          </div>
+
+          <div className="flex flex-col items-center gap-5">
+            <div className="grid grid-cols-2 gap-5 w-full">
+              <Dropdown
+                label="Choose Cuisine"
+                options={cuisineOptions}
+                onSelect={setSelectedCuisine}
+                value={selectedCuisine}
+              />
+              <Dropdown
+                label="Choose Type"
+                options={recipeTypeOptions}
+                onSelect={setSelectedRecipeType}
+                value={selectedRecipeType}
+              />
+            </div>
+
+            <div className="grid grid-cols-2 gap-5 w-full">
+              <Dropdown
+                label="Sort by Date"
+                options={timeOptions}
+                onSelect={setSelectedTime}
+                value={selectedTime}
+              />
+              <Dropdown
+                label="Sort by Popularity"
+                options={favoriteOptions}
+                onSelect={setSelectedFavorite}
+                value={selectedFavorite}
+              />
+            </div>
+
+            {/* Fix #3: reduce empty space + keep helper text close to filters */}
+            <p className="text-xs text-black text-center -mt-1">
+              Filters update recipes automatically
+            </p>
+          </div>
         </div>
-
-        <div className="grid grid-cols-2 gap-5 w-full lg:w-[70%]">
-          <Dropdown
-            label="Sort by Date"
-            options={timeOptions}
-            onSelect={setSelectedTime}
-            value={selectedTime}
-          />
-          <Dropdown
-            label="Sort by Popularity"
-            options={favoriteOptions}
-            onSelect={setSelectedFavorite}
-            value={selectedFavorite}
-          />
-        </div>
-
-        <p className="text-xs text-black text-center">
-          Filters update recipes automatically
-        </p>
       </div>
 
       {/* ACTIVE CHIPS (centered) */}
       {activeChips.length > 0 && (
         <div className="w-full max-w-6xl mx-auto px-6 sm:px-10 lg:px-20">
-          <div className="flex flex-wrap gap-3 mb-5 items-center justify-center">
+          <div className="flex flex-wrap gap-3 mb-6 items-center justify-center">
             {activeChips.map(({ type, value }) => (
               <button
                 key={`${type}-${value.id}`}
@@ -228,41 +240,21 @@ export default function MyRecipes() {
         </div>
       )}
 
-      {/* Divider + Results header grouped (Fix #1 + #2: proximity + stronger results hierarchy) */}
-      <div className="w-full max-w-6xl mx-auto px-6 sm:px-10 lg:px-20">
-        <div className="border-t border-gray-200 my-5" />
+      {/* DIVIDER */}
+      <div className="w-full max-w-6xl px-6 sm:px-10 lg:px-20">
+        <div className="border-t border-gray-200 my-6" />
+      </div>
 
-        <div className="flex items-end justify-between gap-4 flex-wrap mb-4">
-          <div className="flex flex-col gap-1">
-            <h2 className="text-lg font-semibold text-primary-text">
-              Your Recipes{" "}
-              <span className="opacity-80">({recipesCount})</span>
-            </h2>
-            <p className="text-sm text-primary-text opacity-80">
-              {recipesCount === 0
-                ? "No recipes to show yet."
-                : "Click a card to open a recipe."}
-            </p>
-          </div>
-
-          {/* Management signifiers (Fix #3: explicit actions) */}
-          <div className="flex items-center gap-2 text-xs text-primary-text opacity-80">
-            <span className="inline-flex items-center gap-2 rounded-full border border-gray-200 bg-white/60 px-3 py-2">
-              <span aria-hidden>👁️</span> View
-            </span>
-            <span className="inline-flex items-center gap-2 rounded-full border border-gray-200 bg-white/60 px-3 py-2">
-              <span aria-hidden>✏️</span> Edit
-            </span>
-            <span className="inline-flex items-center gap-2 rounded-full border border-gray-200 bg-white/60 px-3 py-2">
-              <span aria-hidden>🗑️</span> Delete
-            </span>
-          </div>
-        </div>
+      {/* RESULTS LABEL */}
+      <div className="w-full max-w-6xl px-6 sm:px-10 lg:px-20 mb-4">
+        <p className="text-sm font-medium text-primary-text">
+          Showing {recipes.length} {recipes.length === 1 ? "recipe" : "recipes"}
+        </p>
       </div>
 
       {/* GRID + ERROR STATE */}
-      <div className="max-w-6xl mx-auto px-6 sm:px-10 lg:px-20 w-full pb-2">
-        <div className="grid gap-6 grid-cols-1 md:grid-cols-2 xl:grid-cols-3 place-items-center min-h-[220px]">
+      <div className="max-w-6xl mx-auto px-6 sm:px-10 lg:px-20 w-full">
+        <div className="grid gap-6 grid-cols-1 md:grid-cols-2 xl:grid-cols-3 place-items-center min-h-[300px]">
           {isError ? (
             <div className="col-span-full flex flex-col items-center gap-4 text-center">
               <p className="text-lg font-semibold text-primary-text">
@@ -279,7 +271,7 @@ export default function MyRecipes() {
               </Button>
             </div>
           ) : recipes.length === 0 && !isLoading ? (
-            <div className="col-span-full flex justify-center items-center py-12">
+            <div className="col-span-full flex justify-center items-center h-96">
               <NoRecipesCard
                 title="Your kitchen is empty!"
                 description="No recipes fitting those filters yet — time to cook up something amazing."
@@ -288,7 +280,7 @@ export default function MyRecipes() {
             </div>
           ) : (
             <>
-              {/* First load skeletons (Fix #2: clearer feedback) */}
+              {/* First load skeletons */}
               {isLoading && currentPage === 1
                 ? Array.from({ length: pageLimit }).map((_, i) => (
                     <RecipeMinimizeCardSkeletonLoader key={`first-${i}`} />
@@ -299,95 +291,37 @@ export default function MyRecipes() {
                     const href = `/recipes/${recipeId}-${titleSlug}`;
 
                     return (
-                      <div key={recipeId} className="w-fit justify-self-center">
-                        {/* Card (view) */}
-                        <Link
-                          href={href}
-                          prefetch
-                          onClick={() => setLoadingRecipeId(recipeId)}
-                          title="Open recipe"
-                          className="
-                            relative
-                            inline-block
-                            w-fit
-                            cursor-pointer
-                            transition-transform duration-200
-                            hover:-translate-y-1 hover:shadow-lg
-                            focus-visible:outline-none
-                            focus-visible:ring-2 focus-visible:ring-accent focus-visible:ring-offset-2
-                            rounded-lg
-                            overflow-hidden
-                          "
-                        >
-                          <RecipeMinimizeCard
-                            id={recipeId}
-                            title={recipe.title}
-                            imageUrl={recipe.image_url || ""}
-                            description={recipe.description || ""}
-                            authorId={recipe.author_id || ""}
-                          />
+                      <Link
+                        key={recipeId}
+                        href={href}
+                        prefetch
+                        onClick={() => setLoadingRecipeId(recipeId)}
+                        title="Open recipe"
+                        className="
+                          relative
+                          inline-block
+                          w-fit
+                          justify-self-center
+                          cursor-pointer
+                          transition-transform duration-200
+                          hover:-translate-y-1 hover:shadow-lg
+                        "
+                      >
+                        <RecipeMinimizeCard
+                          id={recipeId}
+                          title={recipe.title}
+                          imageUrl={recipe.image_url || ""}
+                          description={recipe.description || ""}
+                          authorId={recipe.author_id || ""}
+                        />
 
-                          {/* Spinner overlay (only covers the card now) */}
-                          {loadingRecipeId === recipeId && (
-                            <div className="absolute inset-0 flex justify-center items-center bg-white/70 rounded-lg">
-                              <div className="w-10 h-10 border-4 border-accent border-t-transparent rounded-full animate-spin" />
-                            </div>
-                          )}
-                        </Link>
-
-                        {/* Management actions (Fix #3: signifiers + direct actions) */}
-                        <div className="mt-2 flex items-center justify-center gap-2">
-                          <button
-                            type="button"
-                            className="
-                              inline-flex items-center justify-center gap-2
-                              px-3 py-2 text-xs font-semibold
-                              rounded-xl border border-gray-200
-                              bg-white/60 text-primary-text
-                              shadow-sm
-                              transition-all duration-200
-                              hover:shadow-md hover:-translate-y-[1px]
-                              active:scale-[0.98]
-                              focus-visible:outline-none
-                              focus-visible:ring-2 focus-visible:ring-accent focus-visible:ring-offset-2
-                            "
-                            title="Edit recipe (not implemented)"
-                            aria-label="Edit recipe (not implemented)"
-                            onClick={(e) => {
-                              e.preventDefault();
-                              e.stopPropagation();
-                              // TODO: implement edit navigation/modal
-                            }}
-                          >
-                            ✏️ Edit
-                          </button>
-
-                          <button
-                            type="button"
-                            className="
-                              inline-flex items-center justify-center gap-2
-                              px-3 py-2 text-xs font-semibold
-                              rounded-xl border border-gray-200
-                              bg-white/60 text-primary-text
-                              shadow-sm
-                              transition-all duration-200
-                              hover:shadow-md hover:-translate-y-[1px]
-                              active:scale-[0.98]
-                              focus-visible:outline-none
-                              focus-visible:ring-2 focus-visible:ring-accent focus-visible:ring-offset-2
-                            "
-                            title="Delete recipe (not implemented)"
-                            aria-label="Delete recipe (not implemented)"
-                            onClick={(e) => {
-                              e.preventDefault();
-                              e.stopPropagation();
-                              // TODO: implement delete confirmation + API
-                            }}
-                          >
-                            🗑️ Delete
-                          </button>
-                        </div>
-                      </div>
+                        {/* Spinner overlay (only covers the card now) */}
+                        {loadingRecipeId === recipeId && (
+                          <div className="absolute inset-0 flex justify-center items-center bg-white/70 rounded-lg">
+                            <div className="w-10 h-10 border-4 border-accent border-t-transparent rounded-full animate-spin" />
+                          </div>
+                        )}
+                      </Link>
                     );
                   })}
 
