@@ -121,12 +121,6 @@ export default function NavBar() {
           "focus-visible:ring-offset-2",
         );
 
-        // Slightly stronger signifier for current page
-        if (href === pathname) {
-          a.classList.add("border-accent", "bg-white");
-        } else {
-          a.classList.remove("border-accent", "bg-white");
-        }
 
         // Ensure we have a spinner element inside
         let spinner = a.querySelector("[data-nav-spinner]") as HTMLSpanElement | null;
