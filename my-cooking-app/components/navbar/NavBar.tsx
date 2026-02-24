@@ -21,7 +21,7 @@ export default function NavBar() {
   const [learnPages, setLearnPages] = useState<LessonPageType[]>([]);
   const [error, setError] = useState<string | null>(null);
 
-  // Spinner overlay state (same pattern as recipe/lesson cards)
+  // which nav link is “loading”
   const [loadingHref, setLoadingHref] = useState<string | null>(null);
 
   useEffect(() => {
@@ -67,7 +67,6 @@ export default function NavBar() {
     [learnPages],
   );
 
-  // Flatten all nav/subnav hrefs for quick lookup
   const allHrefs = useMemo(() => {
     const hrefs: string[] = [];
     for (const item of NAV_ITEMS) {
@@ -77,12 +76,86 @@ export default function NavBar() {
     return hrefs;
   }, [NAV_ITEMS]);
 
-  // Clear loader when route actually changes
+  // Clear loader when route changes
   useEffect(() => {
     setLoadingHref(null);
   }, [pathname]);
 
-  // Capture clicks anywhere inside Navigation, and if it’s a nav link → show spinner + route
+  // 1) Add “button-like” styles to nav links (border + padding)
+  // 2) If the link is the one being navigated to, show a spinner INSIDE it
+  useEffect(() => {
+    // Run after Navigation renders
+    const applyButtonStyles = () => {
+      const navRoot = document.querySelector("[data-nav-root]") || document;
+      const anchors = Array.from(navRoot.querySelectorAll("a")) as HTMLAnchorElement[];
+
+      anchors.forEach((a) => {
+        const href = a.getAttribute("href") || "";
+        const isNavHref = href.startsWith("/") && allHrefs.includes(href);
+
+        if (!isNavHref) return;
+
+        // Button-like base styles (Tailwind classes)
+        a.classList.add(
+          "relative",
+          "inline-flex",
+          "items-center",
+          "justify-center",
+          "gap-2",
+          "px-3",
+          "py-2",
+          "rounded-xl",
+          "border",
+          "border-gray-200",
+          "bg-white/60",
+          "shadow-sm",
+          "transition-all",
+          "duration-200",
+          "cursor-pointer",
+          "hover:shadow-md",
+          "hover:-translate-y-[1px]",
+          "active:scale-[0.98]",
+          "focus-visible:outline-none",
+          "focus-visible:ring-2",
+          "focus-visible:ring-accent",
+          "focus-visible:ring-offset-2",
+        );
+
+        // Slightly stronger signifier for current page
+        if (href === pathname) {
+          a.classList.add("border-accent", "bg-white");
+        } else {
+          a.classList.remove("border-accent", "bg-white");
+        }
+
+        // Ensure we have a spinner element inside
+        let spinner = a.querySelector("[data-nav-spinner]") as HTMLSpanElement | null;
+        if (!spinner) {
+          spinner = document.createElement("span");
+          spinner.setAttribute("data-nav-spinner", "true");
+          spinner.className =
+            "hidden w-4 h-4 border-4 border-accent border-t-transparent rounded-full animate-spin";
+          a.appendChild(spinner);
+        }
+
+        // Toggle spinner visibility + soften text while loading
+        const isLoading = loadingHref === href;
+        if (isLoading) {
+          spinner.classList.remove("hidden");
+          a.classList.add("opacity-80");
+          a.setAttribute("aria-busy", "true");
+        } else {
+          spinner.classList.add("hidden");
+          a.classList.remove("opacity-80");
+          a.removeAttribute("aria-busy");
+        }
+      });
+    };
+
+    applyButtonStyles();
+  }, [allHrefs, loadingHref, pathname]);
+
+  // Capture clicks and route with spinner-in-button feedback
   const handleNavClickCapture = (e: React.MouseEvent<HTMLDivElement>) => {
     const target = e.target as HTMLElement | null;
     if (!target) return;
@@ -90,48 +163,33 @@ export default function NavBar() {
     const anchor = target.closest("a") as HTMLAnchorElement | null;
     if (!anchor) return;
 
-    const hrefAttr = anchor.getAttribute("href");
-    if (!hrefAttr) return;
+    const href = anchor.getAttribute("href") || "";
+    const isInternal = href.startsWith("/");
+    const isNavHref = isInternal && allHrefs.includes(href);
 
-    // Only handle internal links that are part of our nav
-    const isInternal = hrefAttr.startsWith("/");
-    const isNavHref = allHrefs.includes(hrefAttr);
+    if (!isNavHref) return;
+    if (href === pathname) return;
 
-    if (!isInternal || !isNavHref) return;
-
-    // If already on that page, do nothing (prevents pointless loader)
-    if (hrefAttr === pathname) return;
-
-    // Replace default navigation so we can show consistent feedback
+    // prevent default so we can set loading state first
     e.preventDefault();
-    setLoadingHref(hrefAttr);
-    router.push(hrefAttr);
+    setLoadingHref(href);
+    router.push(href);
 
-    // Safety: if navigation is very fast or component doesn't unmount, clear shortly
+    // Safety clear
     window.setTimeout(() => setLoadingHref(null), 1200);
   };
 
   return (
     <div className="relative" onClickCapture={handleNavClickCapture}>
+      {/* If you can, add data-nav-root on the root element inside Navigation.
+          If not, this still works using document-level query. */}
       <Navigation items={NAV_ITEMS} />
 
-      {/* Optional: you can surface error somewhere if you want, but keeping structure unchanged */}
+      {/* Keep error accessible without extra UI */}
       {error && (
         <span className="sr-only" aria-live="polite">
           {error}
         </span>
-      )}
-
-      {/* Spinner overlay (same visual as recipe card overlay) */}
-      {loadingHref && (
-        <div className="fixed inset-0 z-[9999] flex items-start justify-center pointer-events-none">
-          <div className="mt-4 rounded-full bg-white/70 px-4 py-2 shadow-md flex items-center gap-3">
-            <div className="w-5 h-5 border-4 border-accent border-t-transparent rounded-full animate-spin" />
-            <span className="text-sm font-medium text-primary-text">
-              Opening…
-            </span>
-          </div>
-        </div>
       )}
     </div>
   );
