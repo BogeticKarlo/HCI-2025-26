@@ -76,7 +76,6 @@ export default function NavBar() {
     return hrefs;
   }, [NAV_ITEMS]);
 
-  // Only top-level items (Home/Cook/Learn/Settings)
   const topLevelHrefs = useMemo(() => new Set(NAV_ITEMS.map((i) => i.href)), [NAV_ITEMS]);
 
   // Clear loader when route changes
@@ -90,28 +89,48 @@ export default function NavBar() {
     return parts.length ? `/${parts[0]}` : "/";
   };
 
-  // Active rules:
-  // - Subnav active ONLY when exact match
-  // - Top-level active when section matches (Cook for /cook/*)
-  // - Learn stays active on /learn/* AND /lesson/*
+  // Decide if a given href should be active
   const isActiveHref = (href: string) => {
     const isTopLevel = topLevelHrefs.has(href);
 
+    // Subnav: active ONLY on exact match
     if (!isTopLevel) return href === pathname;
 
     const root = getSectionRoot(href);
 
+    // Home only active on exact "/"
     if (root === "/") return pathname === "/";
 
+    // Learn stays active on /learn/* and /lesson/*
     if (root === "/learn") {
       return pathname.startsWith("/learn") || pathname.startsWith("/lesson");
     }
 
+    // Cook active for /cook/*
     return pathname.startsWith(root);
   };
 
-  // Apply button-like styles + force ACTIVE/INACTIVE backgrounds
+  // Helper: get actual accent color from your Tailwind class (bg-accent)
+  const getAccentColor = () => {
+    if (typeof window === "undefined") return "#f59e0b"; // fallback amber-ish
+    const probe = document.createElement("span");
+    probe.className = "bg-accent";
+    probe.style.position = "absolute";
+    probe.style.left = "-9999px";
+    document.body.appendChild(probe);
+    const color = window.getComputedStyle(probe).backgroundColor;
+    document.body.removeChild(probe);
+    return color || "#f59e0b";
+  };
+
+  // Apply button-like styles + FORCE background via inline style (this fixes your issue)
   useEffect(() => {
+    const accentColor = getAccentColor();
+    const inactiveBg = "rgba(255,255,255,0.95)";
+    const inactiveBorder = "rgba(229,231,235,1)"; // gray-200
+    const inactiveText = "rgba(17,24,39,1)"; // gray-900
+    const activeText = "rgba(0,0,0,1)";
+
     const applyButtonStyles = () => {
       const navRoot = document.querySelector("[data-nav-root]") || document;
       const anchors = Array.from(navRoot.querySelectorAll("a")) as HTMLAnchorElement[];
@@ -121,9 +140,7 @@ export default function NavBar() {
         const isNavHref = href.startsWith("/") && allHrefs.includes(href);
         if (!isNavHref) return;
 
-        const active = isActiveHref(href);
-
-        // Base styles (button look)
+        // Base “button” look
         a.classList.add(
           "relative",
           "inline-flex",
@@ -147,7 +164,7 @@ export default function NavBar() {
           "overflow-hidden",
         );
 
-        // Ensure label wrapper exists (so we can dim it under overlay)
+        // Ensure label wrapper exists
         let labelWrap = a.querySelector("[data-nav-label]") as HTMLSpanElement | null;
         if (!labelWrap) {
           labelWrap = document.createElement("span");
@@ -190,36 +207,19 @@ export default function NavBar() {
           a.appendChild(overlay);
         }
 
-        // --- FORCE ACTIVE/INACTIVE (IMPORTANT FIX) ---
-        // Remove anything that could conflict (including important variants)
-        a.classList.remove(
-          "bg-accent",
-          "!bg-accent",
-          "bg-white",
-          "!bg-white",
-          "bg-white/60",
-          "!bg-white/60",
-          "text-black",
-          "!text-black",
-          "text-primary-text",
-          "!text-primary-text",
-          "border-accent",
-          "!border-accent",
-          "border-gray-200",
-          "!border-gray-200",
-          "font-semibold",
-          "!font-semibold",
-        );
+        // ---- ACTIVE/INACTIVE (INLINE STYLE OVERRIDE) ----
+        const active = isActiveHref(href);
 
-        if (active) {
-          // Active = orange background for BOTH top-level + currently-selected subnav
-          a.classList.add("!bg-accent", "!border-accent", "!text-black", "!font-semibold");
-        } else {
-          // Inactive = always white background (this fixes Cooking 101 being tinted)
-          a.classList.add("!bg-white", "!border-gray-200", "!text-primary-text");
-        }
+        // Force background/border/text using inline styles (beats Tailwind classes)
+        a.style.backgroundColor = active ? accentColor : inactiveBg;
+        a.style.borderColor = active ? accentColor : inactiveBorder;
+        a.style.color = active ? activeText : inactiveText;
 
-        // Loading overlay
+        // Slightly stronger weight for active
+        if (active) a.classList.add("font-semibold");
+        else a.classList.remove("font-semibold");
+
+        // Loading overlay (same behavior you wanted)
         const isLoading = loadingHref === href;
         if (isLoading) {
           overlay.classList.remove("hidden");
@@ -254,6 +254,7 @@ export default function NavBar() {
     setLoadingHref(href);
     router.push(href);
 
+    // Safety clear (route change also clears it)
     window.setTimeout(() => setLoadingHref(null), 1200);
   };
 
