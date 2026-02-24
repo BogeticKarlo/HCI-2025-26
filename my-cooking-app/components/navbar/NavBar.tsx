@@ -118,12 +118,19 @@ export default function NavBar() {
           "overflow-hidden",
         );
 
-        // Active page = ORANGE border (accent)
-        if (href === pathname) {
-          a.classList.add("border-accent", "bg-orange-50");
-        } else {
-          a.classList.remove("border-accent", "bg-orange-50");
-        }
+        const isActive = pathname === href;
+
+        // Remove ALL background states first (critical)
+        a.classList.remove("bg-white", "bg-white/60", "bg-accent", "border-accent");
+
+        // Active = strong visual weight (orange background)
+        if (isActive) {
+          a.classList.add("bg-accent", "border-accent", "text-black", "font-semibold");
+        } 
+        else {
+          // Default inactive state
+            a.classList.add("bg-white/60");
+          }
 
         // Ensure label wrapper exists (so we can dim it under overlay)
         // If Navigation renders plain text, this still works: we wrap existing nodes once.
