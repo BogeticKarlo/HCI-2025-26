@@ -184,7 +184,7 @@ export default function MyRecipes() {
           />
         </div>
 
-        <p className="text-xs text-secondary-text text-center">
+        <p className="text-xs text-secondary-text text-center color-black/50">
           Filters update recipes automatically
         </p>
       </div>
