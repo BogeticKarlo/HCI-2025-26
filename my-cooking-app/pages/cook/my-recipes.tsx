@@ -148,11 +148,12 @@ export default function MyRecipes() {
 
   return (
     <div className="flex flex-col items-center">
-      <h1 className="font-playfair font-bold text-[40px] text-center mb-10 text-primary-text">
+      {/* FIX #1: reduce empty vertical space (title → filters) */}
+      <h1 className="font-playfair font-bold text-[40px] text-center mb-6 text-primary-text">
         My Recipes
       </h1>
 
-      {/* FILTERS (Fix #1: more contrast + clearer “interactive area”) */}
+      {/* FILTERS (contrast + clearer “interactive area”) */}
       <div className="w-full max-w-6xl mx-auto px-6 sm:px-10 lg:px-20">
         <div className="rounded-2xl border border-gray-200 bg-white/70 shadow-sm p-5 sm:p-6">
           <div className="flex items-center justify-between gap-3 flex-wrap mb-4">
@@ -163,7 +164,7 @@ export default function MyRecipes() {
               </span>
             </p>
 
-            {/* Fix #2: small, inline feedback when filters trigger loading */}
+            {/* Inline feedback when filters trigger loading */}
             {(isLoading || isFetchingMore) && (
               <span className="text-xs text-black/70" aria-live="polite">
                 Updating recipes…
@@ -202,7 +203,7 @@ export default function MyRecipes() {
               />
             </div>
 
-            {/* Fix #3: reduce empty space + keep helper text close to filters */}
+            {/* Keep helper text close to filters */}
             <p className="text-xs text-black text-center -mt-1">
               Filters update recipes automatically
             </p>
@@ -213,7 +214,8 @@ export default function MyRecipes() {
       {/* ACTIVE CHIPS (centered) */}
       {activeChips.length > 0 && (
         <div className="w-full max-w-6xl mx-auto px-6 sm:px-10 lg:px-20">
-          <div className="flex flex-wrap gap-3 mb-6 items-center justify-center">
+          {/* FIX #1: tighten spacing between filters and chips */}
+          <div className="flex flex-wrap gap-3 mt-4 mb-4 items-center justify-center">
             {activeChips.map(({ type, value }) => (
               <button
                 key={`${type}-${value.id}`}
@@ -240,13 +242,13 @@ export default function MyRecipes() {
         </div>
       )}
 
-      {/* DIVIDER */}
+      {/* FIX #1: reduce divider spacing */}
       <div className="w-full max-w-6xl px-6 sm:px-10 lg:px-20">
-        <div className="border-t border-gray-200 my-6" />
+        <div className="border-t border-gray-200 my-4" />
       </div>
 
-      {/* RESULTS LABEL */}
-      <div className="w-full max-w-6xl px-6 sm:px-10 lg:px-20 mb-4">
+      {/* FIX #1: reduce spacing before grid */}
+      <div className="w-full max-w-6xl px-6 sm:px-10 lg:px-20 mb-3">
         <p className="text-sm font-medium text-primary-text">
           Showing {recipes.length} {recipes.length === 1 ? "recipe" : "recipes"}
         </p>
@@ -254,7 +256,8 @@ export default function MyRecipes() {
 
       {/* GRID + ERROR STATE */}
       <div className="max-w-6xl mx-auto px-6 sm:px-10 lg:px-20 w-full">
-        <div className="grid gap-6 grid-cols-1 md:grid-cols-2 xl:grid-cols-3 place-items-center min-h-[300px]">
+        {/* FIX #1: reduce min height so page doesn’t feel “empty” */}
+        <div className="grid gap-6 grid-cols-1 md:grid-cols-2 xl:grid-cols-3 place-items-center min-h-[160px]">
           {isError ? (
             <div className="col-span-full flex flex-col items-center gap-4 text-center">
               <p className="text-lg font-semibold text-primary-text">
