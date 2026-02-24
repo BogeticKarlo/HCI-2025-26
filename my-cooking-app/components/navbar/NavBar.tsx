@@ -76,6 +76,7 @@ export default function NavBar() {
     return hrefs;
   }, [NAV_ITEMS]);
 
+  // Only top-level items (Home/Cook/Learn/Settings)
   const topLevelHrefs = useMemo(() => new Set(NAV_ITEMS.map((i) => i.href)), [NAV_ITEMS]);
 
   // Clear loader when route changes
@@ -89,11 +90,16 @@ export default function NavBar() {
     return parts.length ? `/${parts[0]}` : "/";
   };
 
-  // Decide if a given href should be active
+  /**
+   * Active rules:
+   * - Subnav is active ONLY when exact match
+   * - Top-level is active when section matches (Cook for /cook/*, Settings for /settings, etc.)
+   * - Learn stays active on /learn/* AND /lesson/*
+   */
   const isActiveHref = (href: string) => {
     const isTopLevel = topLevelHrefs.has(href);
 
-    // Subnav: active ONLY on exact match
+    // Subnav: exact match only
     if (!isTopLevel) return href === pathname;
 
     const root = getSectionRoot(href);
@@ -101,36 +107,16 @@ export default function NavBar() {
     // Home only active on exact "/"
     if (root === "/") return pathname === "/";
 
-    // Learn stays active on /learn/* and /lesson/*
+    // Learn stays active on lesson detail pages too
     if (root === "/learn") {
       return pathname.startsWith("/learn") || pathname.startsWith("/lesson");
     }
 
-    // Cook active for /cook/*
     return pathname.startsWith(root);
   };
 
-  // Helper: get actual accent color from your Tailwind class (bg-accent)
-  const getAccentColor = () => {
-    if (typeof window === "undefined") return "#f59e0b"; // fallback amber-ish
-    const probe = document.createElement("span");
-    probe.className = "bg-accent";
-    probe.style.position = "absolute";
-    probe.style.left = "-9999px";
-    document.body.appendChild(probe);
-    const color = window.getComputedStyle(probe).backgroundColor;
-    document.body.removeChild(probe);
-    return color || "#f59e0b";
-  };
-
-  // Apply button-like styles + FORCE background via inline style (this fixes your issue)
+  // Apply button-like styles + spinner overlay ABOVE label + active ring signifier
   useEffect(() => {
-    const accentColor = getAccentColor();
-    const inactiveBg = "rgba(255,255,255,0.95)";
-    const inactiveBorder = "rgba(229,231,235,1)"; // gray-200
-    const inactiveText = "rgba(17,24,39,1)"; // gray-900
-    const activeText = "rgba(0,0,0,1)";
-
     const applyButtonStyles = () => {
       const navRoot = document.querySelector("[data-nav-root]") || document;
       const anchors = Array.from(navRoot.querySelectorAll("a")) as HTMLAnchorElement[];
@@ -140,13 +126,15 @@ export default function NavBar() {
         const isNavHref = href.startsWith("/") && allHrefs.includes(href);
         if (!isNavHref) return;
 
-        // Base “button” look
+        const active = isActiveHref(href);
+
+        // Base button styles
         a.classList.add(
           "relative",
           "inline-flex",
           "items-center",
           "justify-center",
-          "px-3",
+          "px-4",
           "py-2",
           "rounded-xl",
           "border",
@@ -154,6 +142,7 @@ export default function NavBar() {
           "transition-all",
           "duration-200",
           "cursor-pointer",
+          "overflow-hidden",
           "hover:shadow-md",
           "hover:-translate-y-[1px]",
           "active:scale-[0.98]",
@@ -161,10 +150,9 @@ export default function NavBar() {
           "focus-visible:ring-2",
           "focus-visible:ring-accent",
           "focus-visible:ring-offset-2",
-          "overflow-hidden",
         );
 
-        // Ensure label wrapper exists
+        // Ensure label wrapper exists (so we can dim it under overlay)
         let labelWrap = a.querySelector("[data-nav-label]") as HTMLSpanElement | null;
         if (!labelWrap) {
           labelWrap = document.createElement("span");
@@ -190,45 +178,59 @@ export default function NavBar() {
           if (existingSpinner) a.appendChild(existingSpinner);
         }
 
-        // Ensure spinner overlay exists (CENTERED)
+        // Ensure spinner overlay exists (centered like recipe cards / lesson cards)
         let overlay = a.querySelector("[data-nav-spinner-overlay]") as HTMLSpanElement | null;
         if (!overlay) {
           overlay = document.createElement("span");
           overlay.setAttribute("data-nav-spinner-overlay", "true");
           overlay.className =
-            "hidden absolute inset-0 z-20 flex items-center justify-center bg-white/70";
+            "hidden absolute inset-0 z-20 flex items-center justify-center bg-white/40";
 
           const spinner = document.createElement("span");
           spinner.setAttribute("data-nav-spinner", "true");
           spinner.className =
-            "w-10 h-10 border-4 border-accent border-t-transparent rounded-full animate-spin";
+            "w-9 h-9 border-4 border-accent border-t-transparent rounded-full animate-spin";
 
           overlay.appendChild(spinner);
           a.appendChild(overlay);
         }
 
-        // ---- ACTIVE/INACTIVE (INLINE STYLE OVERRIDE) ----
-        const active = isActiveHref(href);
+        // --- NEW DESIGN RULE ---
+        // ALL buttons are orange. Active is shown via ring + stronger shadow.
+        // Remove any conflicting classes first
+        a.classList.remove(
+          "bg-white",
+          "bg-white/60",
+          "bg-accent",
+          "text-black",
+          "text-primary-text",
+          "border-gray-200",
+          "border-accent",
+          "font-semibold",
+          "ring-2",
+          "ring-black/60",
+          "shadow-lg",
+        );
 
-        // Force background/border/text using inline styles (beats Tailwind classes)
-        a.style.backgroundColor = active ? accentColor : inactiveBg;
-        a.style.borderColor = active ? accentColor : inactiveBorder;
-        a.style.color = active ? activeText : inactiveText;
+        // Everyone orange (consistent)
+        a.classList.add("bg-accent", "border-accent", "text-black");
 
-        // Slightly stronger weight for active
-        if (active) a.classList.add("font-semibold");
-        else a.classList.remove("font-semibold");
+        // Active signifier (does NOT change background):
+        // ring + bolder text + slightly stronger shadow
+        if (active) {
+          a.classList.add("ring-2", "ring-black/60", "shadow-lg", "font-semibold");
+        }
 
-        // Loading overlay (same behavior you wanted)
+        // Loading overlay
         const isLoading = loadingHref === href;
         if (isLoading) {
           overlay.classList.remove("hidden");
           a.setAttribute("aria-busy", "true");
-          labelWrap.classList.add("opacity-50");
+          labelWrap.classList.add("opacity-60");
         } else {
           overlay.classList.add("hidden");
           a.removeAttribute("aria-busy");
-          labelWrap.classList.remove("opacity-50");
+          labelWrap.classList.remove("opacity-60");
         }
       });
     };
@@ -254,7 +256,6 @@ export default function NavBar() {
     setLoadingHref(href);
     router.push(href);
 
-    // Safety clear (route change also clears it)
     window.setTimeout(() => setLoadingHref(null), 1200);
   };
 
