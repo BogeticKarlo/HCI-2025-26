@@ -2,6 +2,7 @@
 
 import { useEffect, useState, useMemo } from "react";
 import { RecipeMinimizeCard } from "../components/recipeMinimizeCard/RecipeMinimizeCard";
+import { RecipeMinimizeCardSkeletonLoader } from "@/components/recipeMinimizeCard/RecipeMinimizeCardSkeletonLoader";
 import { fetchRecipes } from "@/fetch/fetch";
 import { Option } from "@/components/dropdown/Dropdown.types";
 import {
@@ -37,13 +38,13 @@ export default function HomePage() {
     useState<Option<"cuisine">>(savedFilters.cuisine || cuisineOptions[0]);
   const [selectedRecipeType, setSelectedRecipeType] =
     useState<Option<"recipeType">>(
-      savedFilters.recipeType || recipeTypeOptions[0]
+      savedFilters.recipeType || recipeTypeOptions[0],
     );
   const [selectedTime, setSelectedTime] =
     useState<Option<"time">>(savedFilters.time || timeOptions[0]);
   const [selectedFavorite, setSelectedFavorite] =
     useState<Option<"favorite">>(
-      savedFilters.favorite || favoriteOptions[0]
+      savedFilters.favorite || favoriteOptions[0],
     );
 
   /* ---------------- SAVE FILTERS ---------------- */
@@ -57,9 +58,11 @@ export default function HomePage() {
     localStorage.setItem(localStorageKey, JSON.stringify(filters));
   }, [selectedCuisine, selectedRecipeType, selectedTime, selectedFavorite]);
 
-  /* ---------------- RESET PAGE ON FILTER CHANGE ---------------- */
+  /* ---------------- RESET PAGE ON FILTER CHANGE (+ clear results for clean feedback) ---------------- */
   useEffect(() => {
     setCurrentPage(1);
+    setRecipes([]);
+    setHasMore(true);
   }, [selectedCuisine, selectedRecipeType, selectedTime, selectedFavorite]);
 
   /* ---------------- FETCH RECIPES ---------------- */
@@ -79,7 +82,7 @@ export default function HomePage() {
       });
 
       setRecipes((prev) =>
-        currentPage === 1 ? newRecipes : [...prev, ...newRecipes]
+        currentPage === 1 ? newRecipes : [...prev, ...newRecipes],
       );
       setHasMore(newRecipes.length === pageLimit);
     } catch (err) {
@@ -92,13 +95,8 @@ export default function HomePage() {
 
   useEffect(() => {
     fetchHomeRecipes();
-  }, [
-    selectedCuisine,
-    selectedRecipeType,
-    selectedTime,
-    selectedFavorite,
-    currentPage,
-  ]);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [selectedCuisine, selectedRecipeType, selectedTime, selectedFavorite, currentPage]);
 
   /* ---------------- FILTER RESET ---------------- */
   const resetFilter = (type: string) => {
@@ -115,12 +113,7 @@ export default function HomePage() {
       { type: "time", value: selectedTime },
       { type: "favorite", value: selectedFavorite },
     ].filter((item) => item.value.id !== "all");
-  }, [
-    selectedCuisine,
-    selectedRecipeType,
-    selectedTime,
-    selectedFavorite,
-  ]);
+  }, [selectedCuisine, selectedRecipeType, selectedTime, selectedFavorite]);
 
   /* ---------------- HANDLE RECIPE CLICK ---------------- */
   const handleRecipeClick = async (recipeId: string) => {
@@ -137,71 +130,95 @@ export default function HomePage() {
 
   return (
     <div className="flex flex-col items-center">
-      <h1 className="font-playfair font-bold text-[40px] text-center mb-10 text-primary-text">
+      <h1 className="font-playfair font-bold text-[40px] text-center mb-8 text-primary-text">
         Check Out Best Recipes
       </h1>
 
-      {/* FILTERS */}
-      <div className="flex flex-col w-9/10 items-center gap-8 mb-10">
-        <div className="grid grid-cols-2 gap-5 w-full lg:w-[70%]">
-          <Dropdown
-            label="Choose Cuisine"
-            options={cuisineOptions}
-            onSelect={setSelectedCuisine}
-            value={selectedCuisine}
-          />
-          <Dropdown
-            label="Choose Type"
-            options={recipeTypeOptions}
-            onSelect={setSelectedRecipeType}
-            value={selectedRecipeType}
-          />
-        </div>
+      {/* FILTERS (Fix #1: more contrast + clearer “interactive area”) */}
+      <div className="w-full max-w-6xl mx-auto px-6 sm:px-10 lg:px-20">
+        <div className="rounded-2xl border border-gray-200 bg-white/70 shadow-sm p-5 sm:p-6">
+          <div className="flex items-center justify-between gap-3 flex-wrap mb-4">
+            <p className="text-sm font-semibold text-primary-text">
+              Filters
+              <span className="ml-2 text-xs font-normal text-black/70">
+                (updates automatically)
+              </span>
+            </p>
 
-        <div className="grid grid-cols-2 gap-5 w-full lg:w-[70%]">
-          <Dropdown
-            label="Sort by Date"
-            options={timeOptions}
-            onSelect={setSelectedTime}
-            value={selectedTime}
-          />
-          <Dropdown
-            label="Sort by Popularity"
-            options={favoriteOptions}
-            onSelect={setSelectedFavorite}
-            value={selectedFavorite}
-          />
-        </div>
+            {/* Fix #2: small, inline feedback when filters trigger loading */}
+            {(isLoading || isFetchingMore) && (
+              <span className="text-xs text-black/70" aria-live="polite">
+                Updating recipes…
+              </span>
+            )}
+          </div>
 
-        <p className="text-xs text-black text-center">
-          Filters update recipes automatically
-        </p>
+          <div className="flex flex-col items-center gap-5">
+            <div className="grid grid-cols-2 gap-5 w-full">
+              <Dropdown
+                label="Choose Cuisine"
+                options={cuisineOptions}
+                onSelect={setSelectedCuisine}
+                value={selectedCuisine}
+              />
+              <Dropdown
+                label="Choose Type"
+                options={recipeTypeOptions}
+                onSelect={setSelectedRecipeType}
+                value={selectedRecipeType}
+              />
+            </div>
+
+            <div className="grid grid-cols-2 gap-5 w-full">
+              <Dropdown
+                label="Sort by Date"
+                options={timeOptions}
+                onSelect={setSelectedTime}
+                value={selectedTime}
+              />
+              <Dropdown
+                label="Sort by Popularity"
+                options={favoriteOptions}
+                onSelect={setSelectedFavorite}
+                value={selectedFavorite}
+              />
+            </div>
+
+            {/* Fix #3: reduce empty space + keep helper text close to filters */}
+            <p className="text-xs text-black text-center -mt-1">
+              Filters update recipes automatically
+            </p>
+          </div>
+        </div>
       </div>
 
       {/* ACTIVE CHIPS */}
       {activeFilters.length > 0 && (
-        <div className="flex flex-wrap gap-3 mb-6">
-          {activeFilters.map(({ type, value }) => {
-            if (type === "time") return null;
-            return (
-              <button
-                key={value.id}
-                onClick={() => resetFilter(type)}
-                className="group flex items-center gap-2 px-4 py-2 text-sm font-medium border border-accent text-accent rounded-full bg-white shadow-sm cursor-pointer transition-all duration-200 hover:scale-105 hover:shadow-xl hover:bg-accent hover:text-black"
-              >
-                <span>{value.label}</span>
-                <span className="text-xs font-bold group-hover:rotate-90 transition-transform duration-200">
-                  ✕
-                </span>
-              </button>
-            );
-          })}
+        <div className="w-full max-w-6xl mx-auto px-6 sm:px-10 lg:px-20">
+          <div className="flex flex-wrap gap-3 mt-5 mb-4 justify-center">
+            {activeFilters.map(({ type, value }) => {
+              if (type === "time") return null;
+              return (
+                <button
+                  key={value.id}
+                  onClick={() => resetFilter(type)}
+                  className="group flex items-center gap-2 px-4 py-2 text-sm font-medium border border-accent text-accent rounded-full bg-white shadow-sm cursor-pointer transition-all duration-200 hover:scale-105 hover:shadow-xl hover:bg-accent hover:text-black active:scale-95"
+                  title={`Remove ${value.label} filter`}
+                >
+                  <span>{value.label}</span>
+                  <span className="text-xs font-bold group-hover:rotate-90 transition-transform duration-200">
+                    ✕
+                  </span>
+                </button>
+              );
+            })}
+          </div>
         </div>
       )}
 
-      {/* DIVIDER */}
+      {/* DIVIDER (Fix #3: less vertical space) */}
       <div className="w-full max-w-6xl px-6 sm:px-10 lg:px-20">
-        <div className="border-t border-gray-200 my-6" />
+        <div className="border-t border-gray-200 my-4" />
       </div>
 
       {/* RESULTS LABEL */}
@@ -212,54 +229,73 @@ export default function HomePage() {
       </div>
 
       {/* RECIPES GRID + ERROR STATE */}
-      <div className="grid gap-6 grid-cols-1 md:grid-cols-2 xl:grid-cols-3 place-items-center min-h-[300px]">
-        {isError ? (
-          <div className="col-span-full flex flex-col items-center gap-4 text-center">
-            <p className="text-lg font-semibold text-primary-text">
-              We couldn’t load recipes.
-            </p>
-            <p className="text-sm text-secondary-text">
-              Please check your connection and try again.
-            </p>
-            <Button
-              onClick={() => fetchHomeRecipes()}
-              disabled={isLoading || isFetchingMore}
-            >
-              Retry
-            </Button>
-          </div>
-        ) : recipes.length === 0 && !isLoading ? (
-          <div className="col-span-full flex justify-center items-center h-96">
-            <NoRecipesCard
-              title="No recipes found"
-              description="Try adjusting your filters."
-              buttonText="Create new dish"
-            />
-          </div>
-        ) : (
-          recipes.map((recipe) => (
-            <div
-              key={recipe.id}
-              className="transition-transform duration-200 hover:-translate-y-1 hover:shadow-lg w-full relative cursor-pointer"
-              onClick={() => handleRecipeClick(recipe.id || "")}
-            >
-              <RecipeMinimizeCard
-                id={recipe.id || ""}
-                title={recipe.title}
-                imageUrl={recipe.image_url || ""}
-                description={recipe.description || ""}
-                authorId={recipe.author_id || ""}
-              />
-
-              {/* Spinner overlay */}
-              {loadingRecipeId === recipe.id && (
-                <div className="absolute inset-0 flex justify-center items-center bg-white/70 rounded-lg">
-                  <div className="w-10 h-10 border-4 border-accent border-t-transparent rounded-full animate-spin"></div>
-                </div>
-              )}
+      <div className="w-full max-w-6xl mx-auto px-6 sm:px-10 lg:px-20">
+        <div className="grid gap-6 grid-cols-1 md:grid-cols-2 xl:grid-cols-3 place-items-center min-h-[300px]">
+          {isError ? (
+            <div className="col-span-full flex flex-col items-center gap-4 text-center">
+              <p className="text-lg font-semibold text-primary-text">
+                We couldn’t load recipes.
+              </p>
+              <p className="text-sm text-secondary-text">
+                Please check your connection and try again.
+              </p>
+              <Button
+                onClick={() => fetchHomeRecipes()}
+                disabled={isLoading || isFetchingMore}
+              >
+                Retry
+              </Button>
             </div>
-          ))
-        )}
+          ) : recipes.length === 0 && isLoading && currentPage === 1 ? (
+            // Fix #2: show skeletons during filter updates / initial load
+            Array.from({ length: pageLimit }).map((_, i) => (
+              <RecipeMinimizeCardSkeletonLoader key={`home-skel-${i}`} />
+            ))
+          ) : recipes.length === 0 && !isLoading ? (
+            <div className="col-span-full flex justify-center items-center h-96">
+              <NoRecipesCard
+                title="No recipes found"
+                description="Try adjusting your filters."
+                buttonText="Create new dish"
+              />
+            </div>
+          ) : (
+            <>
+              {recipes.map((recipe) => (
+                <div
+                  key={recipe.id}
+                  className="transition-transform duration-200 hover:-translate-y-1 hover:shadow-lg w-full relative cursor-pointer"
+                  onClick={() => handleRecipeClick(recipe.id || "")}
+                  title="Open recipe"
+                >
+                  <RecipeMinimizeCard
+                    id={recipe.id || ""}
+                    title={recipe.title}
+                    imageUrl={recipe.image_url || ""}
+                    description={recipe.description || ""}
+                    authorId={recipe.author_id || ""}
+                  />
+
+                  {/* Spinner overlay (existing improvement kept) */}
+                  {loadingRecipeId === recipe.id && (
+                    <div className="absolute inset-0 flex justify-center items-center bg-white/70 rounded-lg">
+                      <div className="w-10 h-10 border-4 border-accent border-t-transparent rounded-full animate-spin" />
+                    </div>
+                  )}
+                </div>
+              ))}
+
+              {/* Fix #2: skeletons while fetching more */}
+              {isFetchingMore && (
+                <>
+                  {Array.from({ length: 3 }).map((_, i) => (
+                    <RecipeMinimizeCardSkeletonLoader key={`home-more-${i}`} />
+                  ))}
+                </>
+              )}
+            </>
+          )}
+        </div>
       </div>
 
       {/* LOAD MORE */}
