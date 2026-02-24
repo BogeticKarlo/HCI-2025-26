@@ -77,36 +77,32 @@ export default function NavBar() {
   }, [NAV_ITEMS]);
 
   // Only top-level items (Home/Cook/Learn/Settings)
-  const topLevelHrefs = useMemo(() => {
-    return new Set(NAV_ITEMS.map((i) => i.href));
-  }, [NAV_ITEMS]);
+  const topLevelHrefs = useMemo(() => new Set(NAV_ITEMS.map((i) => i.href)), [NAV_ITEMS]);
 
   // Clear loader when route changes
   useEffect(() => {
     setLoadingHref(null);
   }, [pathname]);
 
-  // Section root helper (Home uses exact "/")
   const getSectionRoot = (href: string) => {
     if (href === "/") return "/";
     const parts = href.split("/").filter(Boolean);
     return parts.length ? `/${parts[0]}` : "/";
   };
 
-  // Decide if a given href should be orange (active)
+  // Active rules:
+  // - subnav active only on exact match
+  // - top-level active on section match (Cook for /cook/* etc.)
+  // - Learn stays active on /learn/* AND /lesson/*
   const isActiveHref = (href: string) => {
     const isTopLevel = topLevelHrefs.has(href);
 
-    // Subnav / exact match
     if (!isTopLevel) return href === pathname;
 
-    // Top-level / section match
     const root = getSectionRoot(href);
 
-    // Home only active on exact "/"
     if (root === "/") return pathname === "/";
 
-    // Keep Learn active on /learn/* AND /lesson/*
     if (root === "/learn") {
       return pathname.startsWith("/learn") || pathname.startsWith("/lesson");
     }
@@ -114,20 +110,20 @@ export default function NavBar() {
     return pathname.startsWith(root);
   };
 
-  // Add button-like styles + spinner overlay ABOVE the label
+  // Add button-like styles + spinner overlay (CENTERED)
   useEffect(() => {
     const applyButtonStyles = () => {
       const navRoot = document.querySelector("[data-nav-root]") || document;
-      const anchors = Array.from(
-        navRoot.querySelectorAll("a"),
-      ) as HTMLAnchorElement[];
+      const anchors = Array.from(navRoot.querySelectorAll("a")) as HTMLAnchorElement[];
 
       anchors.forEach((a) => {
         const href = a.getAttribute("href") || "";
         const isNavHref = href.startsWith("/") && allHrefs.includes(href);
         if (!isNavHref) return;
 
-        // Base styles (button-like)
+        const active = isActiveHref(href);
+
+        // Base styles
         a.classList.add(
           "relative",
           "inline-flex",
@@ -137,7 +133,6 @@ export default function NavBar() {
           "py-2",
           "rounded-xl",
           "border",
-          "border-gray-200",
           "shadow-sm",
           "transition-all",
           "duration-200",
@@ -153,10 +148,7 @@ export default function NavBar() {
         );
 
         // Ensure label wrapper exists
-        let labelWrap = a.querySelector(
-          "[data-nav-label]",
-        ) as HTMLSpanElement | null;
-
+        let labelWrap = a.querySelector("[data-nav-label]") as HTMLSpanElement | null;
         if (!labelWrap) {
           labelWrap = document.createElement("span");
           labelWrap.setAttribute("data-nav-label", "true");
@@ -182,10 +174,7 @@ export default function NavBar() {
         }
 
         // Ensure spinner overlay exists
-        let overlay = a.querySelector(
-          "[data-nav-spinner-overlay]",
-        ) as HTMLSpanElement | null;
-
+        let overlay = a.querySelector("[data-nav-spinner-overlay]") as HTMLSpanElement | null;
         if (!overlay) {
           overlay = document.createElement("span");
           overlay.setAttribute("data-nav-spinner-overlay", "true");
@@ -201,20 +190,27 @@ export default function NavBar() {
           a.appendChild(overlay);
         }
 
-        // ---- ACTIVE STYLING (fix) ----
-        const active = isActiveHref(href);
-
-        // Remove conflicting backgrounds first (critical)
-        a.classList.remove("bg-white", "bg-white/60", "bg-accent", "text-black");
-        a.classList.remove("border-accent", "font-semibold");
+        // ---- ACTIVE vs INACTIVE (FIX: inactive should be WHITE, not tinted) ----
+        // Clear conflicting classes first
+        a.classList.remove(
+          "bg-accent",
+          "bg-white",
+          "bg-white/60",
+          "text-black",
+          "text-primary-text",
+          "border-accent",
+          "border-gray-200",
+          "font-semibold",
+        );
 
         if (active) {
           a.classList.add("bg-accent", "border-accent", "text-black", "font-semibold");
         } else {
-          a.classList.add("bg-white/60");
+          // Make inactive solid white so non-active subnav (e.g. Cooking 101) stays white
+          a.classList.add("bg-white", "border-gray-200", "text-primary-text");
         }
 
-        // Loading overlay
+        // Loading overlay (centered)
         const isLoading = loadingHref === href;
 
         if (isLoading) {
@@ -232,7 +228,7 @@ export default function NavBar() {
     applyButtonStyles();
   }, [allHrefs, loadingHref, pathname, topLevelHrefs]);
 
-  // Capture clicks and route with overlay spinner feedback
+  // Click capture: show spinner overlay + navigate
   const handleNavClickCapture = (e: React.MouseEvent<HTMLDivElement>) => {
     const target = e.target as HTMLElement | null;
     if (!target) return;
@@ -241,8 +237,7 @@ export default function NavBar() {
     if (!anchor) return;
 
     const href = anchor.getAttribute("href") || "";
-    const isInternal = href.startsWith("/");
-    const isNavHref = isInternal && allHrefs.includes(href);
+    const isNavHref = href.startsWith("/") && allHrefs.includes(href);
 
     if (!isNavHref) return;
     if (href === pathname) return;
@@ -251,7 +246,6 @@ export default function NavBar() {
     setLoadingHref(href);
     router.push(href);
 
-    // Safety clear (route change also clears it)
     window.setTimeout(() => setLoadingHref(null), 1200);
   };
 
