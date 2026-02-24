@@ -23,22 +23,24 @@ export default function SingleLesson({ lesson }: { lesson: LessonType }) {
   return (
     <article className="relative w-full max-w-[800px] bg-section-bg rounded-3xl p-8 pt-16 shadow-md text-body-text mx-auto">
       
+{/* BACK BUTTON — FULL BORDERED CLICKABLE AREA */}
 <button
-    onClick={() => router.back()}
-    className="
-     absolute left-0 top-1/2 -translate-y-1/2
-     flex items-center gap-2 px-3 py-2
-     cursor-pointer
-      border border-gray-300
-      bg-white
-      shadow-sm
-     rounded-lg
-      transition-all duration-200
-      hover:scale-105 hover:shadow-md hover:border-accent
-     active:scale-95
-     focus-visible:outline-none
-      focus-visible:ring-2 focus-visible:ring-accent focus-visible:ring-offset-2
-    "
+  onClick={() => router.back()}
+  className="
+    absolute left-6 top-6
+    inline-flex items-center gap-2
+    px-4 py-2
+    border border-gray-300
+    bg-white/80
+    rounded-xl
+    shadow-sm
+    cursor-pointer
+    transition-all duration-200
+    hover:border-accent hover:bg-white hover:shadow-md
+    active:scale-95
+    focus-visible:outline-none
+    focus-visible:ring-2 focus-visible:ring-accent focus-visible:ring-offset-2
+  "
   title="Go back"
   aria-label="Go back to previous page"
 >
@@ -47,12 +49,12 @@ export default function SingleLesson({ lesson }: { lesson: LessonType }) {
     alt="Back"
     width={36}
     height={36}
-    className="w-9 aspect-square"
+    className="w-5 h-5"
   />
   <span className="text-sm font-semibold text-primary-text">
     Back
   </span>
-  </button>
+</button>
       {/* CENTERED CONTENT WRAPPER */}
       <div className="flex flex-col items-center gap-8 text-center">
 
