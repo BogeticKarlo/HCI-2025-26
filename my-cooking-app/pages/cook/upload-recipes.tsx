@@ -281,8 +281,9 @@ export default function UploadRecipes() {
   };
 
   return (
-    <div>
-      <div className="max-w-[360px] md:max-w-[720px] mx-auto px-2">
+    <div className="w-full">
+      {/* HEADER WRAPPER — WIDER */}
+      <div className="w-full max-w-[1100px] mx-auto px-4 sm:px-6 lg:px-8">
         <h1 className="font-playfair font-bold text-[32px] leading-[120%] md:text-[44px] text-center mb-2 text-primary-text">
           Upload Your Recipe
         </h1>
@@ -291,7 +292,7 @@ export default function UploadRecipes() {
           Follow the steps below to publish your recipe.
         </p>
 
-        <div className="mb-4 rounded-xl border border-gray-200 bg-white/60 px-3 py-2">
+        <div className="mb-4 rounded-xl border border-gray-200 bg-white/60 px-4 py-3">
           <div className="flex items-center justify-between text-xs text-primary-text">
             <span>
               <span className="font-semibold">*</span> Required fields
@@ -323,7 +324,8 @@ export default function UploadRecipes() {
         </div>
       </div>
 
-      <div className="bg-section-bg shadow-lg border border-input-border rounded-2xl flex flex-col items-center w-full max-w-[360px] md:max-w-[720px] mx-auto p-6 md:p-8 gap-8">
+      {/* MAIN CARD — MUCH WIDER */}
+      <div className="bg-section-bg shadow-lg border border-input-border rounded-2xl flex flex-col items-center w-full max-w-[1100px] mx-auto px-4 sm:px-6 lg:px-10 py-6 md:py-8 gap-8">
         {!canAttemptSubmit && missingItems.length > 0 && (
           <div className="w-full border border-gray-300 bg-white p-3 rounded-2xl text-sm text-center text-primary-text shadow-sm">
             <span className="font-semibold">To upload, complete:</span>{" "}
@@ -474,7 +476,6 @@ export default function UploadRecipes() {
                 publish.
               </p>
 
-              {/* ✅ Add required signifier here */}
               <div className="flex flex-col gap-2">
                 <ImageInput
                   value={image}
@@ -518,8 +519,7 @@ export default function UploadRecipes() {
           </Button>
 
           <p className="text-xs text-primary-text opacity-80 text-center">
-            Required fields are marked with{" "}
-            <span className="font-semibold">*</span>
+            Required fields are marked with <span className="font-semibold">*</span>
           </p>
         </div>
       </div>
