@@ -120,9 +120,9 @@ export default function NavBar() {
 
         // Active page = ORANGE border (accent)
         if (href === pathname) {
-          a.classList.add("border-accent", "bg-white");
+          a.classList.add("border-accent", "bg-orange-50");
         } else {
-          a.classList.remove("border-accent", "bg-white");
+          a.classList.remove("border-accent", "bg-orange-50");
         }
 
         // Ensure label wrapper exists (so we can dim it under overlay)
