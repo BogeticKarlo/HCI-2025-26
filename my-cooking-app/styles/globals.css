@@ -56,61 +56,130 @@ button:focus:not(:focus-visible) {
   --rs-color-white: #ffffff;
 }
 
-.dark {
-  color-scheme: dark;
+/* globals.css
+   Goal: dark mode that keeps your current brand (accent orange) but improves:
+   - contrast (text + borders)
+   - surface separation (cards vs page)
+   - input affordance (fields clearly editable)
+   - feedback colors (success/warn/error readable)
+*/
 
-  /* font same, but keep var for flexibility */
+/* ---------- LIGHT (default) ---------- */
+:root {
+  color-scheme: light;
+
+  /* font */
   --rs-font-playfair: "Playfair Display", serif;
 
   /* brand */
-  --rs-color-primary: #e67833;
+  --rs-color-primary: #e67833; /* your orange */
   --rs-color-secondary: #4ca6a8;
 
   /* text */
-  --rs-color-primary-text: #ffffff;
-  --rs-color-secondary-text: #e2e2e2;
-  --rs-color-body-text: #cccccc;
-  --rs-color-footer-text: #bac2cf;
-  --rs-color-text-muted: #9ca3af;
+  --rs-color-primary-text: #111827; /* near-black */
+  --rs-color-secondary-text: #374151; /* gray-700 */
+  --rs-color-body-text: #111827;
+  --rs-color-footer-text: #1f2937; /* gray-800 */
+  --rs-color-text-muted: #6b7280; /* gray-500 */
 
   /* surfaces */
-  --rs-color-main-bg: #1a1d21;
-  --rs-color-section-bg: #25292e;
-  --rs-color-navbar-bg: #2d3136;
-  --rs-color-footer-bg: #2c3237;
+  --rs-color-main-bg: #f7f7fb;
+  --rs-color-section-bg: #ffffff;
+  --rs-color-navbar-bg: #ffffff;
+  --rs-color-footer-bg: #0f172a; /* dark footer on light theme works well */
 
   /* borders / inputs */
-  --rs-color-border: #3a3f45;
-  --rs-color-input-field-bg: #454b52;
-  --rs-color-input-border: #aab2bb;
+  --rs-color-border: #e5e7eb; /* gray-200 */
+  --rs-color-input-field-bg: #ffffff;
+  --rs-color-input-border: #cbd5e1; /* slate-300 */
 
   /* toggles */
   --rs-color-toggle-on: #e67833;
-  --rs-color-toggle-off: #666666;
+  --rs-color-toggle-off: #94a3b8; /* slate-400 */
 
-  /* statuses */
-  --rs-color-success: #1f3a2e;
-  --rs-color-warning: #3a2f12;
-  --rs-color-error: #3a1e1e;
+  /* statuses (backgrounds) */
+  --rs-color-success: #ecfdf5;
+  --rs-color-warning: #fffbeb;
+  --rs-color-error: #fef2f2;
 
-  --rs-color-success-border: #4caf50;
-  --rs-color-warning-border: #ffc107;
-  --rs-color-error-border: #d9534f;
+  /* statuses (borders/text anchors) */
+  --rs-color-success-border: #10b981;
+  --rs-color-warning-border: #f59e0b;
+  --rs-color-error-border: #ef4444;
 
   /* misc */
   --rs-color-focus: #e67833;
   --rs-color-dark-tone: #d56a28;
-  --rs-color-disabled: #6f6f6f;
+  --rs-color-disabled: #9ca3af;
 
   --rs-color-black: #000000;
   --rs-color-white: #ffffff;
+
+  /* optional: subtle shadow color token for consistent “button/card” weight */
+  --rs-shadow-color: 0 0 0;
 }
 
+/* ---------- DARK (override) ---------- */
+.dark {
+  color-scheme: dark;
+
+  /* keep font */
+  --rs-font-playfair: "Playfair Display", serif;
+
+  /* brand (slightly brighter for dark backgrounds) */
+  --rs-color-primary: #ff8a3d; /* brighter orange for visibility */
+  --rs-color-secondary: #58c0c2;
+
+  /* text (high contrast but not pure white everywhere) */
+  --rs-color-primary-text: #f9fafb;   /* near-white */
+  --rs-color-secondary-text: #e5e7eb; /* gray-200 */
+  --rs-color-body-text: #d1d5db;      /* gray-300 */
+  --rs-color-footer-text: #cbd5e1;    /* slate-300 */
+  --rs-color-text-muted: #9ca3af;     /* gray-400 */
+
+  /* surfaces (clear separation: page < navbar < card) */
+  --rs-color-main-bg: #0b0f14;     /* deeper page background */
+  --rs-color-section-bg: #121823;  /* cards/sections */
+  --rs-color-navbar-bg: #0f1622;   /* nav slightly distinct */
+  --rs-color-footer-bg: #0a0f18;
+
+  /* borders / inputs (borders visible, fields clearly editable) */
+  --rs-color-border: #243042;          /* visible divider */
+  --rs-color-input-field-bg: #0f1725;  /* darker than card, signals input */
+  --rs-color-input-border: #3a4a63;    /* visible outline */
+
+  /* toggles */
+  --rs-color-toggle-on: #ff8a3d;
+  --rs-color-toggle-off: #475569; /* slate-600 */
+
+  /* statuses (backgrounds on dark: darker tints, readable) */
+  --rs-color-success: #0b2a1c;
+  --rs-color-warning: #2a1f0b;
+  --rs-color-error: #2a0f12;
+
+  /* statuses (borders) */
+  --rs-color-success-border: #34d399;
+  --rs-color-warning-border: #fbbf24;
+  --rs-color-error-border: #f87171;
+
+  /* misc */
+  --rs-color-focus: #ff8a3d;
+  --rs-color-dark-tone: #ff7a25;
+  --rs-color-disabled: #6b7280;
+
+  --rs-color-black: #000000;
+  --rs-color-white: #ffffff;
+
+  --rs-shadow-color: 0 0 0;
+}
+
+/* ---------- Tailwind theme tokens mapping ---------- */
+/* Keep your existing token names so components don’t change */
 @theme {
   /* font */
   --font-playfair: var(--rs-font-playfair);
 
-  /* brand colors */
+  /* brand */
   --color-primary: var(--rs-color-primary);
   --color-secondary: var(--rs-color-secondary);
 
@@ -154,4 +223,25 @@ button:focus:not(:focus-visible) {
   --color-white: var(--rs-color-white);
 }
 
+/* Let you use: dark:... in Tailwind with your class strategy */
 @custom-variant dark (&:where(.dark, .dark *));
+
+/* ---------- Small global UX polish (safe defaults) ---------- */
+html,
+body {
+  background: var(--rs-color-main-bg);
+  color: var(--rs-color-primary-text);
+}
+
+/* Better focus visibility in both themes */
+:focus-visible {
+  outline: none;
+  box-shadow:
+    0 0 0 2px color-mix(in srgb, var(--rs-color-focus) 70%, transparent),
+    0 0 0 4px color-mix(in srgb, var(--rs-color-focus) 25%, transparent);
+}
+
+/* Optional: selection color that matches your brand */
+::selection {
+  background: color-mix(in srgb, var(--rs-color-primary) 35%, transparent);
+}
