@@ -81,10 +81,8 @@ export default function NavBar() {
     setLoadingHref(null);
   }, [pathname]);
 
-  // 1) Add “button-like” styles to nav links (border + padding)
-  // 2) If the link is the one being navigated to, show a spinner INSIDE it
+  // Add button-like styles and spinner overlay ABOVE the label
   useEffect(() => {
-    // Run after Navigation renders
     const applyButtonStyles = () => {
       const navRoot = document.querySelector("[data-nav-root]") || document;
       const anchors = Array.from(navRoot.querySelectorAll("a")) as HTMLAnchorElement[];
@@ -92,16 +90,14 @@ export default function NavBar() {
       anchors.forEach((a) => {
         const href = a.getAttribute("href") || "";
         const isNavHref = href.startsWith("/") && allHrefs.includes(href);
-
         if (!isNavHref) return;
 
-        // Button-like base styles (Tailwind classes)
+        // Base “button” styles
         a.classList.add(
           "relative",
           "inline-flex",
           "items-center",
           "justify-center",
-          "gap-2",
           "px-3",
           "py-2",
           "rounded-xl",
@@ -119,29 +115,76 @@ export default function NavBar() {
           "focus-visible:ring-2",
           "focus-visible:ring-accent",
           "focus-visible:ring-offset-2",
+          "overflow-hidden",
         );
 
-
-        // Ensure we have a spinner element inside
-        let spinner = a.querySelector("[data-nav-spinner]") as HTMLSpanElement | null;
-        if (!spinner) {
-          spinner = document.createElement("span");
-          spinner.setAttribute("data-nav-spinner", "true");
-          spinner.className =
-            "hidden w-4 h-4 border-4 border-accent border-t-transparent rounded-full animate-spin";
-          a.appendChild(spinner);
+        // Active page = ORANGE border (accent)
+        if (href === pathname) {
+          a.classList.add("border-accent", "bg-white");
+        } else {
+          a.classList.remove("border-accent", "bg-white");
         }
 
-        // Toggle spinner visibility + soften text while loading
+        // Ensure label wrapper exists (so we can dim it under overlay)
+        // If Navigation renders plain text, this still works: we wrap existing nodes once.
+        let labelWrap = a.querySelector("[data-nav-label]") as HTMLSpanElement | null;
+        if (!labelWrap) {
+          labelWrap = document.createElement("span");
+          labelWrap.setAttribute("data-nav-label", "true");
+          labelWrap.className = "relative z-10";
+
+          // Move all existing children (except an existing spinner overlay) into labelWrap
+          const existingSpinner = a.querySelector("[data-nav-spinner-overlay]");
+          const nodes = Array.from(a.childNodes);
+          nodes.forEach((node) => {
+            if (
+              existingSpinner &&
+              node instanceof HTMLElement &&
+              node.hasAttribute("data-nav-spinner-overlay")
+            ) {
+              return;
+            }
+            labelWrap!.appendChild(node);
+          });
+
+          // Clear anchor then re-add labelWrap (+ keep any existing spinner)
+          a.innerHTML = "";
+          a.appendChild(labelWrap);
+          if (existingSpinner) a.appendChild(existingSpinner);
+        }
+
+        // Ensure spinner overlay exists (CENTERED over the button, not next to label)
+        let overlay = a.querySelector(
+          "[data-nav-spinner-overlay]",
+        ) as HTMLSpanElement | null;
+
+        if (!overlay) {
+          overlay = document.createElement("span");
+          overlay.setAttribute("data-nav-spinner-overlay", "true");
+          overlay.className =
+            "hidden absolute inset-0 z-20 flex items-center justify-center bg-white/70";
+
+          // spinner itself
+          const spinner = document.createElement("span");
+          spinner.setAttribute("data-nav-spinner", "true");
+          spinner.className =
+            "w-10 h-10 border-4 border-accent border-t-transparent rounded-full animate-spin";
+
+          overlay.appendChild(spinner);
+          a.appendChild(overlay);
+        }
+
         const isLoading = loadingHref === href;
+
         if (isLoading) {
-          spinner.classList.remove("hidden");
-          a.classList.add("opacity-80");
+          overlay.classList.remove("hidden");
           a.setAttribute("aria-busy", "true");
+          // keep label visible but deemphasized under overlay, like recipe cards
+          labelWrap.classList.add("opacity-50");
         } else {
-          spinner.classList.add("hidden");
-          a.classList.remove("opacity-80");
+          overlay.classList.add("hidden");
           a.removeAttribute("aria-busy");
+          labelWrap.classList.remove("opacity-50");
         }
       });
     };
@@ -149,7 +192,7 @@ export default function NavBar() {
     applyButtonStyles();
   }, [allHrefs, loadingHref, pathname]);
 
-  // Capture clicks and route with spinner-in-button feedback
+  // Capture clicks and route with overlay spinner feedback
   const handleNavClickCapture = (e: React.MouseEvent<HTMLDivElement>) => {
     const target = e.target as HTMLElement | null;
     if (!target) return;
@@ -164,22 +207,18 @@ export default function NavBar() {
     if (!isNavHref) return;
     if (href === pathname) return;
 
-    // prevent default so we can set loading state first
     e.preventDefault();
     setLoadingHref(href);
     router.push(href);
 
-    // Safety clear
+    // Safety clear (route change also clears it)
     window.setTimeout(() => setLoadingHref(null), 1200);
   };
 
   return (
     <div className="relative" onClickCapture={handleNavClickCapture}>
-      {/* If you can, add data-nav-root on the root element inside Navigation.
-          If not, this still works using document-level query. */}
       <Navigation items={NAV_ITEMS} />
 
-      {/* Keep error accessible without extra UI */}
       {error && (
         <span className="sr-only" aria-live="polite">
           {error}
