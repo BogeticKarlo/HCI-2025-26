@@ -236,7 +236,7 @@ export function RecipeCard({
   <span className="text-sm font-semibold text-primary-text">
     Back
   </span>
-</button>
+  </button>
 
         {/* Title area gets more weight + divider */}
         <div className="flex flex-col items-center text-center gap-3 w-full">
