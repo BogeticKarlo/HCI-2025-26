@@ -20,23 +20,17 @@ export const LikeButton = ({ recipeId }: LikeButtonProps) => {
 
   useEffect(() => {
     const fetchLikes = async () => {
-      console.log("🔄 Fetching likes for recipe:", recipeId);
 
       try {
         const count = await getRecipeLikes(recipeId);
-        console.log("👍 Total likes from DB:", count);
         setLikesCount(count);
 
         if (user) {
-          console.log("👤 Checking if user liked:", user.id);
           const likedByUser = await hasUserLikedRecipe(recipeId, user.id);
-          console.log("❤️ User liked?", likedByUser);
           setLiked(likedByUser);
         } else {
-          console.log("⚠️ No user logged in");
         }
       } catch (err) {
-        console.error("❌ Error fetching likes:", err);
       }
     };
 
@@ -44,22 +38,16 @@ export const LikeButton = ({ recipeId }: LikeButtonProps) => {
   }, [recipeId, user]);
 
   const handleLike = async () => {
-    console.log("🖱️ Heart clicked");
 
     if (!user) {
-      console.log("❌ No user — cannot like");
       return;
     }
 
-    console.log("👤 User ID:", user.id);
-    console.log("📌 Recipe ID:", recipeId);
 
     try {
       const result = await toggleRecipeLike(recipeId, user.id);
-      console.log("📡 RPC result:", result);
 
       if (!result) {
-        console.log("❌ No result returned from RPC");
         return;
       }
 
@@ -67,7 +55,6 @@ export const LikeButton = ({ recipeId }: LikeButtonProps) => {
       setLikesCount(result.number_of_likes);
       setLiked(result.liked);
     } catch (err) {
-      console.error("❌ Error in handleLike:", err);
     }
   };
 

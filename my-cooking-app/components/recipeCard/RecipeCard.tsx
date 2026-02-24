@@ -23,14 +23,6 @@ import { LikeButton } from "../LikeButton";
 type Recipe = Database["public"]["Tables"]["recipes"]["Row"];
 type Profile = Database["public"]["Tables"]["profiles"]["Row"];
 
-/**
- * Visual weight improvements included (all 4):
- * 1) Stronger hierarchy: title block gets subtle divider + more spacing, Cuisine/Type is more muted & smaller.
- * 2) Decorative images reduced dominance: slightly smaller on mobile + opacity.
- * 3) Better scanability: Ingredients + Instructions list items have subtle “row” background + padding.
- * 4) Footer balance: author name slightly stronger; Like/Delete wrappers are lighter by default, strengthen on hover.
- */
-
 export function RecipeCard({
   recipe,
   isLoading,
@@ -132,7 +124,6 @@ export function RecipeCard({
 
     const innerButton = root.querySelector("button") as HTMLButtonElement | null;
 
-    // If user clicked the actual LikeButton, let it handle it (avoid double toggle)
     if (
       innerButton &&
       e.target instanceof Node &&
@@ -175,7 +166,6 @@ export function RecipeCard({
     } catch (error) {
       console.error("Error deleting recipe:", error);
       setErrorMessage("Failed to delete recipe. Please try again.");
-      // keep modal open on error
     } finally {
       setDeleting(false);
     }
@@ -205,46 +195,132 @@ export function RecipeCard({
         relative
       "
     >
+      {/* TOP-RIGHT ACTIONS (moved here) */}
+      <div className="absolute right-6 top-6 flex items-start gap-4 z-30">
+        {!isCreator && (
+          <div
+            ref={likeWrapperRef}
+            role="button"
+            tabIndex={0}
+            aria-label="Like this recipe"
+            onClick={handleLikeWrapperClick}
+            onKeyDown={handleLikeWrapperKeyDown}
+            className={`
+              flex flex-col items-center
+              border border-accent/25
+              rounded-xl px-4 py-3
+              bg-white/50
+              transition-all duration-200
+              hover:border-accent hover:bg-white/70 hover:shadow-md hover:-translate-y-[1px] hover:scale-[1.02]
+              active:scale-[0.98] active:translate-y-0
+              cursor-pointer
+              focus:outline-none
+              focus-visible:ring-2 focus-visible:ring-accent focus-visible:ring-offset-2
+              select-none
+              ${likeCooldown ? "opacity-90" : ""}
+            `}
+            title="Tap to like / tap again to unlike"
+          >
+            <span className="text-xs text-text-muted">Like</span>
+            <span className="text-[11px] text-text-muted/80 mb-1">
+              Tap to toggle
+            </span>
+
+            <LikeButton recipeId={recipe.id} />
+          </div>
+        )}
+
+        {isCreator && (
+          <button
+            type="button"
+            onClick={() => {
+              if (!deleteWrapperDisabled) setIsModalOpen(true);
+            }}
+            disabled={deleteWrapperDisabled}
+            title={
+              deleteWrapperDisabled
+                ? "Delete is currently unavailable"
+                : "Delete recipe"
+            }
+            aria-label="Delete recipe"
+            className={`
+              group
+              flex flex-col items-center
+              border border-red-300/40
+              rounded-xl px-4 py-3
+              bg-white/50
+              transition-all duration-200
+              focus-visible:outline-none
+              focus-visible:ring-2 focus-visible:ring-red-400 focus-visible:ring-offset-2
+              ${
+                deleteWrapperDisabled
+                  ? "opacity-60 cursor-not-allowed"
+                  : "cursor-pointer hover:border-red-400 hover:bg-white/70 hover:shadow-md hover:-translate-y-[1px] hover:scale-[1.02] active:scale-[0.98]"
+              }
+            `}
+          >
+            <span className="text-xs text-red-500 font-medium">Delete</span>
+            <span className="text-[11px] text-text-muted/80 mb-1">
+              Permanent
+            </span>
+
+            <span
+              className={`
+                w-10 h-10 flex items-center justify-center rounded-full
+                transition-all duration-200
+                ${
+                  deleteWrapperDisabled
+                    ? "bg-red-100"
+                    : "text-red-500 group-hover:bg-red-100 group-hover:scale-110 active:scale-95"
+                }
+              `}
+            >
+              {deleting ? (
+                <span className="text-xs animate-pulse">...</span>
+              ) : (
+                <TrashIcon className="w-6 h-6" />
+              )}
+            </span>
+          </button>
+        )}
+      </div>
+
       {/* HEADER */}
       <header className="relative flex flex-col items-center gap-4 mb-2">
         <button
-    onClick={() => router.back()}
-    className="
-     absolute left-0 top-1/2 -translate-y-1/2
-     flex items-center gap-2 px-3 py-2
-     cursor-pointer
-      border border-gray-300
-      bg-white
-      shadow-sm
-     rounded-lg
-      transition-all duration-200
-      hover:scale-105 hover:shadow-md hover:border-accent
-     active:scale-95
-     focus-visible:outline-none
-      focus-visible:ring-2 focus-visible:ring-accent focus-visible:ring-offset-2
-    "
-  title="Go back"
-  aria-label="Go back to previous page"
->
-  <Image
-    src={backArrow}
-    alt="Back"
-    width={36}
-    height={36}
-    className="w-9 aspect-square"
-  />
-  <span className="text-sm font-semibold text-primary-text">
-    Back
-  </span>
-  </button>
+          onClick={() => router.back()}
+          className="
+            absolute left-0 top-1/2 -translate-y-1/2
+            flex items-center gap-2 px-3 py-2
+            cursor-pointer
+            border border-gray-300
+            bg-white
+            shadow-sm
+            rounded-lg
+            transition-all duration-200
+            hover:scale-105 hover:shadow-md hover:border-accent
+            active:scale-95
+            focus-visible:outline-none
+            focus-visible:ring-2 focus-visible:ring-accent focus-visible:ring-offset-2
+          "
+          title="Go back"
+          aria-label="Go back to previous page"
+        >
+          <Image
+            src={backArrow}
+            alt="Back"
+            width={36}
+            height={36}
+            className="w-9 aspect-square"
+          />
+          <span className="text-sm font-semibold text-primary-text">Back</span>
+        </button>
 
-        {/* Title area gets more weight + divider */}
         <div className="flex flex-col items-center text-center gap-3 w-full">
           <h1 className="text-3xl md:text-4xl font-bold text-primary-text font-playfair tracking-tight">
             {recipe.title}
           </h1>
 
-          {/* Muted metadata so it doesn't compete with title */}
           <h3 className="text-xs md:text-sm text-text-muted leading-relaxed">
             <span className="font-playfair font-semibold">Cuisine:</span>{" "}
             <span className="text-primary-text/90">{recipe.cuisine}</span>
@@ -305,7 +381,6 @@ export function RecipeCard({
           </h2>
         </div>
 
-        {/* Scanability: subtle row background */}
         <ul className="ml-1 text-sm flex flex-col gap-2">
           {recipe.ingredients.map((item, index) => (
             <li
@@ -318,7 +393,6 @@ export function RecipeCard({
           ))}
         </ul>
 
-        {/* Decorative image de-weighted */}
         <div className="w-24 h-20 mt-6 flex items-center justify-center">
           <Image
             src={CakeImage}
@@ -347,7 +421,6 @@ export function RecipeCard({
           </h2>
         </div>
 
-        {/* Scanability: subtle row background */}
         <ol className="ml-1 text-sm flex flex-col gap-2">
           {recipe.instructions.map((step, index) => (
             <li key={index} className="flex items-start gap-3">
@@ -361,7 +434,6 @@ export function RecipeCard({
           ))}
         </ol>
 
-        {/* Decorative image de-weighted */}
         <div className="w-24 h-20 mt-6 flex items-center justify-center">
           <Image
             src={SoupImage}
@@ -389,9 +461,8 @@ export function RecipeCard({
         </div>
       )}
 
-      {/* FOOTER */}
+      {/* FOOTER (author only now) */}
       <footer className="flex justify-between items-center pt-4 border-t text-sm">
-        {/* Footer balance: give author a bit more weight */}
         <span
           className={`${
             author
@@ -401,100 +472,6 @@ export function RecipeCard({
         >
           {author ? author.username?.split("@")[0] : "Loading author..."}
         </span>
-
-        <div className="flex flex-col sm:flex-row items-center gap-6">
-          {/* LIKE (lighter default; stronger on hover already) */}
-          {!isCreator && (
-            <div
-              ref={likeWrapperRef}
-              role="button"
-              tabIndex={0}
-              aria-label="Like this recipe"
-              onClick={handleLikeWrapperClick}
-              onKeyDown={handleLikeWrapperKeyDown}
-              className={`
-                flex flex-col items-center
-                border border-accent/25
-                rounded-xl px-4 py-3
-                bg-white/50
-                transition-all duration-200
-                hover:border-accent hover:bg-white/70 hover:shadow-md hover:-translate-y-[1px] hover:scale-[1.02]
-                active:scale-[0.98] active:translate-y-0
-                cursor-pointer
-                focus:outline-none
-                focus-visible:ring-2 focus-visible:ring-accent focus-visible:ring-offset-2
-                select-none
-                ${likeCooldown ? "opacity-90" : ""}
-              `}
-              title="Tap to like / tap again to unlike"
-            >
-              <span className="text-xs text-text-muted">Like this recipe</span>
-              <span className="text-[11px] text-text-muted/80 mb-1">
-                Tap to like · tap again to unlike
-              </span>
-
-              <LikeButton recipeId={recipe.id} />
-            </div>
-          )}
-
-          {/* DELETE (lighter default border; stronger on hover) */}
-          {isCreator && (
-            <button
-              type="button"
-              onClick={() => {
-                if (!deleteWrapperDisabled) setIsModalOpen(true);
-              }}
-              disabled={deleteWrapperDisabled}
-              title={
-                deleteWrapperDisabled
-                  ? "Delete is currently unavailable"
-                  : "Delete recipe"
-              }
-              aria-label="Delete recipe"
-              className={`
-                group
-                flex flex-col items-center
-                border border-red-300/40
-                rounded-xl px-4 py-3
-                bg-white/50
-                transition-all duration-200
-                focus-visible:outline-none
-                focus-visible:ring-2 focus-visible:ring-red-400 focus-visible:ring-offset-2
-                ${
-                  deleteWrapperDisabled
-                    ? "opacity-60 cursor-not-allowed"
-                    : "cursor-pointer hover:border-red-400 hover:bg-white/70 hover:shadow-md hover:-translate-y-[1px] hover:scale-[1.02] active:scale-[0.98]"
-                }
-              `}
-            >
-              <span className="text-xs text-red-500 font-medium">
-                Delete your recipe
-              </span>
-
-              <span className="text-[11px] text-text-muted/80 mb-1">
-                You are the author · Removes permanently
-              </span>
-
-              <span
-                className={`
-                  w-10 h-10 flex items-center justify-center rounded-full
-                  transition-all duration-200
-                  ${
-                    deleteWrapperDisabled
-                      ? "bg-red-100"
-                      : "text-red-500 group-hover:bg-red-100 group-hover:scale-110 active:scale-95"
-                  }
-                `}
-              >
-                {deleting ? (
-                  <span className="text-xs animate-pulse">...</span>
-                ) : (
-                  <TrashIcon className="w-6 h-6" />
-                )}
-              </span>
-            </button>
-          )}
-        </div>
       </footer>
 
       {isModalOpen && (
@@ -502,7 +479,9 @@ export function RecipeCard({
           handleAction={handleDelete}
           setIsModalOpen={setIsModalOpen}
           title={
-            deleting ? `Deleting "${recipe.title}"...` : `Delete "${recipe.title}"?`
+            deleting
+              ? `Deleting "${recipe.title}"...`
+              : `Delete "${recipe.title}"?`
           }
         />
       )}
