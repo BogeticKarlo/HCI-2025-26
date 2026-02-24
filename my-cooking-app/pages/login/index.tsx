@@ -99,10 +99,6 @@ export default function LoginPage() {
 
             <p className="font-display font-semibold text-[26px] leading-[1.3] text-body-text max-w-md">
               Join the Recipe Share community.
-              <br />
-              Discover new dishes, share your own,
-              <br />
-              and sharpen your cooking skills.
             </p>
           </div>
 
