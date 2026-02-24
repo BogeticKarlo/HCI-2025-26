@@ -76,23 +76,58 @@ export default function NavBar() {
     return hrefs;
   }, [NAV_ITEMS]);
 
+  // Only top-level items (Home/Cook/Learn/Settings)
+  const topLevelHrefs = useMemo(() => {
+    return new Set(NAV_ITEMS.map((i) => i.href));
+  }, [NAV_ITEMS]);
+
   // Clear loader when route changes
   useEffect(() => {
     setLoadingHref(null);
   }, [pathname]);
 
-  // Add button-like styles and spinner overlay ABOVE the label
+  // Section root helper (Home uses exact "/")
+  const getSectionRoot = (href: string) => {
+    if (href === "/") return "/";
+    const parts = href.split("/").filter(Boolean);
+    return parts.length ? `/${parts[0]}` : "/";
+  };
+
+  // Decide if a given href should be orange (active)
+  const isActiveHref = (href: string) => {
+    const isTopLevel = topLevelHrefs.has(href);
+
+    // Subnav / exact match
+    if (!isTopLevel) return href === pathname;
+
+    // Top-level / section match
+    const root = getSectionRoot(href);
+
+    // Home only active on exact "/"
+    if (root === "/") return pathname === "/";
+
+    // Keep Learn active on /learn/* AND /lesson/*
+    if (root === "/learn") {
+      return pathname.startsWith("/learn") || pathname.startsWith("/lesson");
+    }
+
+    return pathname.startsWith(root);
+  };
+
+  // Add button-like styles + spinner overlay ABOVE the label
   useEffect(() => {
     const applyButtonStyles = () => {
       const navRoot = document.querySelector("[data-nav-root]") || document;
-      const anchors = Array.from(navRoot.querySelectorAll("a")) as HTMLAnchorElement[];
+      const anchors = Array.from(
+        navRoot.querySelectorAll("a"),
+      ) as HTMLAnchorElement[];
 
       anchors.forEach((a) => {
         const href = a.getAttribute("href") || "";
         const isNavHref = href.startsWith("/") && allHrefs.includes(href);
         if (!isNavHref) return;
 
-        // Base “button” styles
+        // Base styles (button-like)
         a.classList.add(
           "relative",
           "inline-flex",
@@ -103,7 +138,6 @@ export default function NavBar() {
           "rounded-xl",
           "border",
           "border-gray-200",
-          "bg-white/60",
           "shadow-sm",
           "transition-all",
           "duration-200",
@@ -118,31 +152,19 @@ export default function NavBar() {
           "overflow-hidden",
         );
 
-        const isActive = pathname === href;
+        // Ensure label wrapper exists
+        let labelWrap = a.querySelector(
+          "[data-nav-label]",
+        ) as HTMLSpanElement | null;
 
-        // Remove ALL background states first (critical)
-        a.classList.remove("bg-white", "bg-white/60", "bg-accent", "border-accent");
-
-        // Active = strong visual weight (orange background)
-        if (isActive) {
-          a.classList.add("bg-accent", "border-accent", "text-black", "font-semibold");
-        } 
-        else {
-          // Default inactive state
-            a.classList.add("bg-white/60");
-          }
-
-        // Ensure label wrapper exists (so we can dim it under overlay)
-        // If Navigation renders plain text, this still works: we wrap existing nodes once.
-        let labelWrap = a.querySelector("[data-nav-label]") as HTMLSpanElement | null;
         if (!labelWrap) {
           labelWrap = document.createElement("span");
           labelWrap.setAttribute("data-nav-label", "true");
           labelWrap.className = "relative z-10";
 
-          // Move all existing children (except an existing spinner overlay) into labelWrap
           const existingSpinner = a.querySelector("[data-nav-spinner-overlay]");
           const nodes = Array.from(a.childNodes);
+
           nodes.forEach((node) => {
             if (
               existingSpinner &&
@@ -154,13 +176,12 @@ export default function NavBar() {
             labelWrap!.appendChild(node);
           });
 
-          // Clear anchor then re-add labelWrap (+ keep any existing spinner)
           a.innerHTML = "";
           a.appendChild(labelWrap);
           if (existingSpinner) a.appendChild(existingSpinner);
         }
 
-        // Ensure spinner overlay exists (CENTERED over the button, not next to label)
+        // Ensure spinner overlay exists
         let overlay = a.querySelector(
           "[data-nav-spinner-overlay]",
         ) as HTMLSpanElement | null;
@@ -171,7 +192,6 @@ export default function NavBar() {
           overlay.className =
             "hidden absolute inset-0 z-20 flex items-center justify-center bg-white/70";
 
-          // spinner itself
           const spinner = document.createElement("span");
           spinner.setAttribute("data-nav-spinner", "true");
           spinner.className =
@@ -181,12 +201,25 @@ export default function NavBar() {
           a.appendChild(overlay);
         }
 
+        // ---- ACTIVE STYLING (fix) ----
+        const active = isActiveHref(href);
+
+        // Remove conflicting backgrounds first (critical)
+        a.classList.remove("bg-white", "bg-white/60", "bg-accent", "text-black");
+        a.classList.remove("border-accent", "font-semibold");
+
+        if (active) {
+          a.classList.add("bg-accent", "border-accent", "text-black", "font-semibold");
+        } else {
+          a.classList.add("bg-white/60");
+        }
+
+        // Loading overlay
         const isLoading = loadingHref === href;
 
         if (isLoading) {
           overlay.classList.remove("hidden");
           a.setAttribute("aria-busy", "true");
-          // keep label visible but deemphasized under overlay, like recipe cards
           labelWrap.classList.add("opacity-50");
         } else {
           overlay.classList.add("hidden");
@@ -197,7 +230,7 @@ export default function NavBar() {
     };
 
     applyButtonStyles();
-  }, [allHrefs, loadingHref, pathname]);
+  }, [allHrefs, loadingHref, pathname, topLevelHrefs]);
 
   // Capture clicks and route with overlay spinner feedback
   const handleNavClickCapture = (e: React.MouseEvent<HTMLDivElement>) => {
