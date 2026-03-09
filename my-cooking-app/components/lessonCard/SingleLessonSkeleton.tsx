@@ -4,7 +4,7 @@ export default function SingleLessonSkeleton() {
   const pulse = "animate-pulse bg-secondary-text/40";
 
   return (
-    <article className="w-[360px] bg-section-bg rounded-3xl p-8 shadow-md flex flex-col gap-6">
+    <article className="w-full max-w-[400px] mx-auto bg-section-bg rounded-3xl p-8 shadow-md flex flex-col gap-6">
       {/* Header */}
       <div className="flex items-center gap-3">
         <div className={clsx("w-10 h-10 rounded-full", pulse)} />

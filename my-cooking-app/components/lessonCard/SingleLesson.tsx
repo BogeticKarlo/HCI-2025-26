@@ -21,12 +21,11 @@ export default function SingleLesson({ lesson }: { lesson: LessonType }) {
   if (loading) return <SingleLessonSkeleton />;
 
   return (
-    <article className="relative w-full max-w-[800px] bg-section-bg rounded-3xl p-8 pt-16 shadow-md text-body-text mx-auto">
-      
-{/* BACK BUTTON — FULL BORDERED CLICKABLE AREA */}
-<button
-  onClick={() => router.back()}
-  className="
+    <article className="relative w-full max-w-[800px] bg-section-bg rounded-3xl p-4 sm:p-8 pt-14 sm:pt-16 shadow-md text-body-text mx-auto">
+      {/* BACK BUTTON — FULL BORDERED CLICKABLE AREA */}
+      <button
+        onClick={() => router.back()}
+        className="
     absolute left-6 top-6
     inline-flex items-center gap-2
     px-4 py-2
@@ -41,23 +40,20 @@ export default function SingleLesson({ lesson }: { lesson: LessonType }) {
     focus-visible:outline-none
     focus-visible:ring-2 focus-visible:ring-accent focus-visible:ring-offset-2
   "
-  title="Go back"
-  aria-label="Go back to previous page"
->
-  <Image
-    src={backArrow}
-    alt="Back"
-    width={36}
-    height={36}
-    className="w-5 h-5"
-  />
-  <span className="text-sm font-semibold text-primary-text">
-    Back
-  </span>
-</button>
+        title="Go back"
+        aria-label="Go back to previous page"
+      >
+        <Image
+          src={backArrow}
+          alt="Back"
+          width={36}
+          height={36}
+          className="w-5 h-5"
+        />
+        <span className="text-sm font-semibold text-primary-text">Back</span>
+      </button>
       {/* CENTERED CONTENT WRAPPER */}
       <div className="flex flex-col items-center gap-8 text-center">
-
         {/* TITLE */}
         <h1 className="text-3xl md:text-4xl font-bold text-primary-text font-playfair max-w-[650px]">
           {lesson.title}
@@ -78,9 +74,7 @@ export default function SingleLesson({ lesson }: { lesson: LessonType }) {
             />
           </div>
         ) : (
-          <p className="text-center text-gray-500">
-            Video not available.
-          </p>
+          <p className="text-center text-gray-500">Video not available.</p>
         )}
       </div>
     </article>

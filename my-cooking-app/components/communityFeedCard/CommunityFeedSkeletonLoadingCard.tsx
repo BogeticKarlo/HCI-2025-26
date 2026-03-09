@@ -5,17 +5,16 @@ export function CommunityFeedSkeletonLoadingCard() {
   return (
     <article
       className="
-        flex items-center justify-between gap-4
+        flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4
         bg-section-bg 
         rounded-2xl
         px-4 py-3
         shadow-[0_4px_4px_rgba(0,0,0,0.25)]
         w-full
-        max-w-3xl
       "
     >
       {/* Left side: avatar + text */}
-      <div className="flex items-start gap-3 flex-1">
+      <div className="flex items-start gap-3 flex-1 min-w-0">
         {/* Avatar skeleton */}
         <div className="w-10 h-10 rounded-full bg-secondary-text animate-pulse" />
 
@@ -38,9 +37,9 @@ export function CommunityFeedSkeletonLoadingCard() {
       </div>
 
       {/* Right side: image + like button */}
-      <div className="flex items-center gap-4 shrink-0">
+      <div className="flex items-center gap-4 shrink-0 self-start sm:self-center">
         {/* Image skeleton */}
-        <div className="w-24 h-24 rounded-xl bg-secondary-text animate-pulse" />
+        <div className="w-20 h-20 sm:w-24 sm:h-24 rounded-xl bg-secondary-text animate-pulse" />
 
         {/* Likes skeleton */}
         <div className="flex items-center gap-1">

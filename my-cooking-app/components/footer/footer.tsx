@@ -19,8 +19,7 @@ export default function Footer() {
   const sectionTitle =
     "text-lg font-semibold text-footer-text flex items-center justify-center gap-2";
 
-  const helperText =
-    "text-xs text-footer-text/70 text-center mb-6";
+  const helperText = "text-xs text-footer-text/70 text-center mb-6";
 
   return (
     <footer className="bg-footer-bg text-footer-text py-10 px-6 mt-10">
@@ -29,7 +28,7 @@ export default function Footer() {
         <div className="flex flex-col sm:flex-row items-center justify-between gap-4 mb-4">
           <div className="text-center sm:text-left">
             <p className="text-sm font-semibold text-footer-text">
-              RecipeShare
+              Recipe Share
             </p>
           </div>
 
@@ -47,8 +46,7 @@ export default function Footer() {
 
         {/* Knowledge in the world (Norman): explain why links don’t navigate */}
         <p className={helperText}>
-          Policy and legal pages are informational placeholders and will be
-          available in a future update.
+          Policy and legal pages are informational placeholders.
         </p>
 
         {/* Top Section (Centered Columns) */}
@@ -208,8 +206,7 @@ export default function Footer() {
                   title="Coming soon – social links not connected yet"
                   className={linkClass}
                 >
-                  <span aria-hidden>✖️</span>
-                  X
+                  <span aria-hidden>✖️</span>X
                 </a>
               </li>
             </ul>

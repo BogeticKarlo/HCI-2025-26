@@ -100,19 +100,29 @@ export function RecipeCard({
 
   if (isLoading || !recipe) return <RecipeCardSkeleton />;
 
-  const publicImageUrl = `https://xhebsnwjpfcdttydwuhg.supabase.co/storage/v1/object/public/recipe-images/${recipe.author_id}/${recipe.image_url}`;
+  const encodedImageUrl = recipe.image_url
+    ? encodeURIComponent(recipe.image_url)
+    : null;
+  const publicImageUrl = encodedImageUrl
+    ? `https://xhebsnwjpfcdttydwuhg.supabase.co/storage/v1/object/public/recipe-images/${recipe.author_id}/${encodedImageUrl}`
+    : null;
 
   const startLikeCooldown = () => {
     setLikeCooldown(true);
     if (likeCooldownTimerRef.current)
       clearTimeout(likeCooldownTimerRef.current);
-    likeCooldownTimerRef.current = setTimeout(() => setLikeCooldown(false), 450);
+    likeCooldownTimerRef.current = setTimeout(
+      () => setLikeCooldown(false),
+      450,
+    );
   };
 
   const triggerInnerLikeClick = () => {
     const root = likeWrapperRef.current;
     if (!root) return;
-    const innerButton = root.querySelector("button") as HTMLButtonElement | null;
+    const innerButton = root.querySelector(
+      "button",
+    ) as HTMLButtonElement | null;
     innerButton?.click();
   };
 
@@ -122,7 +132,9 @@ export function RecipeCard({
     const root = likeWrapperRef.current;
     if (!root) return;
 
-    const innerButton = root.querySelector("button") as HTMLButtonElement | null;
+    const innerButton = root.querySelector(
+      "button",
+    ) as HTMLButtonElement | null;
 
     if (
       innerButton &&
@@ -185,18 +197,20 @@ export function RecipeCard({
         mx-auto
         bg-section-bg
         rounded-3xl
-        p-8
+        p-4
+        sm:p-6
         lg:p-12
         shadow-md
         text-body-text
         flex
         flex-col
-        gap-8
+        gap-6
+        sm:gap-8
         relative
       "
     >
       {/* TOP-RIGHT ACTIONS (moved here) */}
-      <div className="absolute right-6 top-6 flex items-start gap-4 z-30">
+      <div className="flex items-start gap-2 sm:gap-4 z-30 sm:absolute sm:right-6 sm:top-6 self-end">
         {!isCreator && (
           <div
             ref={likeWrapperRef}
@@ -208,7 +222,7 @@ export function RecipeCard({
             className={`
               flex flex-col items-center
               border border-accent/25
-              rounded-xl px-4 py-3
+              rounded-xl px-2 py-2 sm:px-4 sm:py-3
               bg-white/50
               transition-all duration-200
               hover:border-accent hover:bg-white/70 hover:shadow-md hover:-translate-y-[1px] hover:scale-[1.02]
@@ -222,7 +236,7 @@ export function RecipeCard({
             title="Tap to like / tap again to unlike"
           >
             <span className="text-xs text-text-muted">Like</span>
-            <span className="text-[11px] text-text-muted/80 mb-1">
+            <span className="hidden sm:block text-[11px] text-text-muted/80 mb-1">
               Tap to toggle
             </span>
 
@@ -247,7 +261,7 @@ export function RecipeCard({
               group
               flex flex-col items-center
               border border-red-300/40
-              rounded-xl px-4 py-3
+              rounded-xl px-2 py-2 sm:px-4 sm:py-3
               bg-white/50
               transition-all duration-200
               focus-visible:outline-none
@@ -260,7 +274,7 @@ export function RecipeCard({
             `}
           >
             <span className="text-xs text-red-500 font-medium">Delete</span>
-            <span className="text-[11px] text-text-muted/80 mb-1">
+            <span className="hidden sm:block text-[11px] text-text-muted/80 mb-1">
               Permanent
             </span>
 
@@ -290,7 +304,8 @@ export function RecipeCard({
         <button
           onClick={() => router.back()}
           className="
-            absolute left-0 top-1/2 -translate-y-1/2
+            sm:absolute sm:left-0 sm:top-1/2 sm:-translate-y-1/2
+            self-start
             flex items-center gap-2 px-3 py-2
             cursor-pointer
             border border-gray-300
@@ -317,7 +332,7 @@ export function RecipeCard({
         </button>
 
         <div className="flex flex-col items-center text-center gap-3 w-full">
-          <h1 className="text-3xl md:text-4xl font-bold text-primary-text font-playfair tracking-tight">
+          <h1 className="text-2xl sm:text-3xl md:text-4xl font-bold text-primary-text font-playfair tracking-tight">
             {recipe.title}
           </h1>
 
@@ -343,7 +358,7 @@ export function RecipeCard({
       {/* IMAGE */}
       {publicImageUrl && (
         <div
-          className={`relative w-full h-[420px] md:h-[520px] rounded-2xl overflow-hidden transition-all duration-700 ${
+          className={`relative w-full h-[280px] sm:h-[380px] md:h-[520px] rounded-2xl overflow-hidden transition-all duration-700 ${
             showImage ? "opacity-100 translate-y-0" : "opacity-0 translate-y-4"
           }`}
         >
@@ -357,6 +372,7 @@ export function RecipeCard({
             fill
             sizes="100%"
             onLoadingComplete={() => setImageLoaded(true)}
+            onError={() => setImageLoaded(true)}
             className={`object-contain transition-opacity duration-500 ${
               imageLoaded ? "opacity-100" : "opacity-0"
             }`}

@@ -39,13 +39,23 @@ export default function DesktopNavBar({
       <nav className="max-w-6xl mx-auto flex items-center justify-between px-4 sm:px-6 py-3 gap-4">
         {/* Left: logo */}
         <div className="flex items-center gap-3">
-          <Image
-            src={logo}
-            alt="RecipeShare logo"
-            width={56}
-            height={56}
-            className="object-contain"
-          />
+          <button
+            onClick={() => {
+              if (activeMainHref !== "/") {
+                // Navigate to home if not already there
+                window.location.href = "/";
+              }
+            }}
+            className="cursor-pointer"
+          >
+            <Image
+              src={logo}
+              alt="RecipeShare logo"
+              width={56}
+              height={56}
+              className="object-contain"
+            />
+          </button>
         </div>
 
         <ul className="flex items-center gap-6 lg:gap-8 text-lg">

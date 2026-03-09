@@ -30,7 +30,7 @@ export const CommunityFeedCard: FC<CommunityFeedCardProps> = ({
   return (
     <article
       className="
-        flex items-center justify-between gap-4
+        flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4
         bg-section-bg 
         rounded-2xl
         px-4 py-3
@@ -38,37 +38,39 @@ export const CommunityFeedCard: FC<CommunityFeedCardProps> = ({
       "
     >
       {/* Left: avatar + text */}
-      <div className="flex items-start gap-3 flex-1">
+      <div className="flex items-start gap-3 flex-1 min-w-0">
         {/* Simple avatar placeholder – swap with real avatar if you have it */}
-        <div className="w-10 h-10 rounded-full bg-secondary flex items-center justify-center text-secondary-text font-semibold">
+        <div className="w-10 h-10 rounded-full bg-secondary flex items-center justify-center text-secondary-text font-semibold shrink-0">
           {createdBy.charAt(0).toUpperCase()}
         </div>
 
-        <div className="flex flex-col gap-1 flex-1">
+        <div className="flex flex-col gap-1 flex-1 min-w-0">
           {/* Username + time */}
           <div className="flex flex-col items-baseline mb-4">
-            <h3 className="font-playfair font-semibold text-[26px] leading-snug text-primary-text">
+            <h3 className="font-playfair font-semibold text-xl sm:text-[26px] leading-snug text-primary-text truncate">
               {createdBy}
             </h3>
-            <span className="text-[16px] text-body-text">{timeAgo}</span>
+            <span className="text-sm sm:text-[16px] text-body-text">
+              {timeAgo}
+            </span>
           </div>
 
           {/* Title */}
-          <h3 className="font-playfair font-semibold text-[26px] leading-snug text-primary-text">
+          <h3 className="font-playfair font-semibold text-xl sm:text-[26px] leading-snug text-primary-text">
             {title}
           </h3>
 
           {/* Description */}
-          <p className="text-[16px] text-body-text leading-relaxed line-clamp-2">
+          <p className="text-sm sm:text-[16px] text-body-text leading-relaxed line-clamp-2">
             {description}
           </p>
         </div>
       </div>
 
       {/* Right: image + likes */}
-      <div className="flex items-center gap-4">
+      <div className="flex items-center gap-4 self-start sm:self-center">
         {/* Recipe image */}
-        <div className="w-24 h-24 rounded-xl overflow-hidden shrink-0">
+        <div className="w-20 h-20 sm:w-24 sm:h-24 rounded-xl overflow-hidden shrink-0">
           <Image
             src={imageUrl}
             alt={title}
@@ -98,7 +100,9 @@ export const CommunityFeedCard: FC<CommunityFeedCardProps> = ({
               }`}
             />
           </button>
-          <span className="text-[16px] text-body-text">{numberOfLikes}</span>
+          <span className="text-sm sm:text-[16px] text-body-text">
+            {numberOfLikes}
+          </span>
         </div>
       </div>
     </article>

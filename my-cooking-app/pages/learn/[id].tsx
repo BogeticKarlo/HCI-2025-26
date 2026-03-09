@@ -45,7 +45,8 @@ export default function Cooking101({ page, error }: Props) {
       <h1
         className="
           font-playfair font-bold
-          text-[32px] leading-[120%]
+          text-2xl leading-[120%]
+          sm:text-[32px]
           md:text-[40px]
           text-center mb-2 text-primary-text
         "
@@ -108,7 +109,7 @@ export default function Cooking101({ page, error }: Props) {
             </div>
 
             <div className="p-4 sm:p-6">
-              <div className="grid justify-center items-stretch gap-10 grid-cols-1 md:grid-cols-2 lg:grid-cols-3">
+              <div className="grid place-items-center gap-6 sm:gap-8 lg:gap-10 grid-cols-1 sm:grid-cols-2 lg:grid-cols-3">
                 {page.lessons?.map((lesson, i) => (
                   <LessonCardHero key={i} {...lesson} />
                 ))}

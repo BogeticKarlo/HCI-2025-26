@@ -41,8 +41,9 @@ export default function UploadRecipes() {
   const [selectedCuisine, setSelectedCuisine] = useState<Option<"cuisine">>(
     cuisineOptions[0],
   );
-  const [selectedRecipeType, setSelectedRecipeType] =
-    useState<Option<"recipeType">>(recipeTypeOptions[0]);
+  const [selectedRecipeType, setSelectedRecipeType] = useState<
+    Option<"recipeType">
+  >(recipeTypeOptions[0]);
   const [image, setImage] = useState<File | null>(null);
 
   const [errors, setErrors] = useState<Record<string, string>>({});
@@ -284,7 +285,7 @@ export default function UploadRecipes() {
     <div className="w-full">
       {/* HEADER WRAPPER — WIDER */}
       <div className="w-full max-w-[1100px] mx-auto px-4 sm:px-6 lg:px-8">
-        <h1 className="font-playfair font-bold text-[32px] leading-[120%] md:text-[44px] text-center mb-2 text-primary-text">
+        <h1 className="font-playfair font-bold text-2xl sm:text-[32px] leading-[120%] md:text-[44px] text-center mb-2 text-primary-text">
           Upload Your Recipe
         </h1>
 
@@ -466,7 +467,9 @@ export default function UploadRecipes() {
                 Photo
               </h2>
             </div>
-            <span className="text-xs text-primary-text opacity-80">Required</span>
+            <span className="text-xs text-primary-text opacity-80">
+              Required
+            </span>
           </div>
 
           <div className="rounded-2xl border border-gray-200 bg-white/50 p-4 md:p-5">
@@ -501,7 +504,7 @@ export default function UploadRecipes() {
 
           <Button
             variant="primary"
-            className="w-2/3 mx-auto mt-1 shadow-md hover:shadow-lg transition-shadow duration-200"
+            className="w-full sm:w-2/3 mx-auto mt-1 shadow-md hover:shadow-lg transition-shadow duration-200"
             onClick={handleUploadRecipe}
             isLoading={isLoading}
             disabled={!canAttemptSubmit}
@@ -519,7 +522,8 @@ export default function UploadRecipes() {
           </Button>
 
           <p className="text-xs text-primary-text opacity-80 text-center">
-            Required fields are marked with <span className="font-semibold">*</span>
+            Required fields are marked with{" "}
+            <span className="font-semibold">*</span>
           </p>
         </div>
       </div>

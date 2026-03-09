@@ -3,7 +3,7 @@
 
 export function RecipeMinimizeCardSkeletonLoader() {
   return (
-    <article className="flex w-[320px] bg-section-bg rounded-2xl shadow-md overflow-hidden h-24">
+    <article className="flex w-full bg-section-bg rounded-2xl shadow-md overflow-hidden h-24">
       {/* Image skeleton */}
       <div className="w-24 h-24 bg-secondary-text animate-pulse" />
 

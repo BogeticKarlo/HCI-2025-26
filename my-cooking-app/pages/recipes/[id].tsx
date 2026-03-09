@@ -21,7 +21,7 @@ const RecipePage: NextPage<RecipePageProps> = ({ recipe }) => {
   }, []);
 
   return (
-    <main className="w-full min-h-screen bg-main-bg py-12">
+    <main className="w-full min-h-screen bg-main-bg py-6 sm:py-12 px-2 sm:px-0">
       <div className="w-full flex justify-center">
         {loading ? (
           <RecipeCardSkeleton />
@@ -36,10 +36,10 @@ const RecipePage: NextPage<RecipePageProps> = ({ recipe }) => {
 };
 
 export const getServerSideProps: GetServerSideProps<RecipePageProps> = async (
-  context
+  context,
 ) => {
   const { id } = context.params as { id: string };
-  const recipeId = id.slice(0, 36);
+  const recipeId = id.slice(-36);
 
   try {
     const recipe = await fetchRecipeById(recipeId);

@@ -38,11 +38,7 @@ export default function MyApp({ Component, pageProps }: AppProps) {
     <>
       <Head>
         <title>My Cooking App</title>
-        <link
-          rel="icon"
-          type="image/svg+xml"
-          href="/assets/logo.svg"
-        />
+        <link rel="icon" type="image/svg+xml" href="/assets/logo.svg" />
       </Head>
 
       <AuthProvider>
@@ -74,7 +70,7 @@ function PageLayout({
   return (
     <div className="min-h-screen flex flex-col bg-main-bg">
       {!isAuthRoute && <NavBar />}
-      <main className="flex-1 p-5">
+      <main className="flex-1 px-3 py-4 sm:p-5">
         <Component {...pageProps} />
       </main>
       {!isAuthRoute && <Footer />}

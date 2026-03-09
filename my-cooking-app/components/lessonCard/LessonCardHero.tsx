@@ -63,7 +63,9 @@ export default function LessonCardHero({
         group
         relative
         flex flex-col
-        w-[250px]
+        w-full
+        max-w-[280px]
+        mx-auto
         bg-section-bg
         rounded-2xl
         shadow-md
@@ -87,7 +89,7 @@ export default function LessonCardHero({
           src={imageUrl || "/placeholder.png"}
           alt={heroImage?.alt || `Lesson image for ${title}`}
           fill
-          sizes="250px"
+          sizes="(max-width: 640px) 100vw, (max-width: 1024px) 50vw, 280px"
           loading="eager"
           className="object-cover"
         />

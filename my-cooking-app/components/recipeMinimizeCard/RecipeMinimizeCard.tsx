@@ -1,5 +1,6 @@
 "use client";
 
+import { useState } from "react";
 import Image from "next/image";
 import { useRouter } from "next/navigation";
 import { RecipeMinimizeCardProps } from "./RecipeMinimizeCard.types";
@@ -13,31 +14,40 @@ export function RecipeMinimizeCard({
   authorId,
 }: RecipeMinimizeCardProps) {
   const router = useRouter();
+  const [imgError, setImgError] = useState(false);
 
   const handleClick = () => {
-    router.push(`/recipes/${id}-${title.toLowerCase().replace(/\s+/g, "-")}`);
+    router.push(`/recipes/${title.toLowerCase().replace(/\s+/g, "-")}-${id}`);
   };
 
   if (!imageUrl) return <RecipeMinimizeCardSkeletonLoader />;
 
-  const publicImageUrl = `https://xhebsnwjpfcdttydwuhg.supabase.co/storage/v1/object/public/recipe-images/${authorId}/${imageUrl}`;
+  const encodedImageUrl = encodeURIComponent(imageUrl);
+  const publicImageUrl = `https://xhebsnwjpfcdttydwuhg.supabase.co/storage/v1/object/public/recipe-images/${authorId}/${encodedImageUrl}`;
 
   return (
     <article
       onClick={handleClick}
       className="
-        flex w-[320px] bg-section-bg rounded-2xl shadow-md overflow-hidden h-24 cursor-pointer
+        flex w-full bg-section-bg rounded-2xl shadow-md overflow-hidden h-24 cursor-pointer
         transition-transform duration-200 hover:scale-[1.03] hover:shadow-lg active:scale-[0.98]
       "
     >
       <div className="relative w-24 h-24 shrink-0 bg-muted">
-        <Image
-          src={publicImageUrl}
-          alt={title}
-          fill
-          sizes="96px"
-          className="object-cover"
-        />
+        {imgError ? (
+          <div className="w-full h-full flex items-center justify-center bg-gray-200 text-2xl">
+            🍽️
+          </div>
+        ) : (
+          <Image
+            src={publicImageUrl}
+            alt={title}
+            fill
+            sizes="96px"
+            className="object-cover"
+            onError={() => setImgError(true)}
+          />
+        )}
       </div>
 
       <div className="flex flex-col px-4 py-3 gap-1 overflow-hidden">

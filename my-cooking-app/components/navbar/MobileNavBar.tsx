@@ -39,13 +39,23 @@ export default function MobileNavBar({
       <nav className="max-w-6xl mx-auto flex items-center justify-between px-4 py-3 gap-4">
         {/* Left: logo + brand */}
         <div className="flex items-center gap-3">
-          <Image
-            src={logo}
-            alt="RecipeShare logo"
-            width={48}
-            height={48}
-            className="object-contain"
-          />
+          <button
+            onClick={() => {
+              if (activeMainHref !== "/") {
+                // Navigate to home if not already there
+                window.location.href = "/";
+              }
+            }}
+            className="cursor-pointer"
+          >
+            <Image
+              src={logo}
+              alt="RecipeShare logo"
+              width={48}
+              height={48}
+              className="object-contain"
+            />
+          </button>
         </div>
 
         {/* Right: user + hamburger */}

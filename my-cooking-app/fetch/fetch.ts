@@ -7,7 +7,6 @@ import {
   FavoriteOptions,
 } from "@/components/dropdown/Dropdown.types";
 
-
 export async function fetchRecipesByUser(
   userId: string,
   filters?: {
@@ -17,7 +16,7 @@ export async function fetchRecipesByUser(
     favorite?: FavoriteOptions;
     limit?: number;
     page?: number;
-  }
+  },
 ): Promise<BaseRecipe[]> {
   if (!userId) throw new Error("userId is required");
 
@@ -165,11 +164,20 @@ export async function uploadRecipe(recipeData: BaseRecipe) {
 }
 
 export async function uploadRecipeImage(file: File, userId: string) {
-  const filePath = `${userId}/${Date.now()}-${file.name}`;
+  // Sanitize the filename: remove special chars, replace spaces with hyphens
+  const sanitizedName = file.name
+    .replace(/[^a-zA-Z0-9._-]/g, "-")
+    .replace(/-+/g, "-")
+    .toLowerCase();
+
+  const filePath = `${userId}/${Date.now()}-${sanitizedName}`;
 
   const { data, error } = await supabase.storage
     .from("recipe-images")
-    .upload(filePath, file);
+    .upload(filePath, file, {
+      cacheControl: "3600",
+      upsert: false,
+    });
 
   if (error) {
     console.error("Error uploading image:", error);
@@ -223,8 +231,10 @@ export const hasUserLikedRecipe = async (recipeId: string, userId: string) => {
 
 // Like/unlike atomically using RPC
 export const toggleRecipeLike = async (recipeId: string, userId: string) => {
-  const { data, error } = await supabase
-    .rpc("toggle_recipe_like", { p_recipe_id: recipeId, p_user_id: userId });
+  const { data, error } = await supabase.rpc("toggle_recipe_like", {
+    p_recipe_id: recipeId,
+    p_user_id: userId,
+  });
 
   if (error) {
     console.error(error);

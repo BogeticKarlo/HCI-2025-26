@@ -38,21 +38,21 @@ export default function MyRecipes() {
   const [currentPage, setCurrentPage] = useState(1);
   const [hasMore, setHasMore] = useState(true);
 
-  const [selectedCuisine, setSelectedCuisine] =
-    useState<Option<"cuisine">>(savedFilters.cuisine || cuisineOptions[0]);
+  const [selectedCuisine, setSelectedCuisine] = useState<Option<"cuisine">>(
+    savedFilters.cuisine || cuisineOptions[0],
+  );
 
-  const [selectedRecipeType, setSelectedRecipeType] =
-    useState<Option<"recipeType">>(
-      savedFilters.recipeType || recipeTypeOptions[0],
-    );
+  const [selectedRecipeType, setSelectedRecipeType] = useState<
+    Option<"recipeType">
+  >(savedFilters.recipeType || recipeTypeOptions[0]);
 
-  const [selectedTime, setSelectedTime] =
-    useState<Option<"time">>(savedFilters.time || timeOptions[0]);
+  const [selectedTime, setSelectedTime] = useState<Option<"time">>(
+    savedFilters.time || timeOptions[0],
+  );
 
-  const [selectedFavorite, setSelectedFavorite] =
-    useState<Option<"favorite">>(
-      savedFilters.favorite || favoriteOptions[0],
-    );
+  const [selectedFavorite, setSelectedFavorite] = useState<Option<"favorite">>(
+    savedFilters.favorite || favoriteOptions[0],
+  );
 
   if (!user) return null;
 
@@ -149,7 +149,7 @@ export default function MyRecipes() {
   return (
     <div className="flex flex-col items-center">
       {/* FIX #1: reduce empty vertical space (title → filters) */}
-      <h1 className="font-playfair font-bold text-[40px] text-center mb-6 text-primary-text">
+      <h1 className="font-playfair font-bold text-2xl sm:text-[32px] md:text-[40px] text-center mb-6 text-primary-text">
         My Recipes
       </h1>
 
@@ -173,7 +173,7 @@ export default function MyRecipes() {
           </div>
 
           <div className="flex flex-col items-center gap-5">
-            <div className="grid grid-cols-2 gap-5 w-full">
+            <div className="grid grid-cols-1 sm:grid-cols-2 gap-5 w-full">
               <Dropdown
                 label="Choose Cuisine"
                 options={cuisineOptions}
@@ -188,7 +188,7 @@ export default function MyRecipes() {
               />
             </div>
 
-            <div className="grid grid-cols-2 gap-5 w-full">
+            <div className="grid grid-cols-1 sm:grid-cols-2 gap-5 w-full">
               <Dropdown
                 label="Sort by Date"
                 options={timeOptions}
@@ -302,9 +302,8 @@ export default function MyRecipes() {
                         title="Open recipe"
                         className="
                           relative
-                          inline-block
-                          w-fit
-                          justify-self-center
+                          block
+                          w-full
                           cursor-pointer
                           transition-transform duration-200
                           hover:-translate-y-1 hover:shadow-lg

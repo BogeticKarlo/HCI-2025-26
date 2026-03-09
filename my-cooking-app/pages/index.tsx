@@ -34,18 +34,18 @@ export default function HomePage() {
   const [currentPage, setCurrentPage] = useState(1);
   const [hasMore, setHasMore] = useState(true);
 
-  const [selectedCuisine, setSelectedCuisine] =
-    useState<Option<"cuisine">>(savedFilters.cuisine || cuisineOptions[0]);
-  const [selectedRecipeType, setSelectedRecipeType] =
-    useState<Option<"recipeType">>(
-      savedFilters.recipeType || recipeTypeOptions[0],
-    );
-  const [selectedTime, setSelectedTime] =
-    useState<Option<"time">>(savedFilters.time || timeOptions[0]);
-  const [selectedFavorite, setSelectedFavorite] =
-    useState<Option<"favorite">>(
-      savedFilters.favorite || favoriteOptions[0],
-    );
+  const [selectedCuisine, setSelectedCuisine] = useState<Option<"cuisine">>(
+    savedFilters.cuisine || cuisineOptions[0],
+  );
+  const [selectedRecipeType, setSelectedRecipeType] = useState<
+    Option<"recipeType">
+  >(savedFilters.recipeType || recipeTypeOptions[0]);
+  const [selectedTime, setSelectedTime] = useState<Option<"time">>(
+    savedFilters.time || timeOptions[0],
+  );
+  const [selectedFavorite, setSelectedFavorite] = useState<Option<"favorite">>(
+    savedFilters.favorite || favoriteOptions[0],
+  );
 
   /* ---------------- SAVE FILTERS ---------------- */
   useEffect(() => {
@@ -96,7 +96,13 @@ export default function HomePage() {
   useEffect(() => {
     fetchHomeRecipes();
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [selectedCuisine, selectedRecipeType, selectedTime, selectedFavorite, currentPage]);
+  }, [
+    selectedCuisine,
+    selectedRecipeType,
+    selectedTime,
+    selectedFavorite,
+    currentPage,
+  ]);
 
   /* ---------------- FILTER RESET ---------------- */
   const resetFilter = (type: string) => {
@@ -130,7 +136,7 @@ export default function HomePage() {
 
   return (
     <div className="flex flex-col items-center">
-      <h1 className="font-playfair font-bold text-[40px] text-center mb-8 text-primary-text">
+      <h1 className="font-playfair font-bold text-2xl sm:text-[32px] md:text-[40px] text-center mb-8 text-primary-text">
         Check Out Best Recipes
       </h1>
 
@@ -154,7 +160,7 @@ export default function HomePage() {
           </div>
 
           <div className="flex flex-col items-center gap-5">
-            <div className="grid grid-cols-2 gap-5 w-full">
+            <div className="grid grid-cols-1 sm:grid-cols-2 gap-5 w-full">
               <Dropdown
                 label="Choose Cuisine"
                 options={cuisineOptions}
@@ -169,7 +175,7 @@ export default function HomePage() {
               />
             </div>
 
-            <div className="grid grid-cols-2 gap-5 w-full">
+            <div className="grid grid-cols-1 sm:grid-cols-2 gap-5 w-full">
               <Dropdown
                 label="Sort by Date"
                 options={timeOptions}
