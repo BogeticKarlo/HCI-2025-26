@@ -53,7 +53,7 @@ export default function SingleLesson({ lesson }: { lesson: LessonType }) {
         <span className="text-sm font-semibold text-primary-text">Back</span>
       </button>
       {/* CENTERED CONTENT WRAPPER */}
-      <div className="flex flex-col items-center gap-8 text-center">
+      <div className="flex flex-col items-center gap-8 text-center mt-5">
         {/* TITLE */}
         <h1 className="text-3xl md:text-4xl font-bold text-primary-text font-playfair max-w-[650px]">
           {lesson.title}

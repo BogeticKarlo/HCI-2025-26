@@ -291,7 +291,7 @@ export default function MyRecipes() {
                 : recipes.map((recipe) => {
                     const recipeId = recipe.id || "";
                     const titleSlug = slugify(recipe.title || "recipe");
-                    const href = `/recipes/${recipeId}-${titleSlug}`;
+                    const href = `/recipes/${titleSlug}-${recipeId}`;
 
                     return (
                       <Link

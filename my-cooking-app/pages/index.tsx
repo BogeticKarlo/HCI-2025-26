@@ -15,6 +15,7 @@ import { Dropdown } from "@/components/dropdown/Dropdown";
 import { BaseRecipe } from "@/database/models/domain";
 import { NoRecipesCard } from "@/components/noRecipes/NoRecipesCard";
 import { Button } from "@/components/button/Button";
+import Link from "next/link";
 
 const localStorageKey = "recipeFilters";
 const pageLimit = 12;
@@ -121,18 +122,14 @@ export default function HomePage() {
     ].filter((item) => item.value.id !== "all");
   }, [selectedCuisine, selectedRecipeType, selectedTime, selectedFavorite]);
 
-  /* ---------------- HANDLE RECIPE CLICK ---------------- */
-  const handleRecipeClick = async (recipeId: string) => {
-    setLoadingRecipeId(recipeId);
-    try {
-      // simulate network delay
-      await new Promise((res) => setTimeout(res, 600));
-      // navigate to recipe detail page here
-      // router.push(`/recipes/${recipeId}`);
-    } finally {
-      setLoadingRecipeId(null);
-    }
-  };
+  /* ---------------- SLUG HELPER ---------------- */
+  const slugify = (text: string) =>
+    text
+      .toLowerCase()
+      .trim()
+      .replace(/\s+/g, "-")
+      .replace(/[^\p{L}\p{N}-]+/gu, "")
+      .replace(/-+/g, "-");
 
   return (
     <div className="flex flex-col items-center">
@@ -267,29 +264,37 @@ export default function HomePage() {
             </div>
           ) : (
             <>
-              {recipes.map((recipe) => (
-                <div
-                  key={recipe.id}
-                  className="transition-transform duration-200 hover:-translate-y-1 hover:shadow-lg w-full relative cursor-pointer"
-                  onClick={() => handleRecipeClick(recipe.id || "")}
-                  title="Open recipe"
-                >
-                  <RecipeMinimizeCard
-                    id={recipe.id || ""}
-                    title={recipe.title}
-                    imageUrl={recipe.image_url || ""}
-                    description={recipe.description || ""}
-                    authorId={recipe.author_id || ""}
-                  />
+              {recipes.map((recipe) => {
+                const recipeId = recipe.id || "";
+                const titleSlug = slugify(recipe.title || "recipe");
+                const href = `/recipes/${titleSlug}-${recipeId}`;
 
-                  {/* Spinner overlay (existing improvement kept) */}
-                  {loadingRecipeId === recipe.id && (
-                    <div className="absolute inset-0 flex justify-center items-center bg-white/70 rounded-lg">
-                      <div className="w-10 h-10 border-4 border-accent border-t-transparent rounded-full animate-spin" />
-                    </div>
-                  )}
-                </div>
-              ))}
+                return (
+                  <Link
+                    key={recipeId}
+                    href={href}
+                    prefetch
+                    onClick={() => setLoadingRecipeId(recipeId)}
+                    title="Open recipe"
+                    className="transition-transform duration-200 hover:-translate-y-1 hover:shadow-lg w-full relative block cursor-pointer"
+                  >
+                    <RecipeMinimizeCard
+                      id={recipeId}
+                      title={recipe.title}
+                      imageUrl={recipe.image_url || ""}
+                      description={recipe.description || ""}
+                      authorId={recipe.author_id || ""}
+                    />
+
+                    {/* Spinner overlay */}
+                    {loadingRecipeId === recipe.id && (
+                      <div className="absolute inset-0 flex justify-center items-center bg-white/70 rounded-lg">
+                        <div className="w-10 h-10 border-4 border-accent border-t-transparent rounded-full animate-spin" />
+                      </div>
+                    )}
+                  </Link>
+                );
+              })}
 
               {/* Fix #2: skeletons while fetching more */}
               {isFetchingMore && (

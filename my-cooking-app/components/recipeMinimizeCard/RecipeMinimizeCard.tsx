@@ -2,7 +2,6 @@
 
 import { useState } from "react";
 import Image from "next/image";
-import { useRouter } from "next/navigation";
 import { RecipeMinimizeCardProps } from "./RecipeMinimizeCard.types";
 import { RecipeMinimizeCardSkeletonLoader } from "./RecipeMinimizeCardSkeletonLoader";
 
@@ -13,12 +12,7 @@ export function RecipeMinimizeCard({
   description,
   authorId,
 }: RecipeMinimizeCardProps) {
-  const router = useRouter();
   const [imgError, setImgError] = useState(false);
-
-  const handleClick = () => {
-    router.push(`/recipes/${title.toLowerCase().replace(/\s+/g, "-")}-${id}`);
-  };
 
   if (!imageUrl) return <RecipeMinimizeCardSkeletonLoader />;
 
@@ -27,7 +21,6 @@ export function RecipeMinimizeCard({
 
   return (
     <article
-      onClick={handleClick}
       className="
         flex w-full bg-section-bg rounded-2xl shadow-md overflow-hidden h-24 cursor-pointer
         transition-transform duration-200 hover:scale-[1.03] hover:shadow-lg active:scale-[0.98]

@@ -43,6 +43,7 @@ export function RecipeCard({
 
   // Image loading
   const [imageLoaded, setImageLoaded] = useState(false);
+  const [imgError, setImgError] = useState(false);
 
   // Progressive reveal
   const [showImage, setShowImage] = useState(false);
@@ -356,29 +357,38 @@ export function RecipeCard({
       </p>
 
       {/* IMAGE */}
-      {publicImageUrl && (
-        <div
-          className={`relative w-full h-[280px] sm:h-[380px] md:h-[520px] rounded-2xl overflow-hidden transition-all duration-700 ${
-            showImage ? "opacity-100 translate-y-0" : "opacity-0 translate-y-4"
-          }`}
-        >
-          {!imageLoaded && (
-            <div className="absolute inset-0 bg-gray-200 animate-pulse" />
-          )}
+      <div
+        className={`relative w-full h-[280px] sm:h-[380px] md:h-[520px] rounded-2xl overflow-hidden transition-all duration-700 ${
+          showImage ? "opacity-100 translate-y-0" : "opacity-0 translate-y-4"
+        }`}
+      >
+        {!publicImageUrl || imgError ? (
+          <div className="w-full h-full flex flex-col items-center justify-center bg-gray-200 rounded-2xl text-6xl">
+            🍽️
+          </div>
+        ) : (
+          <>
+            {!imageLoaded && (
+              <div className="absolute inset-0 bg-gray-200 animate-pulse rounded-2xl" />
+            )}
 
-          <Image
-            src={publicImageUrl}
-            alt={recipe.title}
-            fill
-            sizes="100%"
-            onLoadingComplete={() => setImageLoaded(true)}
-            onError={() => setImageLoaded(true)}
-            className={`object-contain transition-opacity duration-500 ${
-              imageLoaded ? "opacity-100" : "opacity-0"
-            }`}
-          />
-        </div>
-      )}
+            <Image
+              src={publicImageUrl}
+              alt={recipe.title}
+              fill
+              sizes="100%"
+              onLoadingComplete={() => setImageLoaded(true)}
+              onError={() => {
+                setImageLoaded(true);
+                setImgError(true);
+              }}
+              className={`object-cover rounded-2xl transition-opacity duration-500 ${
+                imageLoaded ? "opacity-100" : "opacity-0"
+              }`}
+            />
+          </>
+        )}
+      </div>
 
       {/* INGREDIENTS */}
       <section
